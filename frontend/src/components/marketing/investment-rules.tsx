@@ -119,7 +119,7 @@ export function InvestmentRules() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.05 * i }}
-              className="bg-[#121a2e] px-5 py-5"
+              className="bg-[#121212] px-5 py-5"
             >
               <p className="text-xs text-gray-500">{tier.range}</p>
               <p className="mt-2 text-2xl font-bold tabular-nums text-white">

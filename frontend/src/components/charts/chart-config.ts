@@ -6,11 +6,11 @@ import type { SymbolPriceFormat } from "@/components/charts/chart-price-format";
 export type ChartThemeMode = "dark" | "light";
 
 const MT5_DARK = {
-  background: "#121a2e",
-  surface: "#1a2438",
-  text: "#e8eaed",
-  muted: "#8b95a8",
-  grid: "#2a3548",
+  background: "#050505",
+  surface: "#121212",
+  text: "#f2f2f2",
+  muted: "#a8a8b0",
+  grid: "#222222",
 };
 
 const MT5_LIGHT = {

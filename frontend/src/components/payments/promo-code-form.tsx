@@ -37,7 +37,7 @@ export function PromoCodeForm({ onSuccess }: { onSuccess?: () => void }) {
     <form onSubmit={handleApply} className="space-y-3">
       <div className="flex items-center gap-2 text-sm text-muted">
         <Tag className="h-4 w-4 shrink-0 text-primary" />
-        <span>Enter the invite code you received from TraderRank.</span>
+        <span>Enter the invite code you received from UnikTrades.</span>
       </div>
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="flex-1 space-y-1">

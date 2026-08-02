@@ -160,7 +160,7 @@ export default function RegisterPage() {
             <Badge variant="gold" className="mx-auto mb-3 w-fit">
               Referral invite
             </Badge>
-            <CardTitle className="text-2xl">Join TraderRank Pro</CardTitle>
+            <CardTitle className="text-2xl">Join UnikTrades</CardTitle>
             <CardDescription>
               You were invited — complete signup below
             </CardDescription>

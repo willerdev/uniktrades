@@ -191,7 +191,7 @@ function LoginForm() {
             </CardTitle>
             <CardDescription>
               {step === "credentials"
-                ? "Sign in to your TraderRank Pro account"
+                ? "Sign in to your UnikTrades account"
                 : `We sent a 6-digit code to ${email}`}
             </CardDescription>
           </CardHeader>

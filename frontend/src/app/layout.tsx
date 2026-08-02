@@ -17,10 +17,14 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tradeguard — Smart Invest",
+  title: "UnikTrades — Trade Smarter. Grow Stronger.",
   description:
     "Put capital to work with Smart Invest: daily yield, clear fees, and USDT wallet withdrawals after KYC.",
-  keywords: ["investing", "smart invest", "daily yield", "USDT", "tradeguard"],
+  keywords: ["investing", "smart invest", "daily yield", "USDT", "uniktrades"],
+  icons: {
+    icon: "/uniktrades-mark.png",
+    apple: "/uniktrades-mark.png",
+  },
 };
 
 /** Lock zoom/pinch-resize on phones so the trading UI stays fixed. */
@@ -31,8 +35,8 @@ export const viewport: Viewport = {
   userScalable: false,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#121a2e" },
-    { media: "(prefers-color-scheme: light)", color: "#F1F5F9" },
+    { media: "(prefers-color-scheme: dark)", color: "#050505" },
+    { media: "(prefers-color-scheme: light)", color: "#F4F4F5" },
   ],
 };
 

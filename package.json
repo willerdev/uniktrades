@@ -1,8 +1,8 @@
 {
-  "name": "traderrank-pro",
+  "name": "uniktrades",
   "version": "1.0.0",
   "private": true,
-  "description": "TraderRank Pro — Trader talent-discovery and funding platform",
+  "description": "UnikTrades — Trader talent-discovery and funding platform",
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
     "dev:api": "cd backend && npm run start:dev",

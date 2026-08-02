@@ -1,4 +1,4 @@
-# TraderRank Pro
+# UnikTrades
 
 Trader talent-discovery platform — traders submit setups, compete weekly, earn virtual funding and payouts.
 

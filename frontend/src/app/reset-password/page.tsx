@@ -82,7 +82,7 @@ function ResetPasswordForm() {
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">Choose a new password</CardTitle>
         <CardDescription>
-          Enter a new password for your TraderRank Pro account.
+          Enter a new password for your UnikTrades account.
         </CardDescription>
       </CardHeader>
       <CardContent>

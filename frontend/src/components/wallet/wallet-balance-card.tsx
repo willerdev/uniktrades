@@ -91,7 +91,7 @@ export function WalletBalanceCard({
             onClick={onClick}
             className="flex flex-col items-center gap-1.5 rounded-xl py-2 transition-colors hover:bg-white/10"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#121a2e]/40 backdrop-blur-sm">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-[#050505]/40 backdrop-blur-sm">
               <Icon className="h-5 w-5 text-white" />
             </span>
             <span className="text-[11px] font-medium text-white/90">{label}</span>

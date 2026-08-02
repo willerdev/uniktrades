@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms & Conditions | TraderRank Pro",
+  title: "Terms & Conditions | UnikTrades",
   description:
-    "Platform terms, preferred withdrawal schedule, and early-exit penalties for TraderRank Pro.",
+    "Platform terms, preferred withdrawal schedule, and early-exit penalties for UnikTrades.",
 };
 
 const EFFECTIVE = "27 July 2026";
@@ -20,7 +20,7 @@ export default function TermsPage() {
       </h1>
       <p className="mt-3 text-sm text-gray-400">
         Effective {EFFECTIVE}. By creating an account, depositing, investing, or
-        requesting a withdrawal on TraderRank Pro (thetradeguard.com), you agree
+        requesting a withdrawal on UnikTrades (thetradeguard.com), you agree
         to these Terms.
       </p>
 
@@ -78,7 +78,7 @@ export default function TermsPage() {
             1. Purpose &amp; stable capital
           </h2>
           <p className="mt-3">
-            TraderRank Pro is a talent-discovery and capital-allocation platform.
+            UnikTrades is a talent-discovery and capital-allocation platform.
             Wallet balances, investor allocations, and depositor plans are
             designed for <strong className="text-gray-200">stable, ongoing
             participation</strong> — not day-to-day cash movement. Random or
@@ -201,8 +201,8 @@ export default function TermsPage() {
             5. Platform protection
           </h2>
           <p className="mt-3">
-            To protect liquidity, other users, and orderly operations, TraderRank
-            Pro may:
+            To protect liquidity, other users, and orderly operations, UnikTrades
+            may:
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li>

@@ -1,25 +1,26 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #121a2e;
-  --color-foreground: #F8FAFC;
-  --color-muted: #94A3B8;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-surface: rgba(22, 30, 48, 0.95);
-  --color-primary: #2563EB;
-  --color-success: #22C55E;
+  --color-background: #050505;
+  --color-foreground: #F2F2F2;
+  --color-muted: #A8A8B0;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-surface: rgba(18, 18, 18, 0.96);
+  --color-primary: #00E676;
+  --color-success: #00E676;
   --color-danger: #EF4444;
-  --color-rank-gold: #FBBF24;
+  --color-rank-gold: #C0C0C8;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 html.light {
-  --color-background: #F1F5F9;
-  --color-foreground: #0F172A;
-  --color-muted: #64748B;
-  --color-border: rgba(15, 23, 42, 0.1);
-  --color-surface: rgba(255, 255, 255, 0.92);
+  --color-background: #F4F4F5;
+  --color-foreground: #0A0A0A;
+  --color-muted: #71717A;
+  --color-border: rgba(10, 10, 10, 0.1);
+  --color-surface: rgba(255, 255, 255, 0.94);
+  --color-primary: #00C853;
 }
 
 * {
@@ -70,7 +71,7 @@ body {
 }
 
 .modal-panel {
-  background: #1a2438 !important;
+  background: #121212 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -85,8 +86,8 @@ html.light .modal-panel {
   --mt5-red: #ff5252;
   --mt5-text: var(--color-foreground);
   --mt5-muted: var(--color-muted);
-  --mt5-bg: #121a2e;
-  --mt5-surface: #1a2438;
+  --mt5-bg: #050505;
+  --mt5-surface: #121212;
   --mt5-divider: var(--color-border);
   --mt5-row-hover: rgba(255, 255, 255, 0.05);
 }
@@ -102,10 +103,10 @@ html.light .mt5-shell {
 
 /* Floating mobile bottom nav */
 .mobile-nav-dock {
-  --nav-dock-bg: #1a2438;
-  --nav-dock-border: rgba(255, 255, 255, 0.08);
-  --nav-dock-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-  --nav-dock-inactive: #94a3b8;
+  --nav-dock-bg: #121212;
+  --nav-dock-border: rgba(255, 255, 255, 0.1);
+  --nav-dock-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  --nav-dock-inactive: #A8A8B0;
 }
 
 html.light .mobile-nav-dock {
@@ -130,7 +131,7 @@ html.light .mobile-nav-dock {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #2563EB 0%, #60A5FA 50%, #FBBF24 100%);
+  background: linear-gradient(135deg, #00E676 0%, #14D4A8 45%, #E8E8E8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

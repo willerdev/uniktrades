@@ -223,19 +223,12 @@ function SidebarBrand({ expanded }: { expanded: boolean }) {
     <Link
       href="/dashboard"
       className={cn(
-        "flex h-14 shrink-0 items-center gap-3 px-3",
+        "group/sidebar flex h-14 shrink-0 items-center gap-0 px-3",
         !expanded && "justify-center px-0",
       )}
-      title="TraderRank Pro"
+      title="UnikTrades"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary ring-1 ring-primary/25">
-        <TrendingUp className="h-5 w-5" strokeWidth={2.5} />
-      </span>
-      {expanded && (
-        <span className="truncate font-bold text-foreground">
-          Trader<span className="text-primary">Rank</span>
-        </span>
-      )}
+      <Logo sidebar={!expanded} compact={expanded} />
     </Link>
   );
 }

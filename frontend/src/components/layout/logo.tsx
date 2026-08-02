@@ -1,5 +1,5 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { TrendingUp } from "lucide-react";
 
 export function Logo({
   className,
@@ -16,23 +16,29 @@ export function Logo({
       <>
         <span
           className={cn(
-            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl",
-            "bg-primary/15 text-primary ring-1 ring-primary/25",
+            "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl",
+            "bg-black ring-1 ring-primary/30",
             className,
           )}
           aria-hidden
         >
-          <TrendingUp className="h-5 w-5" strokeWidth={2.5} />
+          <Image
+            src="/uniktrades-mark.png"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 object-contain"
+          />
         </span>
         <span
           className={cn(
-            "ml-3 overflow-hidden whitespace-nowrap font-bold text-foreground transition-all duration-300",
+            "ml-3 overflow-hidden whitespace-nowrap font-bold tracking-tight text-foreground transition-all duration-300",
             "max-w-0 opacity-0",
             "group-hover/sidebar:max-w-[11rem] group-hover/sidebar:opacity-100",
             "group-focus-within/sidebar:max-w-[11rem] group-focus-within/sidebar:opacity-100",
           )}
         >
-          Trader<span className="text-primary">Rank</span> Pro
+          Unik<span className="text-primary">Trades</span>
         </span>
       </>
     );
@@ -40,15 +46,34 @@ export function Logo({
 
   if (compact) {
     return (
-      <span className={cn("font-bold text-foreground", className)}>
-        Trader<span className="text-primary">Rank</span>
+      <span
+        className={cn(
+          "inline-flex items-center gap-2 font-bold tracking-tight text-foreground",
+          className,
+        )}
+      >
+        <Image
+          src="/uniktrades-mark.png"
+          alt=""
+          width={28}
+          height={28}
+          className="h-7 w-7 rounded-md object-contain"
+        />
+        Unik<span className="text-primary">Trades</span>
       </span>
     );
   }
 
   return (
-    <span className={cn("font-bold text-foreground", className)}>
-      Trader<span className="text-primary">Rank</span> Pro
+    <span className={cn("relative inline-flex items-center", className)}>
+      <Image
+        src="/uniktrades-logo.png"
+        alt="UnikTrades"
+        width={180}
+        height={120}
+        className="h-9 w-auto object-contain sm:h-10"
+        priority
+      />
     </span>
   );
 }
