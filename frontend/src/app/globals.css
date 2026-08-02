@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-background: #FFFFFF;
+  --color-foreground: #0A0A0A;
+  --color-muted: #71717A;
+  --color-border: rgba(10, 10, 10, 0.1);
+  --color-surface: rgba(255, 255, 255, 0.96);
+  --color-primary: #00C853;
+  --color-success: #00C853;
+  --color-danger: #EF4444;
+  --color-rank-gold: #A0A0A8;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html.dark {
   --color-background: #050505;
   --color-foreground: #F2F2F2;
   --color-muted: #A8A8B0;
@@ -8,19 +22,7 @@
   --color-surface: rgba(18, 18, 18, 0.96);
   --color-primary: #00E676;
   --color-success: #00E676;
-  --color-danger: #EF4444;
   --color-rank-gold: #C0C0C8;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-html.light {
-  --color-background: #F4F4F5;
-  --color-foreground: #0A0A0A;
-  --color-muted: #71717A;
-  --color-border: rgba(10, 10, 10, 0.1);
-  --color-surface: rgba(255, 255, 255, 0.94);
-  --color-primary: #00C853;
 }
 
 * {
@@ -65,19 +67,19 @@ body {
 
 /* Solid panels for dialogs — overrides .glass-card transparency */
 .modal-overlay {
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
 
 .modal-panel {
-  background: #121212 !important;
+  background: #ffffff !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 
-html.light .modal-panel {
-  background: #ffffff !important;
+html.dark .modal-panel {
+  background: #121212 !important;
 }
 
 /* MT5 terminal shell — theme-aware surfaces, fixed buy/sell accent colors */
@@ -86,34 +88,31 @@ html.light .modal-panel {
   --mt5-red: #ff5252;
   --mt5-text: var(--color-foreground);
   --mt5-muted: var(--color-muted);
-  --mt5-bg: #050505;
-  --mt5-surface: #121212;
-  --mt5-divider: var(--color-border);
-  --mt5-row-hover: rgba(255, 255, 255, 0.05);
-}
-
-html.light .mt5-shell {
-  --mt5-text: #1a1a1a;
-  --mt5-muted: #6b7280;
   --mt5-bg: #ffffff;
   --mt5-surface: #f8f9fa;
-  --mt5-divider: rgba(0, 0, 0, 0.1);
+  --mt5-divider: var(--color-border);
   --mt5-row-hover: rgba(0, 0, 0, 0.03);
+}
+
+html.dark .mt5-shell {
+  --mt5-bg: #050505;
+  --mt5-surface: #121212;
+  --mt5-row-hover: rgba(255, 255, 255, 0.05);
 }
 
 /* Floating mobile bottom nav */
 .mobile-nav-dock {
-  --nav-dock-bg: #121212;
-  --nav-dock-border: rgba(255, 255, 255, 0.1);
-  --nav-dock-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
-  --nav-dock-inactive: #A8A8B0;
-}
-
-html.light .mobile-nav-dock {
   --nav-dock-bg: #ffffff;
   --nav-dock-border: rgba(15, 23, 42, 0.08);
   --nav-dock-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
   --nav-dock-inactive: #64748b;
+}
+
+html.dark .mobile-nav-dock {
+  --nav-dock-bg: #121212;
+  --nav-dock-border: rgba(255, 255, 255, 0.1);
+  --nav-dock-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  --nav-dock-inactive: #A8A8B0;
 }
 
 /* Desktop floating sidebar — expand main padding when open */
@@ -131,6 +130,13 @@ html.light .mobile-nav-dock {
 }
 
 .text-gradient {
+  background: linear-gradient(135deg, #00C853 0%, #14D4A8 45%, #0A0A0A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+html.dark .text-gradient {
   background: linear-gradient(135deg, #00E676 0%, #14D4A8 45%, #E8E8E8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

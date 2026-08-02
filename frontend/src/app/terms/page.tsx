@@ -15,17 +15,17 @@ export default function TermsPage() {
       <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary">
         Legal
       </p>
-      <h1 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+      <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         Terms &amp; Conditions
       </h1>
-      <p className="mt-3 text-sm text-gray-400">
+      <p className="mt-3 text-sm text-muted">
         Effective {EFFECTIVE}. By creating an account, depositing, investing, or
         requesting a withdrawal on UnikTrades (thetradeguard.com), you agree
         to these Terms.
       </p>
 
-      <nav className="mt-8 rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-gray-300">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+      <nav className="mt-8 rounded-xl border border-[var(--color-border)] bg-foreground/[0.03] p-4 text-sm text-muted">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
           On this page
         </p>
         <ul className="space-y-1.5">
@@ -72,9 +72,9 @@ export default function TermsPage() {
         </ul>
       </nav>
 
-      <div className="prose-terms mt-10 space-y-10 text-sm leading-relaxed text-gray-300">
+      <div className="prose-terms mt-10 space-y-10 text-sm leading-relaxed text-muted">
         <section id="purpose">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             1. Purpose &amp; stable capital
           </h2>
           <p className="mt-3">
@@ -95,7 +95,7 @@ export default function TermsPage() {
         </section>
 
         <section id="withdrawals">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             2. Preferred withdrawal schedule
           </h2>
           <p className="mt-3">
@@ -125,7 +125,7 @@ export default function TermsPage() {
         </section>
 
         <section id="penalties">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             3. Off-schedule / early withdrawals
           </h2>
           <p className="mt-3">
@@ -164,7 +164,7 @@ export default function TermsPage() {
         </section>
 
         <section id="fees">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             4. Fees, KYC &amp; processing
           </h2>
           <ul className="mt-3 list-disc space-y-2 pl-5">
@@ -197,7 +197,7 @@ export default function TermsPage() {
         </section>
 
         <section id="platform">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             5. Platform protection
           </h2>
           <p className="mt-3">
@@ -234,7 +234,7 @@ export default function TermsPage() {
         </section>
 
         <section id="risk">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             6. Risk disclosure
           </h2>
           <p className="mt-3">
@@ -247,7 +247,7 @@ export default function TermsPage() {
         </section>
 
         <section id="changes">
-          <h2 className="text-lg font-semibold text-white">7. Changes</h2>
+          <h2 className="text-lg font-semibold text-foreground">7. Changes</h2>
           <p className="mt-3">
             We may update these Terms from time to time. Material changes to
             withdrawal cadence or penalty structure will be reflected on this
@@ -261,7 +261,7 @@ export default function TermsPage() {
         </section>
 
         <section id="onchain">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             8. On-chain vault contract
           </h2>
           <p className="mt-3">
@@ -282,7 +282,7 @@ export default function TermsPage() {
         </section>
       </div>
 
-      <p className="mt-12 text-center text-sm text-gray-500">
+      <p className="mt-12 text-center text-sm text-muted">
         <Link href="/register" className="text-primary hover:underline">
           Back to register
         </Link>

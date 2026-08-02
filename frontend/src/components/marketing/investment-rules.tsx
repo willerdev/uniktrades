@@ -44,10 +44,10 @@ export function InvestmentRules() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
           {t("rules.eyebrow")}
         </p>
-        <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-5xl">
+        <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
           {t("rules.title")}
         </h2>
-        <p className="mt-4 text-lg text-gray-400">{t("rules.subtitle")}</p>
+        <p className="mt-4 text-lg text-muted">{t("rules.subtitle")}</p>
       </motion.div>
 
       <div className="mt-14 grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
@@ -66,13 +66,13 @@ export function InvestmentRules() {
                 duration: 0.5,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="group border-t border-white/10 pt-6"
+              className="group border-t border-[var(--color-border)] pt-6"
             >
               <div className="mb-4 inline-flex text-primary transition-transform duration-300 group-hover:translate-x-0.5">
                 <Icon className="h-5 w-5" strokeWidth={1.75} />
               </div>
-              <h3 className="text-lg font-semibold text-white">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-gray-400">
+              <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
                 {body === "yield-hold" ? (
                   <>
                     {t("rules.holdIntro")}{" "}
@@ -94,10 +94,10 @@ export function InvestmentRules() {
         transition={{ duration: 0.5, delay: 0.1 }}
         className="mt-16"
       >
-        <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
+        <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted">
           {t("rules.feeBySize")}
         </h3>
-        <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-[var(--color-border)] bg-foreground/10 sm:grid-cols-4">
           {FEE_TIERS.map((tier, i) => (
             <motion.div
               key={tier.range}
@@ -105,10 +105,10 @@ export function InvestmentRules() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.05 * i }}
-              className="bg-[#121212] px-5 py-5"
+              className="bg-background px-5 py-5"
             >
-              <p className="text-xs text-gray-500">{tier.range}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums text-white">
+              <p className="text-xs text-muted">{tier.range}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-foreground">
                 {tier.fee}
               </p>
             </motion.div>

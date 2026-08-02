@@ -14,10 +14,10 @@ const MT5_DARK = {
 };
 
 const MT5_LIGHT = {
-  background: "#f0f2f5",
-  surface: "#ffffff",
-  text: "#1a1a2e",
-  muted: "#6b7280",
+  background: "#ffffff",
+  surface: "#f8f9fa",
+  text: "#0a0a0a",
+  muted: "#71717a",
   grid: "#e5e7eb",
 };
 

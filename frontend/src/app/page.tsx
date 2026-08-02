@@ -154,7 +154,7 @@ export default function HomePage() {
           style={{ scale: heroScale }}
           className="pointer-events-none absolute inset-0 -z-10"
         >
-          <div className="absolute inset-0 bg-[#050505]" />
+          <div className="absolute inset-0 bg-background" />
           <div
             className="absolute inset-0 opacity-40"
             style={{
@@ -198,7 +198,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.18, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-10 max-w-3xl text-[clamp(1.75rem,4.2vw,3.1rem)] font-bold leading-[1.1] tracking-tight text-white"
+            className="mt-10 max-w-3xl text-[clamp(1.75rem,4.2vw,3.1rem)] font-bold leading-[1.1] tracking-tight text-foreground"
           >
             {t("home.headline1")}
             <span className="block text-gradient">{t("home.headline2")}</span>
@@ -260,13 +260,13 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      <section className="border-y border-white/8 bg-white/[0.02] px-4 py-14 sm:px-6">
+      <section className="border-y border-[var(--color-border)] bg-foreground/[0.02] px-4 py-14 sm:px-6">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
           <div>
             <p className="text-[11px] uppercase tracking-[0.28em] text-muted">
               {t("home.dailyYield")}
             </p>
-            <p className="mt-2 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
+            <p className="mt-2 text-5xl font-extrabold tracking-tight text-foreground sm:text-6xl">
               <YieldCounter />
               <span className="text-2xl text-primary sm:text-3xl">%</span>
             </p>
@@ -287,7 +287,7 @@ export default function HomePage() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary">
             {t("home.howTitle")}
           </p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             {t("home.howHeadline")}
           </h2>
           <p className="mt-4 max-w-md text-base text-muted">
@@ -298,7 +298,7 @@ export default function HomePage() {
         <div className="relative mt-14">
           <div
             aria-hidden
-            className="absolute bottom-2 left-[1.15rem] top-2 w-px bg-gradient-to-b from-primary via-white/15 to-transparent"
+            className="absolute bottom-2 left-[1.15rem] top-2 w-px bg-gradient-to-b from-primary via-foreground/15 to-transparent"
           />
 
           <ol className="space-y-10">
@@ -315,11 +315,11 @@ export default function HomePage() {
                 }}
                 className="relative grid grid-cols-[2.3rem_1fr] items-start gap-5"
               >
-                <span className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-primary/40 bg-[#050505] font-mono text-xs font-semibold text-primary">
+                <span className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-primary/40 bg-background font-mono text-xs font-semibold text-primary">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
-                  <h3 className="text-xl font-semibold text-white">{item.title}</h3>
+                  <h3 className="text-xl font-semibold text-foreground">{item.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted">
                     {item.body === "earn-daily" ? (
                       <>
@@ -359,13 +359,13 @@ export default function HomePage() {
           />
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-foreground/20 to-transparent"
           />
 
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary">
             {t("home.inviteOnly")}
           </p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
             {t("home.readyTitle")}
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-muted sm:text-lg">

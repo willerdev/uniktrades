@@ -47,16 +47,16 @@ export function RecentPayoutsShowcase() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
           {t("payouts.title")}
         </p>
-        <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+        <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           {t("payouts.subtitle")}
         </h2>
-        <p className="mt-3 text-gray-400">
+        <p className="mt-3 text-muted">
           {t("payouts.liveHint")}
           {feed && feed.totalPaid > 0 && (
             <>
               {" "}
               —{" "}
-              <strong className="text-white">
+              <strong className="text-foreground">
                 {formatCurrency(feed.totalPaid)}
               </strong>{" "}
               {t("payouts.paidOut")}
@@ -66,7 +66,7 @@ export function RecentPayoutsShowcase() {
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-gray-500">
+        <div className="mt-10 rounded-2xl border border-[var(--color-border)] bg-foreground/[0.03] p-8 text-center text-sm text-muted">
           {t("payouts.empty")}
         </div>
       ) : (
@@ -85,12 +85,12 @@ export function RecentPayoutsShowcase() {
             {doubled.map((item, i) => (
               <div
                 key={`${item.displayName}-${item.paidAt}-${i}`}
-                className="w-72 shrink-0 rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+                className="w-72 shrink-0 rounded-2xl border border-[var(--color-border)] bg-foreground/[0.03] p-5"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-white">{item.displayName}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="font-semibold text-foreground">{item.displayName}</p>
+                    <p className="mt-0.5 text-xs text-muted">
                       {sourceLabel(item.source)}
                     </p>
                   </div>
@@ -98,10 +98,10 @@ export function RecentPayoutsShowcase() {
                     <DollarSign className="h-4 w-4" />
                   </div>
                 </div>
-                <p className="mt-4 text-2xl font-bold tabular-nums text-white">
+                <p className="mt-4 text-2xl font-bold tabular-nums text-foreground">
                   {formatCurrency(item.amount)}
                 </p>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted">
                   {timeAgo(item.paidAt)}
                 </p>
               </div>
@@ -119,10 +119,10 @@ export function RecentPayoutsShowcase() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.08 }}
-              className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm"
+              className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.03] px-4 py-3 text-sm"
             >
-              <span className="text-white">{item.displayName}</span>
-              <span className="text-gray-500"> {t("payouts.received")} </span>
+              <span className="text-foreground">{item.displayName}</span>
+              <span className="text-muted"> {t("payouts.received")} </span>
               <span className="font-semibold tabular-nums text-primary">
                 {formatCurrency(item.amount)}
               </span>

@@ -16,7 +16,7 @@ export function LanguageSwitcher({
   return (
     <div
       className={cn(
-        "inline-flex items-center rounded-lg border border-white/10 bg-white/5 p-0.5 text-xs font-semibold",
+        "inline-flex items-center rounded-lg border border-[var(--color-border)] bg-foreground/5 p-0.5 text-xs font-semibold",
         className,
       )}
       role="group"

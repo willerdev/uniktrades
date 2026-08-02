@@ -89,10 +89,10 @@ export default function RegisterPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10 text-2xl text-success">
               ✓
             </div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-xl font-bold text-foreground">
               {t("register.successTitle")}
             </h2>
-            <p className="mt-2 text-gray-400">
+            <p className="mt-2 text-muted">
 {t("register.successBody")}
             </p>
             <Button className="mt-6" onClick={() => router.push("/login")}>
@@ -121,12 +121,12 @@ export default function RegisterPage() {
                 {t("register.closed")}
               </Badge>
               <CardTitle className="text-2xl">{t("register.inviteOnly")}</CardTitle>
-              <CardDescription className="text-base text-gray-400">
+              <CardDescription className="text-base text-muted">
 {t("register.inviteOnlyBody")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-400">
+              <div className="flex items-start gap-3 rounded-xl border border-[var(--color-border)] bg-foreground/[0.02] p-4 text-sm text-muted">
                 <Users className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p>
 {t("register.membersShare")}
@@ -137,7 +137,7 @@ export default function RegisterPage() {
                   {t("register.alreadyInvited")}
                 </Button>
               </Link>
-              <p className="text-center text-xs text-gray-600">
+              <p className="text-center text-xs text-muted">
                 {t("register.publicDisabled")}
               </p>
             </CardContent>
@@ -234,7 +234,7 @@ export default function RegisterPage() {
                 {loading ? t("register.creating") : t("register.createAccount")}
               </Button>
             </form>
-            <p className="mt-6 text-center text-sm text-gray-400">
+            <p className="mt-6 text-center text-sm text-muted">
               {t("register.haveAccount")}{" "}
               <Link href="/login" className="text-primary hover:underline">
                 {t("common.signIn")}
