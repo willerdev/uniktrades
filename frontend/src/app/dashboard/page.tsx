@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { DashboardInvestorPolicyBanners } from "@/components/dashboard/dashboard-investor-policy-banners";
 import { InvestmentHome } from "@/components/dashboard/investment-home";
+import { InviteCodeCard } from "@/components/dashboard/invite-code-card";
 
 function DashboardBody() {
   const { data, loading, error, fetchDashboard } = useDashboardStore();
@@ -54,6 +55,8 @@ function DashboardBody() {
           onComplete={() => void handleRegistrationComplete()}
         />
       )}
+
+      <InviteCodeCard />
 
       <InvestmentHome
         displayName={data?.user.displayName ?? user?.displayName ?? undefined}

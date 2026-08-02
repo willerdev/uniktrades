@@ -72,6 +72,23 @@ export class AuthService {
     }
   }
 
+  async validateInviteCode(rawCode: string) {
+    const code = rawCode?.trim().toUpperCase();
+    if (!code || code.length < 4) {
+      throw new BadRequestException('Enter a valid code');
+    }
+
+    const referrer = await this.prisma.user.findUnique({
+      where: { referralCode: code },
+      select: { id: true },
+    });
+    if (!referrer) {
+      throw new BadRequestException('This code is not valid');
+    }
+
+    return { valid: true, code };
+  }
+
   async register(dto: RegisterDto, ip?: string) {
     const email = dto.email.trim().toLowerCase();
 
@@ -95,7 +112,7 @@ export class AuthService {
     const referralCode = dto.referralCode?.trim().toUpperCase();
     if (!referralCode) {
       throw new BadRequestException(
-        'Registration is invite-only. Ask a current member for their referral link.',
+        'A valid invite code is required to create an account.',
       );
     }
 
@@ -104,9 +121,7 @@ export class AuthService {
       select: { id: true },
     });
     if (!referrer) {
-      throw new BadRequestException(
-        'Invalid referral invite. Ask a current member for a fresh link.',
-      );
+      throw new BadRequestException('This code is not valid');
     }
 
     const user = await this.prisma.user.create({
@@ -121,6 +136,16 @@ export class AuthService {
         referredById: referrer.id,
       },
     });
+
+    try {
+      await this.referrals.getOrCreateCode(user.id);
+    } catch (err) {
+      this.logger.error(
+        `Invite code assign failed for ${user.id}: ${
+          err instanceof Error ? err.message : err
+        }`,
+      );
+    }
 
     this.logger.log(
       `Invite-only registration: ${user.id} referred by ${referrer.id} (${referralCode})`,

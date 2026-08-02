@@ -56,19 +56,47 @@ export function ReferralCard() {
 
         {info && (
           <>
+            <div>
+              <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-muted">
+                Your code
+              </p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 rounded-md border border-[var(--color-border)] bg-foreground/5 px-3 py-2.5 font-mono text-lg font-bold tracking-widest text-foreground">
+                  {info.code.slice(0, 4)}–{info.code.slice(4)}
+                </code>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="gap-2 shrink-0"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(info.code);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    } catch {
+                      setError("Could not copy");
+                    }
+                  }}
+                >
+                  {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
+                  {copied ? "Copied" : "Copy code"}
+                </Button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
-              <code className="flex-1 truncate rounded-md border border-[var(--color-border)] bg-black/20 px-3 py-2 text-xs">
+              <code className="flex-1 truncate rounded-md border border-[var(--color-border)] bg-foreground/5 px-3 py-2 text-xs">
                 {info.link}
               </code>
               <Button type="button" variant="secondary" className="gap-2 shrink-0" onClick={copyLink}>
                 {copied ? <Check className="h-4 w-4 text-success" /> : <Copy className="h-4 w-4" />}
-                {copied ? "Copied" : "Copy"}
+                {copied ? "Copied" : "Copy link"}
               </Button>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
               <div className="rounded-lg border border-[var(--color-border)] p-3">
-                <p className="text-2xl font-bold text-white">{info.totalReferred}</p>
+                <p className="text-2xl font-bold text-foreground">{info.totalReferred}</p>
                 <p className="text-xs text-muted">Friends invited</p>
               </div>
               <div className="rounded-lg border border-[var(--color-border)] p-3">
@@ -78,7 +106,7 @@ export function ReferralCard() {
                 <p className="text-xs text-muted">Paid to wallet</p>
               </div>
               <div className="rounded-lg border border-[var(--color-border)] p-3 col-span-2 sm:col-span-1">
-                <p className="text-2xl font-bold text-white">
+                <p className="text-2xl font-bold text-foreground">
                   ${(info.pendingUsdt ?? 0).toFixed(2)}
                 </p>
                 <p className="text-xs text-muted">Pending payout</p>

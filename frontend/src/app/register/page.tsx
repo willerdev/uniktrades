@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Lock, Users } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,15 +15,19 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth";
 import { validateDisplayName } from "@/lib/display-name";
 import { useT } from "@/i18n";
+import { api } from "@/lib/api";
+import { InviteCodeBoxes } from "@/components/auth/invite-code-boxes";
+
+type Step = "code" | "form";
 
 export default function RegisterPage() {
   const t = useT();
   const router = useRouter();
   const { register } = useAuthStore();
+  const [step, setStep] = useState<Step>("code");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,20 +35,54 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [referralCode, setReferralCode] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     const ref = new URLSearchParams(window.location.search).get("ref");
-    if (ref?.trim()) setReferralCode(ref.trim().toUpperCase());
+    if (ref?.trim()) {
+      const code = ref.trim().toUpperCase().replace(/[^0-9A-Z]/g, "").slice(0, 8);
+      setInviteCode(code);
+      if (code.length === 8) {
+        void api.auth
+          .validateInviteCode(code)
+          .then(() => setStep("form"))
+          .catch(() => {
+            /* stay on code step with prefilled boxes */
+          })
+          .finally(() => setReady(true));
+        return;
+      }
+    }
     setReady(true);
   }, []);
+
+  async function handleConfirmCode(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    const code = inviteCode.trim().toUpperCase();
+    if (code.length !== 8) {
+      setError(t("register.codeIncomplete"));
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await api.auth.validateInviteCode(code);
+      setInviteCode(res.code);
+      setStep("form");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("register.codeInvalid"));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!referralCode.trim()) {
-      setError(t("register.needReferral"));
+    if (!inviteCode.trim()) {
+      setError(t("register.codeInvalid"));
+      setStep("code");
       return;
     }
     if (!acceptTerms) {
@@ -63,7 +101,7 @@ export default function RegisterPage() {
         password,
         displayName,
         true,
-        referralCode.trim().toUpperCase(),
+        inviteCode.trim().toUpperCase(),
       );
       setSuccess(true);
     } catch (err) {
@@ -92,9 +130,7 @@ export default function RegisterPage() {
             <h2 className="text-xl font-bold text-foreground">
               {t("register.successTitle")}
             </h2>
-            <p className="mt-2 text-muted">
-{t("register.successBody")}
-            </p>
+            <p className="mt-2 text-muted">{t("register.successBody")}</p>
             <Button className="mt-6" onClick={() => router.push("/login")}>
               {t("register.continueLogin")}
             </Button>
@@ -104,7 +140,7 @@ export default function RegisterPage() {
     );
   }
 
-  if (!referralCode) {
+  if (step === "code") {
     return (
       <div className="flex min-h-[80vh] items-center justify-center px-4">
         <motion.div
@@ -112,34 +148,44 @@ export default function RegisterPage() {
           animate={{ opacity: 1, y: 0 }}
           className="w-full max-w-md"
         >
-          <Card>
+          <Card className="border-[var(--color-border)] shadow-lg">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-300">
-                <Lock className="h-5 w-5" />
+              <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <KeyRound className="h-6 w-6" strokeWidth={2} />
               </div>
-              <Badge variant="secondary" className="mx-auto mb-3 w-fit">
-                {t("register.closed")}
-              </Badge>
-              <CardTitle className="text-2xl">{t("register.inviteOnly")}</CardTitle>
-              <CardDescription className="text-base text-muted">
-{t("register.inviteOnlyBody")}
+              <CardTitle className="text-2xl">{t("register.codeTitle")}</CardTitle>
+              <CardDescription className="text-base">
+                {t("register.codeSubtitle")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3 rounded-xl border border-[var(--color-border)] bg-foreground/[0.02] p-4 text-sm text-muted">
-                <Users className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                <p>
-{t("register.membersShare")}
-                </p>
-              </div>
-              <Link href="/login" className="block">
-                <Button className="w-full" variant="secondary">
-                  {t("register.alreadyInvited")}
+            <CardContent>
+              <form onSubmit={handleConfirmCode} className="space-y-6">
+                <InviteCodeBoxes
+                  value={inviteCode}
+                  onChange={(v) => {
+                    setInviteCode(v);
+                    setError("");
+                  }}
+                  disabled={loading}
+                  autoFocus
+                />
+                {error && (
+                  <p className="text-center text-sm text-danger">{error}</p>
+                )}
+                <Button
+                  type="submit"
+                  className="h-12 w-full rounded-full text-base"
+                  disabled={loading || inviteCode.length !== 8}
+                >
+                  {loading ? t("register.codeChecking") : t("register.codeConfirm")}
                 </Button>
-              </Link>
-              <p className="text-center text-xs text-muted">
-                {t("register.publicDisabled")}
-              </p>
+                <p className="text-center text-sm text-muted">
+                  {t("register.haveAccount")}{" "}
+                  <Link href="/login" className="font-medium text-primary hover:underline">
+                    {t("common.signIn")}
+                  </Link>
+                </p>
+              </form>
             </CardContent>
           </Card>
         </motion.div>
@@ -156,13 +202,8 @@ export default function RegisterPage() {
       >
         <Card>
           <CardHeader className="text-center">
-            <Badge variant="gold" className="mx-auto mb-3 w-fit">
-              {t("register.referralBadge")}
-            </Badge>
             <CardTitle className="text-2xl">{t("register.joinTitle")}</CardTitle>
-            <CardDescription>
-              {t("register.joinSubtitle")}
-            </CardDescription>
+            <CardDescription>{t("register.joinSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -176,9 +217,7 @@ export default function RegisterPage() {
                   required
                   maxLength={40}
                 />
-                <p className="text-xs text-gray-500">
-                  {t("register.displayHint")}
-                </p>
+                <p className="text-xs text-muted">{t("register.displayHint")}</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">{t("common.email")}</Label>
@@ -222,9 +261,6 @@ export default function RegisterPage() {
                   {t("register.acceptTermsSuffix")}
                 </span>
               </label>
-              <p className="text-xs text-success">
-                {t("register.referralApplied", { code: referralCode })}
-              </p>
               {error && <p className="text-sm text-danger">{error}</p>}
               <Button
                 type="submit"
@@ -233,6 +269,16 @@ export default function RegisterPage() {
               >
                 {loading ? t("register.creating") : t("register.createAccount")}
               </Button>
+              <button
+                type="button"
+                className="w-full text-center text-sm text-muted hover:text-foreground"
+                onClick={() => {
+                  setStep("code");
+                  setError("");
+                }}
+              >
+                {t("register.changeCode")}
+              </button>
             </form>
             <p className="mt-6 text-center text-sm text-muted">
               {t("register.haveAccount")}{" "}

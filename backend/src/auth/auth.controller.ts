@@ -22,6 +22,13 @@ export class AuthController {
     return this.authService.register(dto, req.ip);
   }
 
+  /** Public: check invite code before showing registration form. */
+  @Post('invite-code/validate')
+  @UseGuards(AuthRateLimitGuard)
+  validateInviteCode(@Body() body: { code?: string }) {
+    return this.authService.validateInviteCode(body?.code ?? '');
+  }
+
   @Post('login')
   @UseGuards(AuthRateLimitGuard)
   login(@Body() dto: LoginDto, @Req() req: Request) {
