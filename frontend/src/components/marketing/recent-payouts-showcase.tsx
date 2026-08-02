@@ -5,26 +5,12 @@ import { motion } from "framer-motion";
 import { DollarSign } from "lucide-react";
 import { api, type PublicPayoutFeed } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
-
-function sourceLabel(source: string) {
-  if (source === "DEPOSITOR") return "Wallet withdrawal";
-  if (source === "TP_REWARD") return "Reward";
-  if (source === "PROFIT_SHARE") return "Profit share";
-  return "Payout";
-}
-
-function timeAgo(iso: string) {
-  const ms = Date.now() - new Date(iso).getTime();
-  const hours = Math.floor(ms / (1000 * 60 * 60));
-  if (hours < 1) return "Just now";
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days === 1) return "Yesterday";
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString();
-}
+import { useT } from "@/i18n";
+import { useLocaleStore } from "@/i18n";
 
 export function RecentPayoutsShowcase() {
+  const t = useT();
+  const locale = useLocaleStore((s) => s.locale);
   const [feed, setFeed] = useState<PublicPayoutFeed | null>(null);
 
   useEffect(() => {
@@ -34,6 +20,24 @@ export function RecentPayoutsShowcase() {
       .catch(() => setFeed(null));
   }, []);
 
+  function sourceLabel(source: string) {
+    if (source === "DEPOSITOR") return t("payouts.wallet");
+    if (source === "TP_REWARD") return t("payouts.reward");
+    if (source === "PROFIT_SHARE") return t("payouts.profitShare");
+    return t("payouts.payout");
+  }
+
+  function timeAgo(iso: string) {
+    const ms = Date.now() - new Date(iso).getTime();
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    if (hours < 1) return t("payouts.justNow");
+    if (hours < 24) return t("payouts.hoursAgo", { n: hours });
+    const days = Math.floor(hours / 24);
+    if (days === 1) return t("payouts.yesterday");
+    if (days < 7) return t("payouts.daysAgo", { n: days });
+    return new Date(iso).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-US");
+  }
+
   const items = feed?.items ?? [];
   const doubled = items.length > 0 ? [...items, ...items] : [];
 
@@ -41,13 +45,13 @@ export function RecentPayoutsShowcase() {
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <div className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-          Recent payouts
+          {t("payouts.title")}
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Capital moving out to wallets
+          {t("payouts.subtitle")}
         </h2>
         <p className="mt-3 text-gray-400">
-          Live highlights of paid withdrawals and rewards on the platform
+          {t("payouts.liveHint")}
           {feed && feed.totalPaid > 0 && (
             <>
               {" "}
@@ -55,7 +59,7 @@ export function RecentPayoutsShowcase() {
               <strong className="text-white">
                 {formatCurrency(feed.totalPaid)}
               </strong>{" "}
-              paid out so far
+              {t("payouts.paidOut")}
             </>
           )}
         </p>
@@ -63,7 +67,7 @@ export function RecentPayoutsShowcase() {
 
       {items.length === 0 ? (
         <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center text-sm text-gray-500">
-          Payout highlights appear here as members withdraw and receive rewards.
+          {t("payouts.empty")}
         </div>
       ) : (
         <div className="relative mt-10 overflow-hidden">
@@ -118,7 +122,7 @@ export function RecentPayoutsShowcase() {
               className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm"
             >
               <span className="text-white">{item.displayName}</span>
-              <span className="text-gray-500"> received </span>
+              <span className="text-gray-500"> {t("payouts.received")} </span>
               <span className="font-semibold tabular-nums text-primary">
                 {formatCurrency(item.amount)}
               </span>

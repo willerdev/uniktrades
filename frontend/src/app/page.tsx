@@ -16,25 +16,7 @@ import { RecentPayoutsShowcase } from "@/components/marketing/recent-payouts-sho
 import { InvestmentRules } from "@/components/marketing/investment-rules";
 import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
 import { useAuthStore } from "@/stores/auth";
-
-const PATH = [
-  {
-    title: "Fund",
-    body: "Deposit USDT to your wallet. Capital stays yours until you allocate.",
-  },
-  {
-    title: "Allocate",
-    body: "Move into Smart Invest, pay the tiered fee, and set your size.",
-  },
-  {
-    title: "Compound",
-    body: "earn-daily",
-  },
-  {
-    title: "Exit",
-    body: "Withdraw after KYC — or auto-reinvest 90% and keep growing.",
-  },
-] as const;
+import { useT } from "@/i18n";
 
 function RisingMarketVisual() {
   const bars = [
@@ -140,6 +122,7 @@ function YieldCounter() {
 
 export default function HomePage() {
   const isLoggedIn = Boolean(useAuthStore((s) => s.token));
+  const t = useT();
   const heroRef = useRef<HTMLElement>(null);
 
   const { scrollYProgress } = useScroll({
@@ -151,11 +134,17 @@ export default function HomePage() {
   const visualY = useTransform(scrollYProgress, [0, 1], [0, 80]);
 
   const primaryHref = isLoggedIn ? "/invest" : "/register";
-  const primaryLabel = isLoggedIn ? "Open Invest" : "Get started";
+  const primaryLabel = isLoggedIn ? t("home.openInvest") : t("home.getStarted");
+
+  const path = [
+    { title: t("home.pathFund"), body: t("home.pathFundBody") },
+    { title: t("home.pathAllocate"), body: t("home.pathAllocateBody") },
+    { title: t("home.pathCompound"), body: "earn-daily" as const },
+    { title: t("home.pathExit"), body: t("home.pathExitBody") },
+  ];
 
   return (
     <div className="relative overflow-hidden">
-      {/* HERO — full-bleed brand composition */}
       <section
         ref={heroRef}
         className="relative min-h-[100svh] overflow-hidden"
@@ -211,8 +200,8 @@ export default function HomePage() {
             transition={{ delay: 0.18, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
             className="mt-10 max-w-3xl text-[clamp(1.75rem,4.2vw,3.1rem)] font-bold leading-[1.1] tracking-tight text-white"
           >
-            Grow with clarity.
-            <span className="block text-gradient">Withdraw with confidence.</span>
+            {t("home.headline1")}
+            <span className="block text-gradient">{t("home.headline2")}</span>
           </motion.h1>
 
           <motion.p
@@ -221,8 +210,7 @@ export default function HomePage() {
             transition={{ delay: 0.32, duration: 0.55 }}
             className="mt-5 max-w-xl text-base leading-relaxed text-muted sm:text-lg"
           >
-            Smart Invest pays daily USDT yield on eligible balance — transparent
-            fees, a 24-hour hold on new capital, KYC before cash-out.
+            {t("home.support")}
           </motion.p>
 
           <motion.div
@@ -239,7 +227,7 @@ export default function HomePage() {
             </Link>
             <Link href={isLoggedIn ? "/wallet" : "/login"}>
               <Button size="lg" variant="secondary" className="px-8">
-                {isLoggedIn ? "Open wallet" : "Sign in"}
+                {isLoggedIn ? t("home.openWallet") : t("common.signIn")}
               </Button>
             </Link>
           </motion.div>
@@ -261,7 +249,7 @@ export default function HomePage() {
             transition={{ delay: 1.1 }}
             className="mt-8 inline-flex flex-col items-center gap-1 text-[11px] uppercase tracking-[0.28em] text-muted transition-colors hover:text-foreground"
           >
-            See the path
+            {t("home.seePath")}
             <motion.span
               animate={{ y: [0, 5, 0] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -272,12 +260,11 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* Yield highlight — below fold */}
       <section className="border-y border-white/8 bg-white/[0.02] px-4 py-14 sm:px-6">
         <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 text-center sm:flex-row sm:justify-between sm:text-left">
           <div>
             <p className="text-[11px] uppercase tracking-[0.28em] text-muted">
-              Platform daily yield
+              {t("home.dailyYield")}
             </p>
             <p className="mt-2 text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
               <YieldCounter />
@@ -285,13 +272,11 @@ export default function HomePage() {
             </p>
           </div>
           <p className="max-w-sm text-sm leading-relaxed text-muted">
-            VIP lifts daily yield to 10%, unlocks weekends, and removes wallet
-            withdrawal fees while active.
+            {t("home.vipNote")}
           </p>
         </div>
       </section>
 
-      {/* Path — vertical spine */}
       <section id="path" className="relative mx-auto max-w-2xl px-4 py-24 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -300,13 +285,13 @@ export default function HomePage() {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         >
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary">
-            How it works
+            {t("home.howTitle")}
           </p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Four moves. One loop.
+            {t("home.howHeadline")}
           </h2>
           <p className="mt-4 max-w-md text-base text-muted">
-            No ladder. No noise. Capital in, yield daily, exit when you&apos;re ready.
+            {t("home.howSupport")}
           </p>
         </motion.div>
 
@@ -317,7 +302,7 @@ export default function HomePage() {
           />
 
           <ol className="space-y-10">
-            {PATH.map((item, i) => (
+            {path.map((item, i) => (
               <motion.li
                 key={item.title}
                 initial={{ opacity: 0, y: 22 }}
@@ -338,7 +323,7 @@ export default function HomePage() {
                   <p className="mt-2 text-sm leading-relaxed text-muted">
                     {item.body === "earn-daily" ? (
                       <>
-                        After the 24-hour hold, eligible balance earns yield{" "}
+                        {t("home.pathCompoundBody")}{" "}
                         <DailyCreditTimeText variant="short" />.
                       </>
                     ) : (
@@ -356,7 +341,6 @@ export default function HomePage() {
 
       <RecentPayoutsShowcase />
 
-      {/* Closing CTA */}
       <section className="relative mx-auto max-w-5xl px-4 pb-28 pt-8 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -379,25 +363,24 @@ export default function HomePage() {
           />
 
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-primary">
-            Invite only
+            {t("home.inviteOnly")}
           </p>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">
-            Ready when you are
+            {t("home.readyTitle")}
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-muted sm:text-lg">
-            Use a member referral link, activate your account, and put capital
-            on Smart Invest.
+            {t("home.readyBody")}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link href="/register">
               <Button size="lg" className="gap-2 px-8">
-                Join UnikTrades
+                {t("home.joinCta")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
             <Link href="/login">
               <Button size="lg" variant="secondary" className="px-8">
-                Sign in
+                {t("common.signIn")}
               </Button>
             </Link>
           </div>

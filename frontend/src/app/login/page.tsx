@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuthStore } from "@/stores/auth";
 import { resolveReturnTo } from "@/lib/return-to";
+import { useT } from "@/i18n";
 
 const LOGIN_SESSION_KEY = "trp-login-session";
 const LOGIN_EMAIL_KEY = "trp-login-email";
@@ -38,6 +39,7 @@ function resolveSessionId(stateSessionId: string) {
 }
 
 function LoginForm() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { startLogin, verifyLoginOtp, resendLoginOtp, isAuthenticated } = useAuthStore();
@@ -53,7 +55,7 @@ function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get("reset") === "1") {
-      setNotice("Password updated. Sign in with your new password.");
+      setNotice(t("login.passwordUpdated"));
     }
   }, [searchParams]);
 
@@ -125,7 +127,7 @@ function LoginForm() {
 
     const sessionId = resolveSessionId(loginSessionId);
     if (!sessionId) {
-      setError("Session expired. Enter your email and password again.");
+      setError(t("login.sessionExpired"));
       setStep("credentials");
       clearLoginSession();
       return;
@@ -148,7 +150,7 @@ function LoginForm() {
 
     const sessionId = resolveSessionId(loginSessionId);
     if (!sessionId) {
-      setError("Session expired. Enter your email and password again.");
+      setError(t("login.sessionExpired"));
       setStep("credentials");
       clearLoginSession();
       return;
@@ -163,7 +165,7 @@ function LoginForm() {
       setLoginSessionId(nextSessionId);
       setResendCooldown(60);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not resend code");
+      setError(err instanceof Error ? err.message : t("login.resendFailed"));
     } finally {
       setLoading(false);
     }
@@ -187,19 +189,19 @@ function LoginForm() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
-              {step === "credentials" ? "Welcome Back" : "Check your email"}
+              {step === "credentials" ? t("login.welcome") : t("login.checkEmail")}
             </CardTitle>
             <CardDescription>
               {step === "credentials"
-                ? "Sign in to your UnikTrades account"
-                : `We sent a 6-digit code to ${email}`}
+                ? t("login.signInAccount")
+                : t("login.codeSent", { email })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {step === "credentials" ? (
               <form onSubmit={handleCredentials} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("common.email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -211,12 +213,12 @@ function LoginForm() {
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">{t("common.password")}</Label>
                     <Link
                       href="/forgot-password"
                       className="text-xs text-primary hover:underline"
                     >
-                      Forgot password?
+                      {t("login.forgot")}
                     </Link>
                   </div>
                   <Input
@@ -233,13 +235,13 @@ function LoginForm() {
                 )}
                 {error && <p className="text-sm text-danger">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Sending code..." : "Continue"}
+                  {loading ? t("login.sendingCode") : t("common.continue")}
                 </Button>
               </form>
             ) : (
               <form onSubmit={handleOtp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="otp">Sign-in code</Label>
+                  <Label htmlFor="otp">{t("login.otpLabel")}</Label>
                   <Input
                     id="otp"
                     inputMode="numeric"
@@ -254,7 +256,7 @@ function LoginForm() {
                 </div>
                 {error && <p className="text-sm text-danger">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading || otp.length !== 6}>
-                  {loading ? "Verifying..." : "Sign in"}
+                  {loading ? t("login.verifying") : t("login.signIn")}
                 </Button>
                 <div className="flex items-center justify-between text-sm">
                   <button
@@ -262,7 +264,7 @@ function LoginForm() {
                     className="text-muted hover:text-foreground"
                     onClick={handleBack}
                   >
-                    ← Back
+                    {t("login.back")}
                   </button>
                   <button
                     type="button"
@@ -270,15 +272,15 @@ function LoginForm() {
                     disabled={loading || resendCooldown > 0}
                     onClick={() => void handleResend()}
                   >
-                    {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend code"}
+                    {resendCooldown > 0 ? t("login.resendIn", { n: resendCooldown }) : t("login.resend")}
                   </button>
                 </div>
               </form>
             )}
             <p className="mt-6 text-center text-sm text-gray-400">
-              New here?{" "}
+              {t("login.newHere")}{" "}
               <Link href="/register" className="text-primary hover:underline">
-                Invite-only registration
+                {t("login.inviteOnly")}
               </Link>
             </p>
           </CardContent>

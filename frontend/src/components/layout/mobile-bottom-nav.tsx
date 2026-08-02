@@ -10,6 +10,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useT } from "@/i18n";
 
 function isMt5Path(pathname: string) {
   return pathname === "/mt5" || pathname.startsWith("/mt5/");
@@ -102,6 +103,7 @@ export function MobileBottomNav({
   onOpenFullMenu?: () => void;
 }) {
   const pathname = usePathname();
+  const t = useT();
 
   if (isMt5Path(pathname)) {
     return null;
@@ -125,36 +127,36 @@ export function MobileBottomNav({
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
         boxShadow: "0 -8px 28px rgba(0,0,0,0.28)",
       }}
-      aria-label="Main navigation"
+      aria-label={t("nav.mainNav")}
     >
       <div className="mx-auto flex max-w-lg items-end px-1 pb-1.5 pt-1">
         <NavTab
           href="/dashboard"
-          label="Home"
+          label={t("nav.home")}
           icon={Home}
           active={homeActive}
         />
         <NavTab
           href="/journal"
-          label="Journal"
+          label={t("nav.journal")}
           icon={ScrollText}
           active={journalActive}
         />
         <NavTab
           href="/invest"
-          label="Invest"
+          label={t("nav.invest")}
           icon={TrendingUp}
           active={investActive}
           emphasize
         />
         <NavTab
           href="/wallet"
-          label="Wallet"
+          label={t("nav.wallet")}
           icon={PiggyBank}
           active={walletActive}
         />
         <NavTab
-          label="More"
+          label={t("nav.more")}
           icon={MoreHorizontal}
           active={moreActive}
           onClick={() => onOpenFullMenu?.()}

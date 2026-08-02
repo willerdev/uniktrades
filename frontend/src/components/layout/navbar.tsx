@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { useAuthStore, useDashboardStore } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { UserAvatar } from "@/components/layout/user-avatar";
 import { PlatformNotificationsBell } from "@/components/layout/platform-notifications-bell";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
@@ -43,6 +44,7 @@ import {
   mt5NavHref,
   type AdminPermissionsView,
 } from "@/lib/copy-access";
+import { useT, type MessageKey } from "@/i18n";
 
 const SIDEBAR_EXPANDED_KEY = "trp-sidebar-expanded";
 
@@ -50,15 +52,15 @@ type NavIcon = ComponentType<{ className?: string; strokeWidth?: number }>;
 
 type NavItem = {
   href: string;
-  label: string;
-  shortLabel: string;
+  labelKey: MessageKey;
+  shortLabelKey: MessageKey;
   icon: NavIcon;
   keywords?: string;
 };
 
 type NavGroup = {
   id: string;
-  label?: string;
+  labelKey?: MessageKey;
   items: NavItem[];
 };
 
@@ -68,15 +70,15 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       {
         href: "/dashboard",
-        label: "Dashboard",
-        shortLabel: "Home",
+        labelKey: "nav.dashboard",
+        shortLabelKey: "nav.home",
         icon: LayoutDashboard,
         keywords: "home overview",
       },
       {
         href: "/journal",
-        label: "Journal",
-        shortLabel: "Journal",
+        labelKey: "nav.journal",
+        shortLabelKey: "nav.journal",
         icon: ScrollText,
         keywords: "income calendar report",
       },
@@ -84,33 +86,33 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "grow",
-    label: "Grow",
+    labelKey: "nav.grow",
     items: [
       {
         href: "/invest",
-        label: "Smart Invest",
-        shortLabel: "Invest",
+        labelKey: "nav.smartInvest",
+        shortLabelKey: "nav.invest",
         icon: TrendingUp,
         keywords: "yield capital",
       },
       {
         href: "/unitrust",
-        label: "Unitrust",
-        shortLabel: "Unitrust",
+        labelKey: "nav.unitrust",
+        shortLabelKey: "nav.unitrust",
         icon: Landmark,
         keywords: "5% monthly",
       },
       {
         href: "/loans",
-        label: "Loans",
-        shortLabel: "Loans",
+        labelKey: "nav.loans",
+        shortLabelKey: "nav.loans",
         icon: HandCoins,
         keywords: "advance borrow",
       },
       {
         href: "/agent",
-        label: "Agent",
-        shortLabel: "Agent",
+        labelKey: "nav.agent",
+        shortLabelKey: "nav.agent",
         icon: Handshake,
         keywords: "momo cash",
       },
@@ -118,26 +120,26 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "money",
-    label: "Money",
+    labelKey: "nav.money",
     items: [
       {
         href: "/wallet",
-        label: "Wallet",
-        shortLabel: "Wallet",
+        labelKey: "nav.wallet",
+        shortLabelKey: "nav.wallet",
         icon: Wallet,
         keywords: "deposit withdraw",
       },
       {
         href: "/blockchain",
-        label: "Blockchain",
-        shortLabel: "Chain",
+        labelKey: "nav.blockchain",
+        shortLabelKey: "nav.chain",
         icon: Blocks,
         keywords: "chain on-chain",
       },
       {
         href: "/payouts",
-        label: "Payouts",
-        shortLabel: "Payouts",
+        labelKey: "nav.payouts",
+        shortLabelKey: "nav.payouts",
         icon: Banknote,
         keywords: "trader rewards",
       },
@@ -145,26 +147,26 @@ const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "tools",
-    label: "Tools",
+    labelKey: "nav.tools",
     items: [
       {
         href: "/mt5",
-        label: "MT5",
-        shortLabel: "MT5",
+        labelKey: "nav.mt5",
+        shortLabelKey: "nav.mt5",
         icon: LineChart,
         keywords: "trading charts",
       },
       {
         href: "/messages",
-        label: "Messages",
-        shortLabel: "Chat",
+        labelKey: "nav.messages",
+        shortLabelKey: "nav.chat",
         icon: MessageCircle,
         keywords: "support chat",
       },
       {
         href: "/settings",
-        label: "Settings",
-        shortLabel: "Account",
+        labelKey: "nav.settings",
+        shortLabelKey: "nav.account",
         icon: Settings,
         keywords: "profile kyc",
       },
@@ -190,26 +192,23 @@ function pathActive(pathname: string, href: string) {
 }
 
 function PublicHeader() {
+  const t = useT();
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-surface)]/90 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center">
           <Logo className="text-lg" />
         </Link>
-        <div className="flex gap-2">
-          <Link href="/invest">
-            <Button size="sm" className="gap-1">
-              Invest
-            </Button>
-          </Link>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher compact />
           <Link href="/login">
             <Button variant="ghost" size="sm">
-              Login
+              {t("publicHeader.login")}
             </Button>
           </Link>
           <Link href="/register">
-            <Button size="sm" variant="secondary">
-              Invite only
+            <Button size="sm">
+              {t("publicHeader.join")}
             </Button>
           </Link>
         </div>
@@ -249,6 +248,7 @@ function SidebarShell({
   onClose?: () => void;
 }) {
   const { logout, user } = useAuthStore();
+  const t = useT();
   const dashboardUser = useDashboardStore((s) => s.data?.user);
   const adminPermissions =
     dashboardUser?.adminPermissions ?? user?.adminPermissions;
@@ -278,14 +278,16 @@ function SidebarShell({
       .map((group) => ({
         ...group,
         items: group.items.filter((item) => {
-          const hay = `${item.label} ${item.shortLabel} ${item.keywords ?? ""}`.toLowerCase();
+          const hay =
+            `${t(item.labelKey)} ${t(item.shortLabelKey)} ${item.keywords ?? ""}`.toLowerCase();
           return hay.includes(q);
         }),
       }))
       .filter((g) => g.items.length > 0);
-  }, [groups, query]);
+  }, [groups, query, t]);
 
-  const displayName = user?.displayName ?? dashboardUser?.displayName ?? "Account";
+  const displayName =
+    user?.displayName ?? dashboardUser?.displayName ?? t("nav.account");
   const email = user?.email ?? dashboardUser?.email ?? "";
   const avatarUrl = dashboardUser?.avatarUrl ?? user?.avatarUrl ?? null;
   const showLabels = expanded || Boolean(mobile);
@@ -309,7 +311,7 @@ function SidebarShell({
             type="button"
             onClick={onClose}
             className="mr-2 rounded-xl p-2 text-muted hover:bg-foreground/5 hover:text-foreground"
-            aria-label="Close menu"
+            aria-label={t("nav.closeMenu")}
           >
             <X className="h-5 w-5" />
           </button>
@@ -319,8 +321,12 @@ function SidebarShell({
               type="button"
               onClick={onToggleExpanded}
               className="rounded-xl p-2 text-muted hover:bg-foreground/5 hover:text-foreground"
-              aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
-              title={expanded ? "Collapse" : "Expand"}
+              aria-label={
+                expanded ? t("nav.collapseSidebar") : t("nav.expandSidebar")
+              }
+              title={
+                expanded ? t("nav.collapseSidebar") : t("nav.expandSidebar")
+              }
             >
               {expanded ? (
                 <PanelLeftClose className="h-4 w-4" />
@@ -339,7 +345,7 @@ function SidebarShell({
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search"
+              placeholder={t("common.search")}
               className="min-w-0 flex-1 bg-transparent text-foreground outline-none placeholder:text-muted"
             />
             {query && (
@@ -348,7 +354,7 @@ function SidebarShell({
                 className="text-xs text-muted hover:text-foreground"
                 onClick={() => setQuery("")}
               >
-                Clear
+                {t("common.clear")}
               </button>
             )}
           </label>
@@ -360,8 +366,8 @@ function SidebarShell({
               type="button"
               onClick={onToggleExpanded}
               className="rounded-xl p-2.5 text-muted hover:bg-foreground/5 hover:text-foreground"
-              aria-label="Search menu"
-              title="Search"
+              aria-label={t("common.search")}
+              title={t("common.search")}
             >
               <Search className="h-4 w-4" />
             </button>
@@ -372,20 +378,21 @@ function SidebarShell({
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 py-3">
         {filtered.map((group) => (
           <div key={group.id} className="mb-3">
-            {group.label && showLabels && (
+            {group.labelKey && showLabels && (
               <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-                {group.label}
+                {t(group.labelKey)}
               </p>
             )}
             <nav className="flex flex-col gap-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const active = pathActive(pathname, item.href);
+                const label = t(item.labelKey);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    title={item.label}
+                    title={label}
                     onClick={onNavigate}
                     className={cn(
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
@@ -400,7 +407,7 @@ function SidebarShell({
                       strokeWidth={active ? 2.25 : 1.75}
                     />
                     {showLabels && (
-                      <span className="truncate">{item.label}</span>
+                      <span className="truncate">{label}</span>
                     )}
                   </Link>
                 );
@@ -431,7 +438,7 @@ function SidebarShell({
               className="flex items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-foreground/5"
             >
               <Settings className="h-4 w-4 text-muted" />
-              Settings
+              {t("nav.settings")}
             </Link>
             <button
               type="button"
@@ -442,7 +449,7 @@ function SidebarShell({
               className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-foreground hover:bg-foreground/5"
             >
               <LogOut className="h-4 w-4 text-muted" />
-              Log out
+              {t("nav.logOut")}
             </button>
           </div>
         )}
@@ -540,6 +547,7 @@ function MobileMenuDrawer({
   onClose: () => void;
   pathname: string;
 }) {
+  const t = useT();
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -555,7 +563,7 @@ function MobileMenuDrawer({
     <div className="fixed inset-0 z-[60] md:hidden">
       <button
         type="button"
-        aria-label="Close menu"
+        aria-label={t("nav.closeMenu")}
         className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
         onClick={onClose}
       />
@@ -573,6 +581,7 @@ function MobileMenuDrawer({
 }
 
 function MobileHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
+  const t = useT();
   const { user } = useAuthStore();
   const dashboardUser = useDashboardStore((s) => s.data?.user);
   const avatarUrl = dashboardUser?.avatarUrl ?? user?.avatarUrl ?? null;
@@ -585,7 +594,7 @@ function MobileHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
           type="button"
           onClick={onOpenMenu}
           className="rounded-xl p-2 text-foreground hover:bg-foreground/5"
-          aria-label="Open menu"
+          aria-label={t("nav.openMenu")}
         >
           <Menu className="h-5 w-5" />
         </button>

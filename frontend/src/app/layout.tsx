@@ -5,6 +5,7 @@ import { Navbar, MainContent } from "@/components/layout/navbar";
 import { AuthHydrator } from "@/components/auth-hydrator";
 import { PresenceTracker } from "@/components/presence-tracker";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LocaleProvider } from "@/components/locale-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,10 +18,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UnikTrades — Trade Smarter. Grow Stronger.",
+  title: "UnikTrades — Tradez plus malin. Grandissez plus fort.",
   description:
-    "Put capital to work with Smart Invest: daily yield, clear fees, and USDT wallet withdrawals after KYC.",
-  keywords: ["investing", "smart invest", "daily yield", "USDT", "uniktrades"],
+    "Faites travailler votre capital avec Smart Invest : rendement quotidien, frais clairs et retraits USDT après KYC.",
+  keywords: ["investissement", "smart invest", "rendement", "USDT", "uniktrades"],
   icons: {
     icon: "/uniktrades-mark.png",
     apple: "/uniktrades-mark.png",
@@ -47,11 +48,12 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <ThemeProvider />
+        <LocaleProvider />
         <AuthHydrator />
         <PresenceTracker />
         <Navbar />

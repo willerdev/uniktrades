@@ -18,8 +18,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth";
 import { validateDisplayName } from "@/lib/display-name";
+import { useT } from "@/i18n";
 
 export default function RegisterPage() {
+  const t = useT();
   const router = useRouter();
   const { register } = useAuthStore();
   const [displayName, setDisplayName] = useState("");
@@ -42,11 +44,11 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
     if (!referralCode.trim()) {
-      setError("A referral invite is required to join");
+      setError(t("register.needReferral"));
       return;
     }
     if (!acceptTerms) {
-      setError("You must accept the terms and risk disclosure");
+      setError(t("register.needTerms"));
       return;
     }
     const nameError = validateDisplayName(displayName);
@@ -65,7 +67,7 @@ export default function RegisterPage() {
       );
       setSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(err instanceof Error ? err.message : t("register.failed"));
     } finally {
       setLoading(false);
     }
@@ -88,14 +90,13 @@ export default function RegisterPage() {
               ✓
             </div>
             <h2 className="text-xl font-bold text-white">
-              Registration Successful
+              {t("register.successTitle")}
             </h2>
             <p className="mt-2 text-gray-400">
-              Sign in and complete registration to start. Identity verification
-              is only required when you request a payout.
+{t("register.successBody")}
             </p>
             <Button className="mt-6" onClick={() => router.push("/login")}>
-              Continue to Login
+              {t("register.continueLogin")}
             </Button>
           </CardContent>
         </Card>
@@ -117,29 +118,27 @@ export default function RegisterPage() {
                 <Lock className="h-5 w-5" />
               </div>
               <Badge variant="secondary" className="mx-auto mb-3 w-fit">
-                Closed community
+                {t("register.closed")}
               </Badge>
-              <CardTitle className="text-2xl">Invite only</CardTitle>
+              <CardTitle className="text-2xl">{t("register.inviteOnly")}</CardTitle>
               <CardDescription className="text-base text-gray-400">
-                Registrations are done through referrals only. This is a closed
-                community — ask a current member for their invite link to join.
+{t("register.inviteOnlyBody")}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/[0.02] p-4 text-sm text-gray-400">
                 <Users className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p>
-                  Members can share a personal referral link from Settings. Open
-                  that link to create your account.
+{t("register.membersShare")}
                 </p>
               </div>
               <Link href="/login" className="block">
                 <Button className="w-full" variant="secondary">
-                  Already invited? Sign in
+                  {t("register.alreadyInvited")}
                 </Button>
               </Link>
               <p className="text-center text-xs text-gray-600">
-                Direct public registration is disabled.
+                {t("register.publicDisabled")}
               </p>
             </CardContent>
           </Card>
@@ -158,32 +157,31 @@ export default function RegisterPage() {
         <Card>
           <CardHeader className="text-center">
             <Badge variant="gold" className="mx-auto mb-3 w-fit">
-              Referral invite
+              {t("register.referralBadge")}
             </Badge>
-            <CardTitle className="text-2xl">Join UnikTrades</CardTitle>
+            <CardTitle className="text-2xl">{t("register.joinTitle")}</CardTitle>
             <CardDescription>
-              You were invited — complete signup below
+              {t("register.joinSubtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName">{t("register.displayName")}</Label>
                 <Input
                   id="displayName"
-                  placeholder="Your trader name"
+                  placeholder={t("register.displayPlaceholder")}
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   required
                   maxLength={40}
                 />
                 <p className="text-xs text-gray-500">
-                  Cannot use names like admin, platform, support, or other
-                  official-sounding titles.
+                  {t("register.displayHint")}
                 </p>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("common.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -194,11 +192,11 @@ export default function RegisterPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("common.password")}</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Min. 8 characters"
+                  placeholder={t("register.passwordPlaceholder")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   minLength={8}
@@ -213,24 +211,19 @@ export default function RegisterPage() {
                   className="mt-1 rounded border-[var(--color-border)]"
                 />
                 <span>
-                  I accept the{" "}
+                  {t("register.acceptTermsPrefix")}{" "}
                   <Link
                     href="/terms"
                     target="_blank"
                     className="text-primary hover:underline"
                   >
-                    Terms &amp; Conditions
+                    {t("register.termsLink")}
                   </Link>{" "}
-                  (including preferred weekly/monthly withdrawals and
-                  off-schedule penalties) and Risk Disclosure. I understand
-                  trading involves substantial risk and virtual accounts do not
-                  guarantee real profits.
+                  {t("register.acceptTermsSuffix")}
                 </span>
               </label>
               <p className="text-xs text-success">
-                Referral code{" "}
-                <span className="font-mono">{referralCode}</span> applied — you
-                were invited by a friend.
+                {t("register.referralApplied", { code: referralCode })}
               </p>
               {error && <p className="text-sm text-danger">{error}</p>}
               <Button
@@ -238,13 +231,13 @@ export default function RegisterPage() {
                 className="w-full"
                 disabled={loading || !acceptTerms}
               >
-                {loading ? "Creating account..." : "Create Account"}
+                {loading ? t("register.creating") : t("register.createAccount")}
               </Button>
             </form>
             <p className="mt-6 text-center text-sm text-gray-400">
-              Already have an account?{" "}
+              {t("register.haveAccount")}{" "}
               <Link href="/login" className="text-primary hover:underline">
-                Sign in
+                {t("common.signIn")}
               </Link>
             </p>
           </CardContent>

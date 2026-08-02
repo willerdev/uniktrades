@@ -26,6 +26,8 @@ import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth";
 import { AuthLoadingScreen, useRequireAuth } from "@/hooks/use-require-auth";
 import { useThemeStore } from "@/stores/theme";
+import { useT } from "@/i18n";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { api, type UserSettings, type KycRecord, type MetaApiAccountRow } from "@/lib/api";
 import { validateDisplayName } from "@/lib/display-name";
 import { cn } from "@/lib/utils";
@@ -137,6 +139,7 @@ function KycUploadField({
 
 export default function SettingsPage() {
   const router = useRouter();
+  const t = useT();
   const { ready } = useRequireAuth();
   const { logout, setAuth, token } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
@@ -1088,8 +1091,8 @@ export default function SettingsPage() {
 
         <SettingsSection
           id="preferences"
-          title="App preferences"
-          description="Theme and session."
+          title={t("settings.appPrefs")}
+          description={t("settings.appPrefsDesc")}
         >
         {/* Account */}
         <Card>
@@ -1100,7 +1103,7 @@ export default function SettingsPage() {
               ) : (
                 <Sun className="h-5 w-5 text-primary" />
               )}
-              <CardTitle>Appearance & session</CardTitle>
+              <CardTitle>{t("settings.appearanceSession")}</CardTitle>
             </div>
             <CardDescription>
               Member since{" "}
@@ -1113,7 +1116,14 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="mb-2 text-sm font-medium text-foreground">Appearance</p>
+              <p className="mb-2 text-sm font-medium text-foreground">
+                {t("settings.language")}
+              </p>
+              <p className="mb-2 text-xs text-muted">{t("settings.languageHint")}</p>
+              <LanguageSwitcher />
+            </div>
+            <div>
+              <p className="mb-2 text-sm font-medium text-foreground">{t("settings.appearance")}</p>
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -1122,7 +1132,7 @@ export default function SettingsPage() {
                   onClick={() => setTheme("dark")}
                 >
                   <Moon className="h-4 w-4" />
-                  Dark
+                  {t("settings.dark")}
                 </Button>
                 <Button
                   type="button"
@@ -1131,7 +1141,7 @@ export default function SettingsPage() {
                   onClick={() => setTheme("light")}
                 >
                   <Sun className="h-4 w-4" />
-                  Light
+                  {t("settings.light")}
                 </Button>
               </div>
             </div>
@@ -1141,7 +1151,7 @@ export default function SettingsPage() {
               onClick={handleLogout}
             >
               <LogOut className="h-4 w-4" />
-              Log out
+              {t("settings.logOut")}
             </Button>
           </CardContent>
         </Card>

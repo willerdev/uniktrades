@@ -14,8 +14,10 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { useT } from "@/i18n";
 
 export default function ForgotPasswordPage() {
+  const t = useT();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -28,13 +30,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     try {
       const res = await api.auth.forgotPassword(email.trim().toLowerCase());
-      setMessage(
-        res.message ||
-          "If an account exists for that email, we sent password reset instructions.",
-      );
+      setMessage(res.message || t("forgot.sentFallback"));
       setEmail("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Request failed");
+      setError(err instanceof Error ? err.message : t("common.retry"));
     } finally {
       setLoading(false);
     }
@@ -49,10 +48,8 @@ export default function ForgotPasswordPage() {
       >
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Forgot password</CardTitle>
-            <CardDescription>
-              Enter your email and we&apos;ll send a link to reset your password.
-            </CardDescription>
+            <CardTitle className="text-2xl">{t("forgot.title")}</CardTitle>
+            <CardDescription>{t("forgot.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
             {message ? (
@@ -60,14 +57,14 @@ export default function ForgotPasswordPage() {
                 <p className="text-sm text-success">{message}</p>
                 <Link href="/login">
                   <Button variant="secondary" className="w-full">
-                    Back to sign in
+                    {t("forgot.backToSignIn")}
                   </Button>
                 </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("common.email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -79,11 +76,11 @@ export default function ForgotPasswordPage() {
                 </div>
                 {error && <p className="text-sm text-danger">{error}</p>}
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Sending..." : "Send reset link"}
+                  {loading ? t("forgot.sending") : t("forgot.send")}
                 </Button>
                 <p className="text-center text-sm text-gray-400">
                   <Link href="/login" className="text-primary hover:underline">
-                    Back to sign in
+                    {t("forgot.backToSignIn")}
                   </Link>
                 </p>
               </form>

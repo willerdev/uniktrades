@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Clock, Crown, Lock, Percent, RefreshCw, ShieldCheck } from "lucide-react";
 import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
+import { useT, type MessageKey } from "@/i18n";
 
 const FEE_TIERS = [
   { range: "$100 – $200", fee: "$10" },
@@ -11,40 +12,26 @@ const FEE_TIERS = [
   { range: "$1,000 – $5,000", fee: "$200" },
 ] as const;
 
-const RULES = [
-  {
-    icon: Percent,
-    title: "Tiered enrollment fee",
-    body: "Pay a one-time fee by capital size when you enroll. Your investment then earns daily yield on eligible balance.",
-  },
-  {
-    icon: Clock,
-    title: "24-hour yield hold",
-    body: "yield-hold",
-  },
-  {
-    icon: Crown,
-    title: "VIP upgrade",
-    body: "VIP ($20/month) raises default daily yield to 10%, unlocks weekend earnings, and removes wallet withdrawal fees while active.",
-  },
-  {
-    icon: Lock,
-    title: "Minimum $500",
-    body: "From 27 July 2026, investments below $500 automatically stop earning. Top up on Invest to stay active.",
-  },
+const RULE_DEFS: {
+  icon: typeof Percent;
+  titleKey: MessageKey;
+  bodyKey: MessageKey;
+}[] = [
+  { icon: Percent, titleKey: "rules.feeTitle", bodyKey: "rules.feeBody" },
+  { icon: Clock, titleKey: "rules.holdTitle", bodyKey: "rules.holdBody" },
+  { icon: Crown, titleKey: "rules.vipTitle", bodyKey: "rules.vipBody" },
+  { icon: Lock, titleKey: "rules.minTitle", bodyKey: "rules.minBody" },
   {
     icon: RefreshCw,
-    title: "Optional auto-reinvest",
-    body: "Compound daily earnings into investment: 10% fee on the full daily return, 90% added back to principal. Turn off anytime.",
+    titleKey: "rules.reinvestTitle",
+    bodyKey: "rules.reinvestBody",
   },
-  {
-    icon: ShieldCheck,
-    title: "KYC for withdrawals",
-    body: "You can enroll and earn without KYC. Identity verification is required only before withdrawing to an external wallet.",
-  },
-] as const;
+  { icon: ShieldCheck, titleKey: "rules.kycTitle", bodyKey: "rules.kycBody" },
+];
 
 export function InvestmentRules() {
+  const t = useT();
+
   return (
     <section className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6">
       <motion.div
@@ -55,22 +42,22 @@ export function InvestmentRules() {
         className="max-w-2xl"
       >
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">
-          The rules
+          {t("rules.eyebrow")}
         </p>
         <h2 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-5xl">
-          Clear before you commit capital
+          {t("rules.title")}
         </h2>
-        <p className="mt-4 text-lg text-gray-400">
-          Live Smart Invest terms — fees, hold period, VIP, and withdrawals.
-        </p>
+        <p className="mt-4 text-lg text-gray-400">{t("rules.subtitle")}</p>
       </motion.div>
 
       <div className="mt-14 grid gap-x-12 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {RULES.map((rule, i) => {
+        {RULE_DEFS.map((rule, i) => {
           const Icon = rule.icon;
+          const title = t(rule.titleKey);
+          const body = t(rule.bodyKey);
           return (
             <motion.div
-              key={rule.title}
+              key={rule.titleKey}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
@@ -84,16 +71,15 @@ export function InvestmentRules() {
               <div className="mb-4 inline-flex text-primary transition-transform duration-300 group-hover:translate-x-0.5">
                 <Icon className="h-5 w-5" strokeWidth={1.75} />
               </div>
-              <h3 className="text-lg font-semibold text-white">{rule.title}</h3>
+              <h3 className="text-lg font-semibold text-white">{title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-gray-400">
-                {rule.body === "yield-hold" ? (
+                {body === "yield-hold" ? (
                   <>
-                    New allocations only earn after funds have been invested for
-                    at least 24 hours. Daily credits post{" "}
+                    {t("rules.holdIntro")}{" "}
                     <DailyCreditTimeText variant="around" />.
                   </>
                 ) : (
-                  rule.body
+                  body
                 )}
               </p>
             </motion.div>
@@ -109,7 +95,7 @@ export function InvestmentRules() {
         className="mt-16"
       >
         <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-gray-500">
-          Enrollment fee by size
+          {t("rules.feeBySize")}
         </h3>
         <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 sm:grid-cols-4">
           {FEE_TIERS.map((tier, i) => (

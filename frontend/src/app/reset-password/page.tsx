@@ -15,8 +15,10 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { api } from "@/lib/api";
+import { useT } from "@/i18n";
 
 function ResetPasswordForm() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token")?.trim() ?? "";
@@ -58,7 +60,7 @@ function ResetPasswordForm() {
     return (
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Invalid reset link</CardTitle>
+          <CardTitle className="text-2xl">{t("reset.invalid")}</CardTitle>
           <CardDescription>
             This link is missing or incomplete. Request a new password reset.
           </CardDescription>
@@ -69,7 +71,7 @@ function ResetPasswordForm() {
           </Link>
           <p className="text-center text-sm text-gray-400">
             <Link href="/login" className="text-primary hover:underline">
-              Back to sign in
+              {t("forgot.backToSignIn")}
             </Link>
           </p>
         </CardContent>
@@ -80,15 +82,15 @@ function ResetPasswordForm() {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl">Choose a new password</CardTitle>
+        <CardTitle className="text-2xl">{t("reset.title")}</CardTitle>
         <CardDescription>
-          Enter a new password for your UnikTrades account.
+          {t("reset.accountHint")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">New password</Label>
+            <Label htmlFor="password">{t("reset.newPassword")}</Label>
             <Input
               id="password"
               type="password"
@@ -100,7 +102,7 @@ function ResetPasswordForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm password</Label>
+            <Label htmlFor="confirmPassword">{t("reset.confirm")}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -113,11 +115,11 @@ function ResetPasswordForm() {
           </div>
           {error && <p className="text-sm text-danger">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Updating..." : "Update password"}
+            {loading ? t("reset.updating") : t("reset.update")}
           </Button>
           <p className="text-center text-sm text-gray-400">
             <Link href="/login" className="text-primary hover:underline">
-              Back to sign in
+              {t("forgot.backToSignIn")}
             </Link>
           </p>
         </form>
