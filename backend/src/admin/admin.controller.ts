@@ -859,6 +859,20 @@ export class AdminController {
     return this.adminService.creditUserWallet(req.user.id, body);
   }
 
+  @Post('wallet/debit')
+  debitUserWallet(
+    @Request() req: { user: { id: string } },
+    @Body()
+    body: {
+      userId?: string;
+      email?: string;
+      amount: number;
+      description?: string;
+    },
+  ) {
+    return this.adminService.debitUserWallet(req.user.id, body);
+  }
+
   @Post('notifications/yield-hold-policy')
   broadcastYieldHoldPolicy(
     @Request() req: { user: { id: string } },

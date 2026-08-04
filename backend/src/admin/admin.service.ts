@@ -2285,6 +2285,52 @@ export class AdminService {
     };
   }
 
+  async debitUserWallet(
+    adminId: string,
+    input: {
+      userId?: string;
+      email?: string;
+      amount: number;
+      description?: string;
+    },
+  ) {
+    const email = input.email?.trim().toLowerCase();
+    const user = input.userId
+      ? await this.prisma.user.findUnique({ where: { id: input.userId } })
+      : email
+        ? await this.prisma.user.findFirst({
+            where: { email: { equals: email, mode: 'insensitive' } },
+          })
+        : null;
+
+    if (!user) {
+      throw new NotFoundException('User not found — provide a valid userId or email');
+    }
+    if (!Number.isFinite(input.amount) || input.amount <= 0) {
+      throw new BadRequestException('Amount must be positive');
+    }
+
+    const result = await this.walletService.adminDebitWallet(
+      user.id,
+      input.amount,
+      adminId,
+      input.description,
+    );
+
+    await this.logAction(adminId, 'WALLET_DEBIT', user.id, {
+      amount: input.amount,
+      balance: result.balance,
+      description: result.description,
+    });
+
+    return {
+      ...result,
+      email: user.email,
+      displayName: user.displayName,
+      emailSent: result.emailSent,
+    };
+  }
+
   /**
    * Email all users about the 24h investment/deposit yield-hold rule.
    * Marks PlatformConfig so startup/cron only sends once unless force=true.

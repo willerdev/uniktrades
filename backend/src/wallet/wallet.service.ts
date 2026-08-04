@@ -682,6 +682,41 @@ export class WalletService {
     };
   }
 
+  async adminDebitWallet(
+    userId: string,
+    amount: number,
+    adminId: string,
+    description?: string,
+  ) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const note =
+      description?.trim() ||
+      `Admin withdrawal — $${amount.toFixed(2)} USDT`;
+    const { balance } = await this.debitBalance(
+      userId,
+      amount,
+      'ADJUSTMENT',
+      note,
+      `admin_debit_${adminId}`,
+    );
+
+    const emailSent = await this.notifications.notifyWalletAdminDebit(userId, {
+      amount,
+      balance,
+      note,
+    });
+
+    return {
+      userId,
+      amount,
+      balance,
+      description: note,
+      emailSent,
+    };
+  }
+
   /** Credits platform wallet for an admin referral settlement. */
   async creditReferralSettlement(
     userId: string,

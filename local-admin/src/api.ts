@@ -998,6 +998,24 @@ export const api = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+  debitUserWallet: (data: {
+    userId?: string;
+    email?: string;
+    amount: number;
+    description?: string;
+  }) =>
+    request<{
+      userId: string;
+      amount: number;
+      balance: number;
+      description: string;
+      email: string | null;
+      displayName: string;
+      emailSent: boolean;
+    }>("/admin/wallet/debit", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 
   accountTransfers: (params?: { limit?: number; offset?: number; status?: string }) => {
     const q = new URLSearchParams();

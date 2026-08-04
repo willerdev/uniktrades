@@ -2514,6 +2514,14 @@ export class NotificationService {
     return this.sendWalletAdminCredit(userId, data);
   }
 
+  /** Awaitable admin withdrawal email (used when an admin debits a wallet). */
+  notifyWalletAdminDebit(
+    userId: string,
+    data: { amount: number; balance: number; note?: string },
+  ) {
+    return this.sendWalletAdminDebit(userId, data);
+  }
+
   referralSettlementPaid(
     userId: string,
     data: {
@@ -2563,6 +2571,32 @@ export class NotificationService {
       subject: `Admin deposited $${data.amount.toFixed(2)} USDT to your wallet`,
       html,
       text: `An admin deposited $${data.amount.toFixed(2)} USDT. Balance: $${data.balance.toFixed(2)} USDT. Invested funds earn yield only after 24 hours.`,
+    });
+  }
+
+  private async sendWalletAdminDebit(
+    userId: string,
+    data: { amount: number; balance: number; note?: string },
+  ) {
+    const user = await this.userContact(userId);
+    if (!user) return false;
+    const noteLine =
+      data.note?.trim()
+        ? `<p style="color:#94a3b8;font-size:14px;">Note: ${this.escape(data.note.trim())}</p>`
+        : '';
+    const html = this.email.layout(
+      'Admin withdrawal',
+      `<p>Hi ${this.escape(user.name)},</p>
+      <p>An administrator withdrew <strong>$${data.amount.toFixed(2)} USDT</strong> from your platform wallet.</p>
+      <p>Available balance: <strong>$${data.balance.toFixed(2)} USDT</strong></p>
+      ${noteLine}
+      ${this.email.button(`${this.email.frontendUrl}/wallet`, 'View wallet')}`,
+    );
+    return this.email.send({
+      to: user.email,
+      subject: `Admin withdrew $${data.amount.toFixed(2)} USDT from your wallet`,
+      html,
+      text: `An admin withdrew $${data.amount.toFixed(2)} USDT. Balance: $${data.balance.toFixed(2)} USDT.`,
     });
   }
 

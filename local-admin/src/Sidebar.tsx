@@ -22,6 +22,7 @@ export type Tab =
   | "sms"
   | "referrals"
   | "platform"
+  | "wallet"
   | "mt5Copy"
   | "mt5Sync"
   | "hub";
@@ -33,6 +34,7 @@ export const ADMIN_TABS: Tab[] = [
   "overview",
   "users",
   "platform",
+  "wallet",
   "payouts",
   "whitelist",
   "loans",
@@ -65,6 +67,7 @@ export type AdminPermissions = {
  * Remove an email here to restore full finance UI for that account.
  */
 export const RESTRICTED_FINANCE_ADMIN_EMAILS = [
+  "viewer@uniktrades.com",
   "viewer@traderrank.pro",
 ] as const;
 
@@ -133,6 +136,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "users", label: "Users", icon: "users" },
   { id: "platform", label: "Investor & depositor", icon: "forecast" },
+  { id: "wallet", label: "Wallet", icon: "wallet" },
   { id: "payouts", label: "Payouts", icon: "payouts" },
   { id: "whitelist", label: "Whitelist", icon: "whitelist" },
   { id: "loans", label: "Loans", icon: "loans" },
@@ -204,6 +208,17 @@ const icons = {
       <rect x="3" y="6" width="18" height="13" rx="2" />
       <path d="M3 10h18" strokeLinecap="round" />
       <path d="M7 15h4" strokeLinecap="round" />
+    </svg>
+  ),
+  wallet: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <path
+        d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18a1 1 0 0 1 1 1v2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <rect x="3" y="8" width="18" height="11" rx="2" />
+      <circle cx="16" cy="13.5" r="1.25" fill="currentColor" stroke="none" />
     </svg>
   ),
   whitelist: (
@@ -356,9 +371,9 @@ export function Sidebar({
     <aside className="sidebar">
       <div className="sidebar-brand">
         <div className="sidebar-brand-icon" aria-hidden>
-          TR
+          UT
         </div>
-        <span className="sidebar-brand-name">TraderRank</span>
+        <span className="sidebar-brand-name">UnikTrades</span>
         <span className="sidebar-brand-badge">
           {staffSummary ? "Staff" : "Admin"}
         </span>

@@ -17,7 +17,7 @@ export function Logo({
         <span
           className={cn(
             "relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl",
-            "bg-black ring-1 ring-primary/30",
+            "ring-1 ring-primary/20",
             className,
           )}
           aria-hidden
@@ -69,8 +69,8 @@ export function Logo({
       <Image
         src="/uniktrades-logo.png"
         alt="UnikTrades"
-        width={320}
-        height={86}
+        width={1024}
+        height={100}
         className="h-8 w-auto max-w-[11rem] object-contain object-left sm:h-9 sm:max-w-[14rem]"
         priority
       />

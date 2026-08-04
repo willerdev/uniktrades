@@ -112,7 +112,7 @@ export class CustodyDepositService {
       amount,
       orderId,
       network: deposit.network,
-      description: 'TraderRank payout custody top-up',
+      description: 'UnikTrades payout custody top-up',
       ipnCallbackUrl: this.ipnUrl(),
     });
 

@@ -52,6 +52,7 @@ import { AccountTransfersPanel } from "./AccountTransfersPanel";
 import { SmsPanel } from "./SmsPanel";
 import { ProductAgentPanel } from "./ProductAgentPanel";
 import { ComposeEmailPanel } from "./ComposeEmailPanel";
+import { AdminWalletPanel } from "./AdminWalletPanel";
 
 function badgeClass(status: string) {
   return `badge ${status.toLowerCase()}`;
@@ -746,6 +747,8 @@ export default function App() {
         await loadUsersPage(userPage, userSearch);
       } else if (active === "transactions") {
         /* TransactionsPanel loads its own data */
+      } else if (active === "wallet") {
+        /* AdminWalletPanel is self-contained */
       } else if (active === "messages") {
         const res = await api.messageThreads();
         setMessageThreads(res.items);
@@ -1435,8 +1438,8 @@ export default function App() {
   if (!authed) {
     return (
       <div className="login">
-        <h1>TraderRank Local Admin</h1>
-        <p className="muted">Runs on your machine only — not on thetradeguard.com</p>
+        <h1>UnikTrades Local Admin</h1>
+        <p className="muted">Runs on your machine only — not on the public site</p>
         <form onSubmit={(e) => void handleLogin(e)}>
           {loginStep === "credentials" ? (
             <>
@@ -2230,6 +2233,13 @@ export default function App() {
 
         {tab === "transactions" && (
           <TransactionsPanel onOpenUser={(id) => setUserDetailId(id)} />
+        )}
+
+        {tab === "wallet" && (
+          <AdminWalletPanel
+            onMessage={setMessage}
+            showSensitiveFinance={showSensitiveFinance}
+          />
         )}
 
         {tab === "messages" && (

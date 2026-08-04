@@ -1,5 +1,5 @@
 {
-  "name": "traderrank-local-admin",
+  "name": "uniktrades-local-admin",
   "private": true,
   "version": "1.0.0",
   "description": "Local-only admin console — NOT deployed to Render",
