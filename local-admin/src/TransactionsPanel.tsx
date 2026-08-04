@@ -87,12 +87,13 @@ export function TransactionsPanel({ onOpenUser }: Props) {
     <div>
       <div className="toolbar toolbar-wrap">
         <div>
+          <p className="page-eyebrow">Payments</p>
           <h2 style={{ margin: 0 }}>Transactions</h2>
           <p className="muted" style={{ margin: "0.35rem 0 0" }}>
             Platform payments via crypto (NOWPayments) or MoMo (Flutterwave).
           </p>
         </div>
-        <button type="button" onClick={() => void load(page)} disabled={loading}>
+        <button type="button" className="ghost" onClick={() => void load(page)} disabled={loading}>
           {loading ? "Loading…" : "Refresh"}
         </button>
       </div>

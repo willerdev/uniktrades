@@ -444,10 +444,6 @@ export default function App() {
   const [refundPayoutReason, setRefundPayoutReason] = useState("");
   const [refundPayoutLoading, setRefundPayoutLoading] = useState(false);
   const [refundPayoutError, setRefundPayoutError] = useState("");
-  const [creditWalletEmail, setCreditWalletEmail] = useState("");
-  const [creditWalletAmount, setCreditWalletAmount] = useState("");
-  const [creditWalletNote, setCreditWalletNote] = useState("");
-  const [creditWalletLoading, setCreditWalletLoading] = useState(false);
   const [instantWithdrawUsers, setInstantWithdrawUsers] = useState<
     InstantWithdrawRow[]
   >([]);
@@ -1543,15 +1539,21 @@ export default function App() {
 
         {tab === "overview" && !loading && !overview && (
           <div className="page-empty">
-            Could not load overview. Check that the API is running on port 4000
-            and refresh.
+            Could not load overview. Check that the UnikTrades API is running on
+            port 4001 and refresh.
           </div>
         )}
 
         {tab === "overview" && overview && (
           <>
             <div className="toolbar">
-              <h2>Platform overview</h2>
+              <div>
+                <p className="page-eyebrow">Dashboard</p>
+                <h2>Platform overview</h2>
+                <p className="muted" style={{ margin: "0.35rem 0 0" }}>
+                  Live snapshot of users, revenue, and queues.
+                </p>
+              </div>
             </div>
             <div className="cards">
               <div className="card">
@@ -1607,9 +1609,6 @@ export default function App() {
                 </div>
               </div>
             </div>
-            <p className="muted">
-              Use the sidebar for investor tools, users, KYC, payouts, email, and SMS.
-            </p>
           </>
         )}
 
@@ -1998,11 +1997,14 @@ export default function App() {
         {tab === "users" && (
           <>
             <div className="toolbar toolbar-wrap">
-              <h2>
-                Users ({userCount})
-                {suspiciousOnly ? " — suspicious emails" : ""}
-                {userSearch ? ` — “${userSearch}”` : ""}
-              </h2>
+              <div>
+                <p className="page-eyebrow">People</p>
+                <h2>
+                  Users ({userCount})
+                  {suspiciousOnly ? " — suspicious emails" : ""}
+                  {userSearch ? ` — “${userSearch}”` : ""}
+                </h2>
+              </div>
               <div className="toolbar-actions toolbar-actions-wrap">
                 <form
                   className="users-search"
@@ -2534,10 +2536,13 @@ export default function App() {
         {tab === "kyc" && (
           <>
             <div className="toolbar toolbar-wrap">
-              <h2>
-                KYC submissions ({kycCount})
-                {kycStatusFilter !== "all" ? ` · ${kycStatusFilter}` : ""}
-              </h2>
+              <div>
+                <p className="page-eyebrow">Compliance</p>
+                <h2>
+                  KYC submissions ({kycCount})
+                  {kycStatusFilter !== "all" ? ` · ${kycStatusFilter}` : ""}
+                </h2>
+              </div>
               <div className="toolbar-actions">
                 <button
                   type="button"
@@ -2737,7 +2742,10 @@ export default function App() {
         {tab === "agents" && (
           <>
             <div className="toolbar">
-              <h2>Cash agents</h2>
+              <div>
+                <p className="page-eyebrow">Cash network</p>
+                <h2>Cash agents</h2>
+              </div>
             </div>
             <div className="kyc-card" style={{ marginBottom: "1.25rem" }}>
               <p className="muted" style={{ margin: "0 0 0.75rem" }}>
@@ -2973,7 +2981,10 @@ export default function App() {
         {tab === "loans" && (
           <>
             <div className="toolbar">
-              <h2>Loan requests</h2>
+              <div>
+                <p className="page-eyebrow">Credit</p>
+                <h2>Loan requests</h2>
+              </div>
             </div>
             <div className="kyc-card" style={{ marginBottom: "1.25rem" }}>
               <p className="muted" style={{ margin: "0 0 0.75rem" }}>
@@ -3125,7 +3136,10 @@ export default function App() {
         {tab === "payouts" && (
           <>
             <div className="toolbar">
-              <h2>Payout requests</h2>
+              <div>
+                <p className="page-eyebrow">Finance</p>
+                <h2>Payout requests</h2>
+              </div>
             </div>
             <div className="kyc-card" style={{ marginBottom: "1.25rem" }}>
               <h3 style={{ margin: "0 0 0.5rem" }}>MoMo P2P queue</h3>
@@ -3254,95 +3268,6 @@ export default function App() {
               credits the trader&apos;s platform wallet. If the claim is still pending
               review, Approve also verifies the screenshots first.
             </p>
-
-            {showSensitiveFinance && (
-              <div className="kyc-card" style={{ marginBottom: "1rem" }}>
-                <h3 style={{ margin: "0 0 0.5rem" }}>Credit user wallet</h3>
-                <p className="muted" style={{ margin: "0 0 0.75rem" }}>
-                  Add USDT to any user&apos;s platform wallet — use for bonuses, corrections,
-                  or manual refunds.
-                </p>
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: "0.5rem",
-                    alignItems: "end",
-                  }}
-                >
-                  <label>
-                    <span className="muted" style={{ display: "block", fontSize: "0.75rem" }}>
-                      User email
-                    </span>
-                    <input
-                      type="email"
-                      value={creditWalletEmail}
-                      onChange={(e) => setCreditWalletEmail(e.target.value)}
-                      placeholder="trader@example.com"
-                      style={{ minWidth: "14rem" }}
-                    />
-                  </label>
-                  <label>
-                    <span className="muted" style={{ display: "block", fontSize: "0.75rem" }}>
-                      Amount (USDT)
-                    </span>
-                    <input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={creditWalletAmount}
-                      onChange={(e) => setCreditWalletAmount(e.target.value)}
-                      style={{ width: "7rem" }}
-                    />
-                  </label>
-                  <label>
-                    <span className="muted" style={{ display: "block", fontSize: "0.75rem" }}>
-                      Note (optional)
-                    </span>
-                    <input
-                      value={creditWalletNote}
-                      onChange={(e) => setCreditWalletNote(e.target.value)}
-                      placeholder="Bonus, correction…"
-                      style={{ minWidth: "12rem" }}
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="primary"
-                    disabled={
-                      creditWalletLoading ||
-                      !creditWalletEmail.trim() ||
-                      !creditWalletAmount
-                    }
-                    onClick={() => {
-                      setCreditWalletLoading(true);
-                      setMessage("");
-                      void api
-                        .creditUserWallet({
-                          email: creditWalletEmail.trim(),
-                          amount: Number(creditWalletAmount),
-                          description: creditWalletNote.trim() || undefined,
-                        })
-                        .then((res) => {
-                          setMessage(
-                            `Credited ${fmtMoney(res.amount)} to ${res.displayName} — balance ${fmtMoney(res.balance)}.` +
-                              (res.emailSent
-                                ? " Email sent."
-                                : " Email NOT sent (check Resend)."),
-                          );
-                          setCreditWalletEmail("");
-                          setCreditWalletAmount("");
-                          setCreditWalletNote("");
-                        })
-                        .catch((err: Error) => setMessage(err.message))
-                        .finally(() => setCreditWalletLoading(false));
-                    }}
-                  >
-                    {creditWalletLoading ? "Crediting…" : "Credit wallet"}
-                  </button>
-                </div>
-              </div>
-            )}
 
             <div className="kyc-card" style={{ marginBottom: "1rem" }}>
               <h3 style={{ margin: "0 0 0.5rem" }}>Instant withdraw whitelist</h3>
@@ -3875,7 +3800,10 @@ export default function App() {
         {tab === "whitelist" && (
           <>
             <div className="toolbar">
-              <h2>Instant withdraw whitelist</h2>
+              <div>
+                <p className="page-eyebrow">Privileges</p>
+                <h2>Instant withdraw whitelist</h2>
+              </div>
             </div>
             <div className="kyc-card" style={{ marginBottom: "1rem" }}>
               <p className="muted" style={{ margin: "0 0 0.75rem" }}>
@@ -4590,6 +4518,7 @@ export default function App() {
           <>
             <div className="toolbar toolbar-wrap">
               <div>
+                <p className="page-eyebrow">Growth</p>
                 <h2>Email marketing</h2>
                 <p className="muted" style={{ margin: "0.35rem 0 0" }}>
                   {marketingSchedule?.cadence ??

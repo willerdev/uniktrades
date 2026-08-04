@@ -186,6 +186,7 @@ export function ComposeEmailPanel({ onMessage }: Props) {
     <>
       <div className="toolbar toolbar-wrap">
         <div>
+          <p className="page-eyebrow">Comms</p>
           <h2>Compose email</h2>
           <p className="muted" style={{ margin: "0.35rem 0 0", maxWidth: 620 }}>
             Choose Active or Investors so you don’t email useless accounts. Write

@@ -1,10 +1,23 @@
-import { useState } from "react";
-import { api } from "./api";
+import { useCallback, useEffect, useState } from "react";
+import {
+  api,
+  type CustodyDepositCreated,
+  type CustodyDepositRow,
+  type NowPaymentsWalletSummary,
+} from "./api";
+import { STATIC_NOWPAYMENTS_BALANCE_LABEL } from "./Sidebar";
 
 function fmtMoney(n: number | string | null | undefined) {
   const v = Number(n);
   return Number.isFinite(v) ? `$${v.toFixed(2)}` : "—";
 }
+
+function fmtDate(iso: string | null | undefined) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString();
+}
+
+type Sheet = "none" | "deposit" | "withdraw";
 
 type Props = {
   onMessage: (msg: string) => void;
@@ -12,234 +25,367 @@ type Props = {
 };
 
 export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
-  const [mode, setMode] = useState<"deposit" | "withdraw">("deposit");
-  const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [lookupLoading, setLookupLoading] = useState(false);
-  const [preview, setPreview] = useState<{
-    email: string;
-    displayName: string;
-    balance: number;
-  } | null>(null);
+  const [wallet, setWallet] = useState<NowPaymentsWalletSummary | null>(null);
+  const [deposits, setDeposits] = useState<CustodyDepositRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [sheet, setSheet] = useState<Sheet>("none");
+  const [amount, setAmount] = useState("100");
+  const [network, setNetwork] = useState("TRC20");
+  const [address, setAddress] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [activeDeposit, setActiveDeposit] = useState<CustodyDepositCreated | null>(
+    null,
+  );
+  const [pendingPayoutId, setPendingPayoutId] = useState<string | null>(null);
+  const [verifyCode, setVerifyCode] = useState("");
 
-  async function lookupUser() {
-    const q = email.trim();
-    if (!q) {
-      onMessage("Enter a user email to look up");
+  const refresh = useCallback(async (sync = false) => {
+    setLoading(true);
+    try {
+      const [w, d] = await Promise.all([
+        api.nowPaymentsWallet(),
+        api.custodyDeposits(20, sync),
+      ]);
+      setWallet(w);
+      setDeposits(d.items);
+    } catch (err) {
+      onMessage(err instanceof Error ? err.message : "Failed to load wallet");
+    } finally {
+      setLoading(false);
+    }
+  }, [onMessage]);
+
+  useEffect(() => {
+    void refresh(false);
+  }, [refresh]);
+
+  const balanceLabel = showSensitiveFinance
+    ? fmtMoney(wallet?.usdtBalance)
+    : STATIC_NOWPAYMENTS_BALANCE_LABEL;
+
+  async function submitDeposit() {
+    const amt = Number(amount);
+    if (!Number.isFinite(amt) || amt <= 0) {
+      onMessage("Enter a valid deposit amount");
       return;
     }
-    setLookupLoading(true);
-    setPreview(null);
+    setBusy(true);
     try {
-      const res = await api.users({ search: q, limit: 10 });
-      const match =
-        res.items.find(
-          (u) => u.email?.toLowerCase() === q.toLowerCase(),
-        ) ?? res.items[0];
-      if (!match) {
-        onMessage("No user found for that email");
-        return;
-      }
-      setPreview({
-        email: match.email,
-        displayName: match.displayName || match.email,
-        balance: Number(match.walletBalance ?? 0),
-      });
-      if (match.email.toLowerCase() !== q.toLowerCase()) {
-        setEmail(match.email);
-      }
-      onMessage(
-        `${match.displayName || match.email} — balance ${fmtMoney(match.walletBalance)}`,
-      );
+      const res = await api.createCustodyDeposit(amt, network);
+      setActiveDeposit(res);
+      onMessage(res.message);
+      await refresh(false);
     } catch (err) {
-      onMessage(err instanceof Error ? err.message : "Lookup failed");
+      onMessage(err instanceof Error ? err.message : "Deposit failed");
     } finally {
-      setLookupLoading(false);
+      setBusy(false);
     }
   }
 
-  async function submit() {
-    const trimmed = email.trim();
+  async function submitWithdraw() {
     const amt = Number(amount);
-    if (!trimmed) {
-      onMessage("Enter a user email");
-      return;
-    }
     if (!Number.isFinite(amt) || amt <= 0) {
-      onMessage("Enter a valid amount greater than 0");
+      onMessage("Enter a valid withdraw amount");
       return;
     }
-    if (mode === "withdraw" && preview && amt > preview.balance) {
-      onMessage(
-        `Insufficient balance — available ${fmtMoney(preview.balance)}`,
-      );
+    if (address.trim().length < 10) {
+      onMessage("Enter a destination wallet address");
       return;
     }
-
-    setLoading(true);
+    setBusy(true);
     try {
-      const payload = {
-        email: trimmed,
-        amount: amt,
-        description: note.trim() || undefined,
-      };
-      const res =
-        mode === "deposit"
-          ? await api.creditUserWallet(payload)
-          : await api.debitUserWallet(payload);
-
-      onMessage(
-        `${mode === "deposit" ? "Deposited" : "Withdrew"} ${fmtMoney(res.amount)} ${
-          mode === "deposit" ? "to" : "from"
-        } ${res.displayName} — balance ${fmtMoney(res.balance)}.` +
-          (res.emailSent ? " Email sent." : " Email NOT sent (check Resend)."),
-      );
-      setPreview({
-        email: res.email ?? trimmed,
-        displayName: res.displayName,
-        balance: res.balance,
-      });
-      setAmount("");
-      setNote("");
+      const res = await api.createCustodyWithdraw(amt, address.trim(), network);
+      setPendingPayoutId(res.payoutId);
+      onMessage(res.message);
     } catch (err) {
-      onMessage(err instanceof Error ? err.message : "Wallet update failed");
+      onMessage(err instanceof Error ? err.message : "Withdraw failed");
     } finally {
-      setLoading(false);
+      setBusy(false);
+    }
+  }
+
+  async function submitVerify() {
+    if (!pendingPayoutId || !verifyCode.trim()) {
+      onMessage("Enter the NOWPayments verification code");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await api.verifyCustodyWithdraw(
+        pendingPayoutId,
+        verifyCode.trim(),
+      );
+      onMessage(res.message);
+      setPendingPayoutId(null);
+      setVerifyCode("");
+      setAddress("");
+      setSheet("none");
+      await refresh(false);
+    } catch (err) {
+      onMessage(err instanceof Error ? err.message : "Verification failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function openSheet(next: Sheet) {
+    setSheet(next);
+    setActiveDeposit(null);
+    setPendingPayoutId(null);
+    setVerifyCode("");
+    if (next === "deposit") setAmount("100");
+    if (next === "withdraw") setAmount("");
+  }
+
+  async function copyText(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      onMessage("Copied to clipboard");
+    } catch {
+      onMessage("Could not copy");
     }
   }
 
   if (!showSensitiveFinance) {
     return (
-      <section>
-        <h2>Wallet</h2>
-        <p className="muted">
-          Deposit and withdraw controls are hidden for this admin account.
-        </p>
+      <section className="wallet-app">
+        <div className="wallet-hero">
+          <p className="wallet-hero-label">Available balance</p>
+          <p className="wallet-hero-balance">{STATIC_NOWPAYMENTS_BALANCE_LABEL}</p>
+          <p className="wallet-hero-sub muted">
+            Sensitive wallet controls are hidden for this admin account.
+          </p>
+        </div>
       </section>
     );
   }
 
   return (
-    <section>
-      <h2>Wallet</h2>
-      <p className="muted" style={{ marginTop: 0 }}>
-        Deposit USDT into a user&apos;s platform wallet, or withdraw (debit)
-        available balance. Full admins only — this adjusts the ledger directly
-        and does not create a crypto payout.
-      </p>
-
-      <div className="kyc-card" style={{ marginBottom: "1rem" }}>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginBottom: "1rem",
-          }}
-        >
+    <section className="wallet-app">
+      <div className="wallet-hero">
+        <div className="wallet-hero-top">
+          <div>
+            <p className="wallet-hero-label">Custody wallet</p>
+            <h2 className="wallet-hero-title">USDT</h2>
+          </div>
           <button
             type="button"
-            className={mode === "deposit" ? "primary" : undefined}
-            onClick={() => setMode("deposit")}
+            className="wallet-icon-btn"
+            disabled={loading}
+            onClick={() => void refresh(true)}
+            title="Refresh"
           >
+            {loading ? "…" : "↻"}
+          </button>
+        </div>
+
+        <p className="wallet-hero-balance">{loading && !wallet ? "—" : balanceLabel}</p>
+        <p className="wallet-hero-sub">
+          {wallet?.configured === false
+            ? wallet.message ?? "NOWPayments not configured"
+            : wallet?.pendingCryptoPayoutCount
+              ? `${wallet.pendingCryptoPayoutCount} pending payout${wallet.pendingCryptoPayoutCount === 1 ? "" : "s"} · ${fmtMoney(wallet.pendingCryptoPayoutTotal)}`
+              : "Ready for deposits & withdrawals"}
+        </p>
+
+        <div className="wallet-actions">
+          <button
+            type="button"
+            className="wallet-action wallet-action-in"
+            disabled={!wallet?.configured}
+            onClick={() => openSheet("deposit")}
+          >
+            <span className="wallet-action-icon">↓</span>
             Deposit
           </button>
           <button
             type="button"
-            className={mode === "withdraw" ? "primary" : undefined}
-            onClick={() => setMode("withdraw")}
+            className="wallet-action wallet-action-out"
+            disabled={!wallet?.configured || wallet?.payoutConfigured === false}
+            onClick={() => openSheet("withdraw")}
           >
+            <span className="wallet-action-icon">↑</span>
             Withdraw
           </button>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0.5rem",
-            alignItems: "end",
-          }}
-        >
-          <label>
-            <span className="muted" style={{ display: "block", fontSize: "0.75rem" }}>
-              User email
-            </span>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setPreview(null);
-              }}
-              placeholder="trader@example.com"
-              style={{ minWidth: "16rem" }}
-            />
-          </label>
-          <button
-            type="button"
-            disabled={lookupLoading || !email.trim()}
-            onClick={() => void lookupUser()}
-          >
-            {lookupLoading ? "Looking up…" : "Look up"}
-          </button>
-          <label>
-            <span className="muted" style={{ display: "block", fontSize: "0.75rem" }}>
-              Amount (USDT)
-            </span>
-            <input
-              type="number"
-              min="0.01"
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              style={{ width: "8rem" }}
-            />
-          </label>
-          <label>
-            <span className="muted" style={{ display: "block", fontSize: "0.75rem" }}>
-              Note (optional)
-            </span>
-            <input
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder={
-                mode === "deposit" ? "Bonus, correction…" : "Adjustment, clawback…"
-              }
-              style={{ minWidth: "14rem" }}
-            />
-          </label>
-          <button
-            type="button"
-            className="primary"
-            disabled={loading || !email.trim() || !amount}
-            onClick={() => void submit()}
-          >
-            {loading
-              ? mode === "deposit"
-                ? "Depositing…"
-                : "Withdrawing…"
-              : mode === "deposit"
-                ? "Deposit"
-                : "Withdraw"}
+        {wallet?.configured && wallet.payoutConfigured === false && (
+          <p className="wallet-warn">{wallet.message}</p>
+        )}
+      </div>
+
+      {sheet !== "none" && (
+        <div className="wallet-sheet">
+          <div className="wallet-sheet-head">
+            <h3>{sheet === "deposit" ? "Deposit USDT" : "Withdraw USDT"}</h3>
+            <button type="button" className="wallet-icon-btn" onClick={() => openSheet("none")}>
+              ✕
+            </button>
+          </div>
+
+          {sheet === "deposit" && !activeDeposit && (
+            <>
+              <label className="wallet-field">
+                <span>Amount</span>
+                <div className="wallet-amount-row">
+                  <input
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <span className="wallet-amount-unit">USDT</span>
+                </div>
+              </label>
+              <div className="wallet-chips">
+                {["50", "100", "250", "500"].map((v) => (
+                  <button key={v} type="button" onClick={() => setAmount(v)}>
+                    ${v}
+                  </button>
+                ))}
+              </div>
+              <label className="wallet-field">
+                <span>Network</span>
+                <select value={network} onChange={(e) => setNetwork(e.target.value)}>
+                  <option value="TRC20">TRC20</option>
+                  <option value="BEP20">BEP20</option>
+                  <option value="ERC20">ERC20</option>
+                </select>
+              </label>
+              <button
+                type="button"
+                className="wallet-primary"
+                disabled={busy}
+                onClick={() => void submitDeposit()}
+              >
+                {busy ? "Creating…" : "Continue"}
+              </button>
+            </>
+          )}
+
+          {sheet === "deposit" && activeDeposit?.payAddress && (
+            <div className="wallet-pay">
+              <p className="muted">
+                Send exactly{" "}
+                <strong>
+                  {activeDeposit.payAmount} {activeDeposit.payCurrency}
+                </strong>
+              </p>
+              <code className="wallet-address">{activeDeposit.payAddress}</code>
+              <div className="wallet-sheet-actions">
+                <button
+                  type="button"
+                  onClick={() => void copyText(activeDeposit.payAddress!)}
+                >
+                  Copy address
+                </button>
+                {activeDeposit.invoiceUrl && (
+                  <a href={activeDeposit.invoiceUrl} target="_blank" rel="noreferrer">
+                    Open invoice
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+
+          {sheet === "withdraw" && !pendingPayoutId && (
+            <>
+              <label className="wallet-field">
+                <span>Amount</span>
+                <div className="wallet-amount-row">
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                  />
+                  <span className="wallet-amount-unit">USDT</span>
+                </div>
+              </label>
+              <label className="wallet-field">
+                <span>Network</span>
+                <select value={network} onChange={(e) => setNetwork(e.target.value)}>
+                  <option value="TRC20">TRC20</option>
+                  <option value="BEP20">BEP20</option>
+                  <option value="ERC20">ERC20</option>
+                </select>
+              </label>
+              <label className="wallet-field">
+                <span>Destination address</span>
+                <input
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="Paste wallet address"
+                  autoComplete="off"
+                />
+              </label>
+              <button
+                type="button"
+                className="wallet-primary"
+                disabled={busy}
+                onClick={() => void submitWithdraw()}
+              >
+                {busy ? "Sending…" : "Withdraw"}
+              </button>
+            </>
+          )}
+
+          {sheet === "withdraw" && pendingPayoutId && (
+            <>
+              <p className="muted">
+                Confirm with the code NOWPayments emailed / showed for this payout.
+              </p>
+              <label className="wallet-field">
+                <span>Verification code</span>
+                <input
+                  value={verifyCode}
+                  onChange={(e) => setVerifyCode(e.target.value)}
+                  placeholder="6-digit code"
+                  inputMode="numeric"
+                />
+              </label>
+              <button
+                type="button"
+                className="wallet-primary"
+                disabled={busy || !verifyCode.trim()}
+                onClick={() => void submitVerify()}
+              >
+                {busy ? "Confirming…" : "Confirm withdrawal"}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="wallet-activity">
+        <div className="wallet-activity-head">
+          <h3>Recent deposits</h3>
+          <button type="button" disabled={loading} onClick={() => void refresh(true)}>
+            Sync
           </button>
         </div>
-
-        {preview && (
-          <p style={{ margin: "0.85rem 0 0" }}>
-            <strong>{preview.displayName}</strong>
-            <span className="muted"> · {preview.email}</span>
-            <br />
-            Available balance: <strong>{fmtMoney(preview.balance)}</strong>
-          </p>
-        )}
-
-        {mode === "withdraw" && (
-          <p className="muted" style={{ margin: "0.75rem 0 0", fontSize: "0.85rem" }}>
-            Withdraw fails if the amount exceeds the user&apos;s available
-            balance. Locked / invested funds are not touched.
-          </p>
+        {deposits.length === 0 ? (
+          <p className="muted wallet-empty">No deposits yet. Tap Deposit to fund the wallet.</p>
+        ) : (
+          <ul className="wallet-tx-list">
+            {deposits.map((d) => (
+              <li key={d.id} className="wallet-tx">
+                <div className="wallet-tx-icon in">↓</div>
+                <div className="wallet-tx-body">
+                  <strong>Deposit · {d.network}</strong>
+                  <span className="muted">{fmtDate(d.createdAt)}</span>
+                </div>
+                <div className="wallet-tx-right">
+                  <strong>+{fmtMoney(d.amount)}</strong>
+                  <span className={`wallet-pill ${d.status.toLowerCase()}`}>
+                    {d.status}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </section>

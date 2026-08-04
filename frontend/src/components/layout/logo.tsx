@@ -70,7 +70,7 @@ export function Logo({
         src="/uniktrades-logo.png"
         alt="UnikTrades"
         width={1024}
-        height={100}
+        height={87}
         className="h-8 w-auto max-w-[11rem] object-contain object-left sm:h-9 sm:max-w-[14rem]"
         priority
       />

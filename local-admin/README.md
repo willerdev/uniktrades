@@ -32,4 +32,4 @@ VITE_PROXY_TARGET=https://your-api.onrender.com
 
 ## Wallet tab
 
-Full admins can **deposit** (credit) or **withdraw** (debit) USDT on any user’s platform wallet via the Wallet tab. Restricted finance viewers do not see these controls.
+Full admins see a custody wallet (NOWPayments balance) with **Deposit** and **Withdraw**. This funds platform payouts — it does not credit user wallets.

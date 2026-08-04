@@ -1358,6 +1358,24 @@ export class AdminService {
     return this.custodyDeposits.syncAllPendingDeposits();
   }
 
+  createCustodyWithdraw(
+    adminId: string,
+    amount: number,
+    address: string,
+    network: string,
+  ) {
+    return this.custodyDeposits.createWithdraw(
+      adminId,
+      amount,
+      address,
+      network,
+    );
+  }
+
+  verifyCustodyWithdraw(payoutId: string, code: string) {
+    return this.custodyDeposits.verifyWithdraw(payoutId, code);
+  }
+
   listMetaApiAccounts(query?: {
     limit?: number;
     offset?: number;

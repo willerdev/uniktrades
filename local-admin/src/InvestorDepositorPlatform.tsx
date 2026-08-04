@@ -62,10 +62,6 @@ export function InvestorDepositorPlatform({
   const [transferDrafts, setTransferDrafts] = useState<Record<string, string>>({});
   const [journalSource, setJournalSource] = useState<"" | "INVESTOR" | "DEPOSITOR">("");
 
-  const [creditEmail, setCreditEmail] = useState("");
-  const [creditAmount, setCreditAmount] = useState("");
-  const [creditNote, setCreditNote] = useState("");
-  const [creditSaving, setCreditSaving] = useState(false);
   const [broadcastSaving, setBroadcastSaving] = useState(false);
   const [broadcastKind, setBroadcastKind] = useState<
     null | "yield" | "autoStop" | "loan" | "loan-withdraw" | "sunset"
@@ -1307,81 +1303,6 @@ export function InvestorDepositorPlatform({
               {enrollSaving ? "Enrolling…" : "Enroll investor"}
             </button>
           </section>
-
-          {showSensitiveFinance ? (
-          <section className="platform-card platform-card-tool">
-            <div className="platform-card-head">
-              <span className="platform-card-icon platform-card-icon-wallet">💳</span>
-              <div>
-                <h3>Credit user wallet</h3>
-                <p>Add USDT to any user&apos;s platform wallet by email.</p>
-              </div>
-            </div>
-            <div className="platform-field-stack">
-              <label className="platform-field">
-                <span>User email</span>
-                <input
-                  className="platform-input"
-                  placeholder="trader@example.com"
-                  value={creditEmail}
-                  onChange={(e) => setCreditEmail(e.target.value)}
-                />
-              </label>
-              <label className="platform-field">
-                <span>Amount (USDT)</span>
-                <input
-                  className="platform-input"
-                  type="number"
-                  min="0.01"
-                  step="0.01"
-                  value={creditAmount}
-                  onChange={(e) => setCreditAmount(e.target.value)}
-                />
-              </label>
-              <label className="platform-field">
-                <span>Note (optional)</span>
-                <input
-                  className="platform-input"
-                  placeholder="Bonus, correction, etc."
-                  value={creditNote}
-                  onChange={(e) => setCreditNote(e.target.value)}
-                />
-              </label>
-            </div>
-            <button
-              type="button"
-              className="platform-btn platform-btn-primary"
-              disabled={creditSaving || !creditEmail.trim() || !creditAmount}
-              onClick={() => {
-                setCreditSaving(true);
-                void api
-                  .creditUserWallet({
-                    email: creditEmail.trim(),
-                    amount: Number(creditAmount),
-                    description: creditNote.trim() || undefined,
-                  })
-                  .then((res) => {
-                    onMessage(
-                      `Credited ${fmtMoney(res.amount)} to ${res.displayName} — balance ${fmtMoney(res.balance)}.` +
-                        (res.emailSent
-                          ? " Email sent."
-                          : " Email NOT sent (check Resend)."),
-                    );
-                    setCreditEmail("");
-                    setCreditAmount("");
-                    setCreditNote("");
-                    void load();
-                  })
-                  .catch((e) =>
-                    onMessage(e instanceof Error ? e.message : "Credit failed"),
-                  )
-                  .finally(() => setCreditSaving(false));
-              }}
-            >
-              {creditSaving ? "Crediting…" : "Credit wallet"}
-            </button>
-          </section>
-          ) : null}
 
           <section className="platform-card platform-card-signal">
             <div className="platform-card-head">

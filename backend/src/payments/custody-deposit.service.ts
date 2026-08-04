@@ -461,4 +461,88 @@ export class CustodyDepositService {
 
     return { confirmed: false };
   }
+
+  async createWithdraw(
+    _adminId: string,
+    amount: number,
+    address: string,
+    network: string,
+  ) {
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new BadRequestException('Withdraw amount must be greater than zero');
+    }
+    const dest = address.trim();
+    if (dest.length < 10) {
+      throw new BadRequestException('Enter a valid destination wallet address');
+    }
+    if (!this.nowPayments.isConfigured) {
+      throw new BadRequestException('NOWPayments is not configured');
+    }
+    const payoutStatus = this.nowPayments.getPayoutConfigStatus();
+    if (!payoutStatus.payoutConfigured) {
+      const missing = [
+        !payoutStatus.payoutEmailSet ? 'NOWPAYMENTS_PAYOUT_EMAIL' : null,
+        !payoutStatus.payoutPasswordSet ? 'NOWPAYMENTS_PAYOUT_PASSWORD' : null,
+      ].filter(Boolean);
+      throw new BadRequestException(
+        `Wallet withdrawals need ${missing.join(' and ')} on the API service.`,
+      );
+    }
+
+    const summary = await this.getWalletSummary();
+    if (amount > summary.usdtBalance) {
+      throw new BadRequestException(
+        `Insufficient custody balance (available $${summary.usdtBalance.toFixed(2)} USDT)`,
+      );
+    }
+
+    const currency = this.nowPayments.mapNetworkToCurrency(network || 'TRC20');
+    let result: { id: string };
+    try {
+      result = await this.nowPayments.createPayout({
+        address: dest,
+        amount,
+        currency,
+        ipnCallbackUrl: this.ipnUrl(),
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'NOWPayments payout failed';
+      throw new BadRequestException(
+        `Could not queue withdrawal: ${message}`,
+      );
+    }
+
+    return {
+      payoutId: result.id,
+      amount,
+      address: dest,
+      network: (network || 'TRC20').toUpperCase(),
+      needsVerification: true,
+      message:
+        'Withdrawal queued. Enter the 2FA / email verification code from NOWPayments to confirm.',
+    };
+  }
+
+  async verifyWithdraw(payoutId: string, code: string) {
+    const trimmed = code?.trim();
+    if (!trimmed) {
+      throw new BadRequestException('Verification code is required');
+    }
+    if (!payoutId?.trim()) {
+      throw new BadRequestException('Payout id is required');
+    }
+    try {
+      await this.nowPayments.verifyPayout(payoutId.trim(), trimmed);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Verification failed';
+      throw new BadRequestException(message);
+    }
+    return {
+      ok: true as const,
+      payoutId: payoutId.trim(),
+      message: 'Withdrawal verified and sent.',
+    };
+  }
 }

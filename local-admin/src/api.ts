@@ -336,6 +336,28 @@ export const api = {
       body: JSON.stringify({ amount, network }),
     }),
 
+  createCustodyWithdraw: (amount: number, address: string, network: string) =>
+    request<{
+      payoutId: string;
+      amount: number;
+      address: string;
+      network: string;
+      needsVerification: boolean;
+      message: string;
+    }>("/admin/payouts/custody/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ amount, address, network }),
+    }),
+
+  verifyCustodyWithdraw: (payoutId: string, code: string) =>
+    request<{ ok: boolean; payoutId: string; message: string }>(
+      "/admin/payouts/custody/withdraw/verify",
+      {
+        method: "POST",
+        body: JSON.stringify({ payoutId, code }),
+      },
+    ),
+
   custodyDeposits: (limit = 20, sync = false, status?: string) => {
     const q = new URLSearchParams({ limit: String(limit) });
     if (sync) q.set("sync", "true");

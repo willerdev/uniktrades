@@ -82,6 +82,7 @@ export function SmsPanel({ onMessage }: Props) {
     <>
       <div className="toolbar toolbar-wrap">
         <div>
+          <p className="page-eyebrow">Comms</p>
           <h2>SMS / WhatsApp (Twilio)</h2>
           <p className="muted" style={{ margin: "0.35rem 0 0" }}>
             Temp test credentials from env. WhatsApp sandbox recipients must
@@ -90,7 +91,7 @@ export function SmsPanel({ onMessage }: Props) {
         </div>
         <button
           type="button"
-          className="btn-secondary"
+          className="ghost"
           onClick={() => void refresh()}
           disabled={loading}
         >

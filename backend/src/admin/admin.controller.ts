@@ -254,6 +254,29 @@ export class AdminController {
     return this.adminService.getCustodyDepositStatus(depositId);
   }
 
+  @Post('payouts/custody/withdraw')
+  createPayoutCustodyWithdraw(
+    @Request() req: { user: { id: string } },
+    @Body('amount') amount: number,
+    @Body('address') address: string,
+    @Body('network') network: string,
+  ) {
+    return this.adminService.createCustodyWithdraw(
+      req.user.id,
+      Number(amount),
+      address,
+      network || 'TRC20',
+    );
+  }
+
+  @Post('payouts/custody/withdraw/verify')
+  verifyPayoutCustodyWithdraw(
+    @Body('payoutId') payoutId: string,
+    @Body('code') code: string,
+  ) {
+    return this.adminService.verifyCustodyWithdraw(payoutId, code);
+  }
+
   @Post('payouts/:payoutId/approve')
   @RequireAdminPermission('payout')
   approvePayout(
