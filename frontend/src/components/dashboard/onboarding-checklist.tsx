@@ -16,7 +16,7 @@ const INVEST_STEPS = [
   },
   {
     key: "accountActive" as const,
-    label: "Open Smart Invest and allocate capital",
+    label: "Open Smart-Invest and allocate capital",
     href: "/invest",
     action: "Open Invest",
   },
@@ -49,7 +49,7 @@ export function OnboardingChecklist({
         <CardTitle className="text-lg">Start investing</CardTitle>
         <CardDescription>
           Pay registration to activate your account, then allocate capital on
-          Smart Invest. KYC is only required before withdrawals (
+          Smart-Invest. KYC is only required before withdrawals (
           {completed}/{INVEST_STEPS.length}).
         </CardDescription>
         <div className="mt-3 h-2 overflow-hidden rounded-full bg-foreground/10">

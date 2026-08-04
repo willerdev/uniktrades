@@ -207,7 +207,7 @@ export class LoansService {
     const quote = await this.quote(userId, termRaw);
     if (!quote.eligible) {
       throw new BadRequestException(
-        `Need at least $${LOAN_MIN_CORPUS_USDT} invested (Smart Invest + Unitrust) and ~$${LOAN_MIN_DAILY_EARNING_USDT}/day projected earnings to request a loan`,
+        `Need at least $${LOAN_MIN_CORPUS_USDT} invested (Smart-Invest + Unitrust) and ~$${LOAN_MIN_DAILY_EARNING_USDT}/day projected earnings to request a loan`,
       );
     }
     if (quote.principal < 1) {

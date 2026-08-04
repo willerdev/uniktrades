@@ -168,7 +168,7 @@ export function ComposeEmailPanel({ onMessage }: Props) {
       title: "Investors",
       detail:
         status?.audiences?.investors.description ??
-        "Only Smart Invest enrolled users",
+        "Only Smart-Invest enrolled users",
     },
     {
       id: "selected",

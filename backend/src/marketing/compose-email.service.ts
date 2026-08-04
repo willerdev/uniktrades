@@ -100,7 +100,7 @@ export class ComposeEmailService {
         investors: {
           count: investorCount,
           label: 'Investors',
-          description: 'Users with Smart Invest enrollment (investorActive)',
+          description: 'Users with Smart-Invest enrollment (investorActive)',
         },
       },
     };

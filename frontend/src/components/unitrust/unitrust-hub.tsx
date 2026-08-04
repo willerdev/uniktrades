@@ -204,7 +204,7 @@ export function UnitrustHub() {
       <p className="text-center text-sm text-gray-500">
         Also use{" "}
         <Link href="/invest" className="text-primary hover:underline">
-          Smart Invest
+          Smart-Invest
         </Link>{" "}
         for the standard investor product.
       </p>

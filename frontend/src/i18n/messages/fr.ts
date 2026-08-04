@@ -21,7 +21,7 @@ export const fr = {
     dashboard: "Tableau de bord",
     journal: "Journal",
     invest: "Investir",
-    smartInvest: "Smart Invest",
+    smartInvest: "Smart-Invest",
     unitrust: "Unitrust",
     loans: "Prêts",
     agent: "Agent",
@@ -53,7 +53,7 @@ export const fr = {
     headline1: "Grandissez avec clarté.",
     headline2: "Retirez en toute confiance.",
     support:
-      "Smart Invest verse un rendement USDT quotidien sur le solde éligible — frais transparents, délai de 24 h sur le nouveau capital, KYC avant retrait.",
+      "Smart-Invest verse un rendement USDT quotidien sur le solde éligible — frais transparents, délai de 24 h sur le nouveau capital, KYC avant retrait.",
     getStarted: "Commencer",
     openInvest: "Ouvrir Investir",
     openWallet: "Ouvrir le portefeuille",
@@ -70,7 +70,7 @@ export const fr = {
       "Déposez des USDT dans votre portefeuille. Le capital reste le vôtre jusqu’à l’allocation.",
     pathAllocate: "Allouer",
     pathAllocateBody:
-      "Passez dans Smart Invest, payez les frais par palier et définissez votre montant.",
+      "Passez dans Smart-Invest, payez les frais par palier et définissez votre montant.",
     pathCompound: "Composer",
     pathCompoundBody:
       "Après le délai de 24 h, le solde éligible génère un rendement",
@@ -80,7 +80,7 @@ export const fr = {
     inviteOnly: "Sur invitation",
     readyTitle: "Prêt quand vous l’êtes",
     readyBody:
-      "Utilisez le lien de parrainage d’un membre, activez votre compte et placez du capital sur Smart Invest.",
+      "Utilisez le lien de parrainage d’un membre, activez votre compte et placez du capital sur Smart-Invest.",
     joinCta: "Rejoindre UnikTrades",
   },
   rules: {
@@ -105,7 +105,7 @@ export const fr = {
     kycTitle: "KYC pour les retraits",
     kycBody:
       "Vous pouvez vous inscrire et gagner sans KYC. La vérification d’identité n’est requise qu’avant un retrait vers un portefeuille externe.",
-    subtitle: "Conditions Smart Invest en direct — frais, délai, VIP et retraits.",
+    subtitle: "Conditions Smart-Invest en direct — frais, délai, VIP et retraits.",
     feeBySize: "Frais d’inscription selon le montant",
     paidOut: "versés jusqu’ici",
     received: "a reçu",
@@ -230,6 +230,6 @@ export const fr = {
   meta: {
     title: "UnikTrades — Tradez plus malin. Grandissez plus fort.",
     description:
-      "Faites travailler votre capital avec Smart Invest : rendement quotidien, frais clairs et retraits USDT après KYC.",
+      "Faites travailler votre capital avec Smart-Invest : rendement quotidien, frais clairs et retraits USDT après KYC.",
   },
 } as const;

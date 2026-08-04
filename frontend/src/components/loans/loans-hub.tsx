@@ -99,7 +99,7 @@ export function LoansHub() {
           Borrow 80% of projected earnings
         </h2>
         <p className="mt-2 text-sm text-gray-400">
-          Daily / weekly / monthly based on your Smart Invest + Unitrust daily
+          Daily / weekly / monthly based on your Smart-Invest + Unitrust daily
           yield. You receive 80% in advance and repay with 20% interest on that
           advance. KYC required. Admin must approve. While the loan is open you
           may only withdraw the loan advance — repay to unlock other withdrawals.

@@ -17,10 +17,10 @@ const PRODUCTS = [
     id: "invest",
     href: "/invest",
     icon: TrendingUp,
-    title: "Smart Invest",
+    title: "Smart-Invest",
     tagline: "Put capital to work with daily yield",
     how: [
-      "Deposit USDT to your wallet, then allocate into Smart Invest.",
+      "Deposit USDT to your wallet, then allocate into Smart-Invest.",
       "Daily yield credits after a 24-hour hold on new allocations.",
       "VIP unlocks a higher daily rate, weekend earnings, and $0 withdraw fees.",
       "Optional auto-reinvest compounds most of each day’s return back into capital.",
@@ -30,7 +30,7 @@ const PRODUCTS = [
       "Open Invest → fund wallet → allocate capital.",
       "Complete KYC only when you are ready to withdraw.",
     ],
-    cta: "Open Smart Invest",
+    cta: "Open Smart-Invest",
   },
   {
     id: "unitrust",
@@ -84,7 +84,7 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
           {displayName ? `Welcome, ${displayName}` : "Your investment hub"}
         </h1>
         <p className="max-w-2xl text-sm text-gray-400 sm:text-base">
-          Grow capital with Smart Invest and Unitrust, or borrow against projected
+          Grow capital with Smart-Invest and Unitrust, or borrow against projected
           earnings with Loans. Pick a product below to see how it works and get
           started.
         </p>

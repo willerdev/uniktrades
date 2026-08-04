@@ -1,4 +1,4 @@
-/** Minimum Smart Invest balance required to earn daily yield once the policy is in force. */
+/** Minimum Smart-Invest balance required to earn daily yield once the policy is in force. */
 export const INVESTOR_MIN_BALANCE_USDT = 500;
 
 /** UTC calendar date when under-minimum investments stop earning (inclusive). */

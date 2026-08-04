@@ -129,7 +129,7 @@ const SUPPORT_TOOLS = [
     function: {
       name: 'transfer_wallet_to_investment',
       description:
-        'Move USDT from available wallet to Smart Invest investment balance. User must be an enrolled investor. Requires confirmed: true.',
+        'Move USDT from available wallet to Smart-Invest investment balance. User must be an enrolled investor. Requires confirmed: true.',
       parameters: {
         type: 'object',
         properties: {
@@ -146,7 +146,7 @@ const SUPPORT_TOOLS = [
     function: {
       name: 'transfer_investment_to_wallet',
       description:
-        'Move USDT from Smart Invest investment balance back to available wallet. Requires confirmed: true.',
+        'Move USDT from Smart-Invest investment balance back to available wallet. Requires confirmed: true.',
       parameters: {
         type: 'object',
         properties: {

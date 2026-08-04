@@ -2563,7 +2563,7 @@ export class NotificationService {
       <p>An administrator deposited <strong>$${data.amount.toFixed(2)} USDT</strong> into your platform wallet.</p>
       <p>Available balance: <strong>$${data.balance.toFixed(2)} USDT</strong></p>
       ${noteLine}
-      <p style="color:#94a3b8;font-size:14px;">Funds moved into Smart Invest only earn daily yield after they have been invested for at least <strong>24 hours</strong>.</p>
+      <p style="color:#94a3b8;font-size:14px;">Funds moved into Smart-Invest only earn daily yield after they have been invested for at least <strong>24 hours</strong>.</p>
       ${this.email.button(`${this.email.frontendUrl}/wallet`, 'View wallet')}`,
     );
     return this.email.send({
@@ -3199,7 +3199,7 @@ export class NotificationService {
       `<p>Hi ${this.escape(user.name)},</p>
       <p>Your investor enrollment payment of <strong>$${data.amount.toFixed(2)} USDT</strong> was confirmed.</p>
       <p>Link your MT5 account and set your risk % to start automated system trading at 1:2 RR.</p>
-      ${this.email.button(`${this.email.frontendUrl}/invest`, 'Open Smart Invest')}`,
+      ${this.email.button(`${this.email.frontendUrl}/invest`, 'Open Smart-Invest')}`,
     );
     return this.email.send({
       to: user.email,
@@ -3232,23 +3232,23 @@ export class NotificationService {
     const html = this.email.layout(
       'You have been enrolled as an investor',
       `<p>Hi ${this.escape(user.name)},</p>
-      <p>An administrator activated your <strong>Smart Invest</strong> account.</p>
+      <p>An administrator activated your <strong>Smart-Invest</strong> account.</p>
       <p>Investment amount: <strong>$${data.investmentAmount.toFixed(2)} USDT</strong></p>
       ${feeLine}
       <p>Amount invested: <strong>$${data.netInvested.toFixed(2)} USDT</strong></p>
       ${noteLine}
       <p>Open Invest to review your balance, daily yield, and MT5 settings.</p>
-      ${this.email.button(`${this.email.frontendUrl}/invest`, 'Open Smart Invest')}`,
+      ${this.email.button(`${this.email.frontendUrl}/invest`, 'Open Smart-Invest')}`,
     );
     return this.email.send({
       to: user.email,
       subject: complimentary
-        ? 'You have been enrolled in Smart Invest'
-        : 'Smart Invest enrollment confirmed',
+        ? 'You have been enrolled in Smart-Invest'
+        : 'Smart-Invest enrollment confirmed',
       html,
       text: complimentary
-        ? `An admin enrolled you in Smart Invest. $${data.netInvested.toFixed(2)} USDT invested (fee waived). ${this.email.frontendUrl}/invest`
-        : `An admin enrolled you in Smart Invest. $${data.investmentAmount.toFixed(2)} USDT deposit, $${data.feeUsdt.toFixed(2)} fee, $${data.netInvested.toFixed(2)} invested. ${this.email.frontendUrl}/invest`,
+        ? `An admin enrolled you in Smart-Invest. $${data.netInvested.toFixed(2)} USDT invested (fee waived). ${this.email.frontendUrl}/invest`
+        : `An admin enrolled you in Smart-Invest. $${data.investmentAmount.toFixed(2)} USDT deposit, $${data.feeUsdt.toFixed(2)} fee, $${data.netInvested.toFixed(2)} invested. ${this.email.frontendUrl}/invest`,
     });
   }
 
@@ -3641,7 +3641,7 @@ export class NotificationService {
       <p>To protect the platform and all investors, we are introducing a clear rule:</p>
       <p><strong>New deposits and investment allocations only start earning daily yield after they have been in place for at least 24 hours.</strong></p>
       <ul style="padding-left:18px;color:#cbd5e1;">
-        <li>Smart Invest: amounts moved into investment in the last 24 hours are excluded from that day’s yield.</li>
+        <li>Smart-Invest: amounts moved into investment in the last 24 hours are excluded from that day’s yield.</li>
         <li>Depositor plans: the first daily earning credits after a full 24 hours from plan start.</li>
         <li>Existing capital that has already been invested for 24+ hours continues to earn as usual.</li>
       </ul>
@@ -3708,7 +3708,7 @@ export class NotificationService {
     const html = this.email.layout(
       'Minimum investment update',
       `<p>Hi ${this.escape(user.name)},</p>
-      <p>We are updating Smart Invest to keep the program healthy for everyone.</p>
+      <p>We are updating Smart-Invest to keep the program healthy for everyone.</p>
       <p><strong>From 27 July 2026, investments below $500 will automatically stop.</strong></p>
       <p>Your current investment balance is <strong>$${bal} USDT</strong>.</p>
       <ul style="padding-left:18px;color:#cbd5e1;">
@@ -3783,7 +3783,7 @@ export class NotificationService {
     const html = this.email.layout(
       'You may be eligible for an investment loan',
       `<p>Hi ${this.escape(user.name)},</p>
-      <p>Because your Smart Invest balance is <strong>$1,000 or more</strong>, you are eligible for our new investment loan program.</p>
+      <p>Because your Smart-Invest balance is <strong>$1,000 or more</strong>, you are eligible for our new investment loan program.</p>
       <p>Your current investment: <strong>$${bal} USDT</strong> (illustrative borrow capacity up to <strong>$${borrowMax} USDT</strong> — 80%).</p>
       <ul style="padding-left:18px;color:#cbd5e1;">
         <li>Reinvest profit from your investment into growing your position.</li>
@@ -3974,11 +3974,11 @@ export class NotificationService {
       'An important update from TraderRank Pro',
       `<p>Hi ${this.escape(user.name)},</p>
       <p>We are writing with a difficult but necessary update about the future of TraderRank Pro (Trade Guard).</p>
-      <p>Over the past months our community and product have grown most strongly around <strong>Smart Invest</strong> — daily yield, transparent fees, and a clearer path for capital. After careful review, we have decided to <strong>conclude the trader competition and prop-style funding programs</strong> as part of our core offering.</p>
+      <p>Over the past months our community and product have grown most strongly around <strong>Smart-Invest</strong> — daily yield, transparent fees, and a clearer path for capital. After careful review, we have decided to <strong>conclude the trader competition and prop-style funding programs</strong> as part of our core offering.</p>
       <p>This was not an easy decision. We are genuinely sorry to see the competitive trading chapter close, and we are grateful for every setup submitted, every claim reviewed, and every trader who trusted us with their craft. Your participation helped shape who we are.</p>
       <p><strong>What this means</strong></p>
       <ul style="padding-left:18px;color:#cbd5e1;">
-        <li>New focus of the platform is <strong>investment</strong>: Smart Invest, wallet deposits, daily earnings, and withdrawals after KYC.</li>
+        <li>New focus of the platform is <strong>investment</strong>: Smart-Invest, wallet deposits, daily earnings, and withdrawals after KYC.</li>
         <li>Trader leaderboard competition, virtual funded accounts, and prop-style evaluation pathways are being wound down as product priorities.</li>
         <li>If you hold wallet or investment balances, those remain yours — continue to manage them from Invest and Wallet.</li>
         <li>Support remains available in Messages if you have questions about balances, KYC, or withdrawals.</li>
@@ -3986,14 +3986,14 @@ export class NotificationService {
       <p>We regret any disappointment this causes, especially for members who joined primarily to compete and get funded. We believe concentrating on investment services will let us serve you more clearly and reliably going forward.</p>
       <p>Thank you for being part of TraderRank Pro. We hope you will stay with us on the investment path.</p>
       <p style="color:#94a3b8;font-size:14px;">— The TraderRank Pro team</p>
-      ${this.email.button(`${this.email.frontendUrl}/invest`, 'Open Smart Invest')}`,
+      ${this.email.button(`${this.email.frontendUrl}/invest`, 'Open Smart-Invest')}`,
     );
     return this.email.send({
       to: user.email,
       subject:
-        'TraderRank Pro update: closing trader & prop programs — focusing on Smart Invest',
+        'TraderRank Pro update: closing trader & prop programs — focusing on Smart-Invest',
       html,
-      text: `Hi ${user.name}, We are concluding TraderRank Pro’s trader competition and prop-style funding programs and focusing the platform on Smart Invest. We regret seeing that chapter end and thank you for your participation. Wallet and investment balances remain yours. Open ${this.email.frontendUrl}/invest or message Support with questions. — The TraderRank Pro team`,
+      text: `Hi ${user.name}, We are concluding TraderRank Pro’s trader competition and prop-style funding programs and focusing the platform on Smart-Invest. We regret seeing that chapter end and thank you for your participation. Wallet and investment balances remain yours. Open ${this.email.frontendUrl}/invest or message Support with questions. — The TraderRank Pro team`,
     });
   }
 }

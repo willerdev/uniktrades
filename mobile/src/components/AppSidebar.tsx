@@ -67,7 +67,7 @@ function AppSidebar({ visible, onClose }: { visible: boolean; onClose: () => voi
     },
     {
       key: "invest",
-      title: "Smart Invest",
+      title: "Smart-Invest",
       icon: "trending-up-outline",
       onPress: () => go("Invest"),
     },

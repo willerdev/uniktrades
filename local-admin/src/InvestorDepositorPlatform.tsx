@@ -758,7 +758,7 @@ export function InvestorDepositorPlatform({
               onClick={() => {
                 if (
                   !window.confirm(
-                    "Email ALL users that trader/prop programs are ending and the company is focusing on Smart Invest? This cannot be casually undone.",
+                    "Email ALL users that trader/prop programs are ending and the company is focusing on Smart-Invest? This cannot be casually undone.",
                   )
                 ) {
                   return;

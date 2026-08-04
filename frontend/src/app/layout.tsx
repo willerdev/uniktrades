@@ -20,8 +20,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "UnikTrades — Tradez plus malin. Grandissez plus fort.",
   description:
-    "Faites travailler votre capital avec Smart Invest : rendement quotidien, frais clairs et retraits USDT après KYC.",
-  keywords: ["investissement", "smart invest", "rendement", "USDT", "uniktrades"],
+    "Faites travailler votre capital avec Smart-Invest : rendement quotidien, frais clairs et retraits USDT après KYC.",
+  keywords: ["investissement", "smart-invest", "rendement", "USDT", "uniktrades"],
   icons: {
     icon: "/uniktrades-mark.png",
     apple: "/uniktrades-mark.png",

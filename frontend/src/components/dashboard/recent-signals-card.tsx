@@ -62,7 +62,7 @@ export function RecentSignalsCard({ signals, onRefresh }: Props) {
               <p className="text-gray-500">No recent setups on this account</p>
               <Link href="/invest" className="mt-4 inline-block">
                 <Button variant="secondary" size="sm" className="gap-2">
-                  Go to Smart Invest
+                  Go to Smart-Invest
                   <ArrowRight className="h-3 w-3" />
                 </Button>
               </Link>

@@ -63,7 +63,7 @@ type SeedProduct = {
 const DEFAULT_PRODUCTS: SeedProduct[] = [
   {
     slug: 'smart_invest_daily',
-    name: 'Smart Invest (daily yield)',
+    name: 'Smart-Invest (daily yield)',
     description:
       'Daily return investment account — balance earns yield every day.',
     cadence: 'daily',
@@ -508,14 +508,14 @@ export class ProductAgentService {
       topPaths.some((p) => p.path.startsWith('/invest') || p.path === '/journal');
 
     const styleHints: string[] = [];
-    if (prefersDailyYield) styleHints.push('Talk about daily compounding and Smart Invest.');
+    if (prefersDailyYield) styleHints.push('Talk about daily compounding and Smart-Invest.');
     if (prefersDepositorPlans) styleHints.push('Highlight fixed depositor plan credits.');
     if (onlineMostlyEvenings) styleHints.push('User is usually online evenings UTC.');
     if (user.investorActive && !user.investorSettings?.autoReinvestEarnings) {
       styleHints.push('Already investing — pitch auto-reinvest compounding.');
     }
     if (!user.investorActive && !user.depositorActive) {
-      styleHints.push('Not on any return product yet — introduce Smart Invest gently.');
+      styleHints.push('Not on any return product yet — introduce Smart-Invest gently.');
     }
     if (unused.includes('investor_vip') && user.investorActive) {
       styleHints.push('Active investor who is not VIP yet.');
@@ -851,7 +851,7 @@ export class ProductAgentService {
     ) {
       angle = 'compound_existing';
       hook =
-        'Your Smart Invest balance is earning — auto-reinvest can compound it for you.';
+        'Your Smart-Invest balance is earning — auto-reinvest can compound it for you.';
     } else if (
       profile.investing.investorActive &&
       product.slug === 'investor_vip'

@@ -21,7 +21,7 @@ export const en = {
     dashboard: "Dashboard",
     journal: "Journal",
     invest: "Invest",
-    smartInvest: "Smart Invest",
+    smartInvest: "Smart-Invest",
     unitrust: "Unitrust",
     loans: "Loans",
     agent: "Agent",
@@ -53,7 +53,7 @@ export const en = {
     headline1: "Grow with clarity.",
     headline2: "Withdraw with confidence.",
     support:
-      "Smart Invest pays daily USDT yield on eligible balance — transparent fees, a 24-hour hold on new capital, KYC before cash-out.",
+      "Smart-Invest pays daily USDT yield on eligible balance — transparent fees, a 24-hour hold on new capital, KYC before cash-out.",
     getStarted: "Get started",
     openInvest: "Open Invest",
     openWallet: "Open wallet",
@@ -70,7 +70,7 @@ export const en = {
       "Deposit USDT to your wallet. Capital stays yours until you allocate.",
     pathAllocate: "Allocate",
     pathAllocateBody:
-      "Move into Smart Invest, pay the tiered fee, and set your size.",
+      "Move into Smart-Invest, pay the tiered fee, and set your size.",
     pathCompound: "Compound",
     pathCompoundBody:
       "After the 24-hour hold, eligible balance earns yield",
@@ -80,7 +80,7 @@ export const en = {
     inviteOnly: "Invite only",
     readyTitle: "Ready when you are",
     readyBody:
-      "Use a member referral link, activate your account, and put capital on Smart Invest.",
+      "Use a member referral link, activate your account, and put capital on Smart-Invest.",
     joinCta: "Join UnikTrades",
   },
   rules: {
@@ -105,7 +105,7 @@ export const en = {
     kycTitle: "KYC for withdrawals",
     kycBody:
       "You can enroll and earn without KYC. Identity verification is required only before withdrawing to an external wallet.",
-    subtitle: "Live Smart Invest terms — fees, hold period, VIP, and withdrawals.",
+    subtitle: "Live Smart-Invest terms — fees, hold period, VIP, and withdrawals.",
     feeBySize: "Enrollment fee by size",
     paidOut: "paid out so far",
     received: "received",
@@ -230,6 +230,6 @@ export const en = {
   meta: {
     title: "UnikTrades — Trade Smarter. Grow Stronger.",
     description:
-      "Put capital to work with Smart Invest: daily yield, clear fees, and USDT wallet withdrawals after KYC.",
+      "Put capital to work with Smart-Invest: daily yield, clear fees, and USDT wallet withdrawals after KYC.",
   },
 };

@@ -89,7 +89,7 @@ export function InvestorPolicyBanners({
               <p className="text-amber-100/85 leading-relaxed">
                 {blockedNow ? (
                   <>
-                    Your Smart Invest balance is{" "}
+                    Your Smart-Invest balance is{" "}
                     <strong>${balance.toFixed(2)}</strong>, below the{" "}
                     <strong>${threshold.toLocaleString()}</strong> minimum. Daily
                     yield is paused until you top up to at least $
