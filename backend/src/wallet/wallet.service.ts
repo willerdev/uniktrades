@@ -551,7 +551,7 @@ export class WalletService {
         config?.depositorDailyYieldPercent ?? 0.5,
       ),
       investorDailyYieldPercent: Number(
-        config?.investorDailyYieldPercent ?? 0.5,
+        config?.investorDailyYieldPercent ?? 5,
       ),
       minDepositUsdt: Number(config?.depositorMinDepositUsdt ?? 50),
     };
