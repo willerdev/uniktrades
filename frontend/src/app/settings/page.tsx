@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   User,
@@ -17,6 +18,7 @@ import {
   XCircle,
   TrendingUp,
   Wallet,
+  ArrowRight,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -881,8 +883,8 @@ export default function SettingsPage() {
               </Badge>
             </div>
             <CardDescription>
-              Required before you can request a payout. You can pay registration and submit
-              setups without completing this step.
+              One verification process for payouts, loans, and contract access —
+              government ID, AI check, and live selfie.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -890,110 +892,32 @@ export default function SettingsPage() {
               <div className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger">
                 <p className="font-medium">Previous submission rejected</p>
                 <p className="mt-1">{kycRejectionReason}</p>
-                {canRetryKyc && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="secondary"
-                    className="mt-3"
-                    disabled={kycRetrying}
-                    onClick={() => void retryKyc()}
-                  >
-                    {kycRetrying ? "Preparing..." : "Upload new documents"}
-                  </Button>
-                )}
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label>Document type</Label>
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    ["PASSPORT", "Passport"],
-                    ["NATIONAL_ID", "National ID"],
-                    ["DRIVERS_LICENSE", "Driver's license"],
-                  ] as const
-                ).map(([value, label]) => (
-                  <Button
-                    key={value}
-                    type="button"
-                    size="sm"
-                    variant={kycForm.documentType === value ? "default" : "secondary"}
-                    disabled={kycLocked}
-                    onClick={() =>
-                      setKycForm({ ...kycForm, documentType: value })
-                    }
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="docNumber">Document number</Label>
-              <Input
-                id="docNumber"
-                value={kycForm.documentNumber}
-                disabled={kycLocked}
-                onChange={(e) =>
-                  setKycForm({ ...kycForm, documentNumber: e.target.value })
-                }
-              />
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <KycUploadField
-                label="Document front"
-                url={kycForm.documentFrontUrl}
-                disabled={kycLocked}
-                onUpload={(url) =>
-                  setKycForm({ ...kycForm, documentFrontUrl: url })
-                }
-                onClear={() =>
-                  setKycForm({ ...kycForm, documentFrontUrl: "" })
-                }
-              />
-              <KycUploadField
-                label="Document back (optional)"
-                url={kycForm.documentBackUrl}
-                disabled={kycLocked}
-                onUpload={(url) =>
-                  setKycForm({ ...kycForm, documentBackUrl: url })
-                }
-                onClear={() =>
-                  setKycForm({ ...kycForm, documentBackUrl: "" })
-                }
-              />
-            </div>
-
-            <KycUploadField
-              label="Selfie with document"
-              url={kycForm.selfieUrl}
-              disabled={kycLocked}
-              onUpload={(url) => setKycForm({ ...kycForm, selfieUrl: url })}
-              onClear={() => setKycForm({ ...kycForm, selfieUrl: "" })}
-            />
-
-            {!kycLocked && (
-              <Button
-                onClick={() => void submitKyc()}
-                disabled={kycSubmitting}
-                className="w-full"
-              >
-                {kycSubmitting
-                  ? "Submitting..."
-                  : showKycResubmit
-                    ? "Resubmit for verification"
-                    : "Submit for verification"}
-              </Button>
-            )}
-
-            {kycStatus === "APPROVED" && (
+            {kycStatus === "APPROVED" ? (
               <p className="text-sm text-success">
                 Your identity has been verified. No further action needed.
               </p>
+            ) : kycStatus === "PENDING" ? (
+              <p className="text-sm text-muted-foreground">
+                Your documents and liveness check are under review. You will be
+                notified when verification is complete.
+              </p>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  UnikTrades uses one KYC process for everyone: government ID,
+                  AI document check, and a live selfie scan. This unlocks
+                  payouts, loans, and contract enrollment.
+                </p>
+                <Button asChild className="w-full sm:w-auto">
+                  <Link href="/blockchain">
+                    Continue verification
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </>
             )}
           </CardContent>
         </Card>

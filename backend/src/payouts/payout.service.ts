@@ -718,7 +718,7 @@ export class PayoutService {
     });
     if (config?.requireKycForPayouts !== false) {
       const cleared =
-        Boolean(user?.kyc?.status === 'APPROVED') ||
+        (await this.compliance.hasApprovedIdentityKyc(userId)) ||
         (await this.compliance.isWithdrawKycExempt(userId));
       if (!cleared) {
         throw new BadRequestException(

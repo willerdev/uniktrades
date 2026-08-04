@@ -76,15 +76,13 @@ export class ComplianceService {
       return;
     }
 
-    const kyc = await this.prisma.kycVerification.findUnique({
-      where: { userId },
-    });
-
-    if (!kyc || kyc.status !== 'APPROVED') {
-      throw new ForbiddenException(
-        'Identity verification (KYC) must be approved before requesting payouts. Complete KYC in Settings.',
-      );
+    if (await this.hasApprovedIdentityKyc(userId)) {
+      return;
     }
+
+    throw new ForbiddenException(
+      'Identity verification (KYC) must be approved before requesting payouts. Complete KYC in Settings or Contract enrollment.',
+    );
   }
 
   /**
@@ -102,6 +100,29 @@ export class ComplianceService {
     return Boolean(user?.instantWithdraw && user.instantWithdrawKycExempt);
   }
 
+  /**
+   * Single identity bar: platform KycVerification APPROVED, or chain contract
+   * enrollment APPROVED/ACTIVE (same documents + liveness review).
+   */
+  async hasApprovedIdentityKyc(userId: string): Promise<boolean> {
+    const [kyc, enrollment] = await Promise.all([
+      this.prisma.kycVerification.findUnique({
+        where: { userId },
+        select: { status: true },
+      }),
+      this.prisma.chainContractEnrollment
+        .findUnique({
+          where: { userId },
+          select: { status: true },
+        })
+        .catch(() => null),
+    ]);
+    if (kyc?.status === 'APPROVED') return true;
+    return (
+      enrollment?.status === 'APPROVED' || enrollment?.status === 'ACTIVE'
+    );
+  }
+
   /** True when KYC is approved, globally disabled, or whitelist-verified. */
   async isKycSatisfiedForPayout(userId: string): Promise<boolean> {
     const config = await this.prisma.platformConfig.findUnique({
@@ -109,10 +130,6 @@ export class ComplianceService {
     });
     if (config?.requireKycForPayouts === false) return true;
     if (await this.isWithdrawKycExempt(userId)) return true;
-    const kyc = await this.prisma.kycVerification.findUnique({
-      where: { userId },
-      select: { status: true },
-    });
-    return kyc?.status === 'APPROVED';
+    return this.hasApprovedIdentityKyc(userId);
   }
 }

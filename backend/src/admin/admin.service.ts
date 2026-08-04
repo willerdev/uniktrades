@@ -474,6 +474,19 @@ export class AdminService {
     await this.logAction(adminId, 'KYC_APPROVED', userId);
     this.notifications.kycApproved(userId);
     await this.referrals.rewardForKyc(userId).catch(() => undefined);
+
+    // Keep chain enrollment aligned when admin approves from the KYC queue.
+    await this.prisma.chainContractEnrollment
+      .updateMany({
+        where: { userId, status: 'KYC_PENDING' },
+        data: {
+          status: 'APPROVED',
+          approvedAt: new Date(),
+          rejectionReason: null,
+        },
+      })
+      .catch(() => undefined);
+
     return updated;
   }
 
@@ -498,6 +511,17 @@ export class AdminService {
 
     await this.logAction(adminId, 'KYC_REJECTED', userId, { reason });
     this.notifications.kycRejected(userId, reason.trim());
+
+    await this.prisma.chainContractEnrollment
+      .updateMany({
+        where: { userId, status: 'KYC_PENDING' },
+        data: {
+          status: 'KYC_REJECTED',
+          rejectionReason: reason.trim(),
+        },
+      })
+      .catch(() => undefined);
+
     return updated;
   }
 
@@ -1275,7 +1299,16 @@ export class AdminService {
     if (config?.requireKycForPayouts !== false) {
       const whitelistVerified =
         payout.user.instantWithdraw && payout.user.instantWithdrawKycExempt;
-      if (payout.user.kyc?.status !== 'APPROVED' && !whitelistVerified) {
+      const platformApproved = payout.user.kyc?.status === 'APPROVED';
+      const chain = await this.prisma.chainContractEnrollment
+        .findUnique({
+          where: { userId: payout.userId },
+          select: { status: true },
+        })
+        .catch(() => null);
+      const chainApproved =
+        chain?.status === 'APPROVED' || chain?.status === 'ACTIVE';
+      if (!platformApproved && !chainApproved && !whitelistVerified) {
         throw new BadRequestException(
           'Cannot approve payout — trader KYC is not verified',
         );

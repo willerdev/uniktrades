@@ -4,8 +4,10 @@ import { BlockchainService } from './blockchain.service';
 import { ChainSyncService } from './chain-sync.service';
 import { ChainEnrollmentService } from './chain-enrollment.service';
 import { KycAiService } from './kyc-ai.service';
+import { ReferralsModule } from '../referrals/referrals.module';
 
 @Module({
+  imports: [ReferralsModule],
   controllers: [BlockchainController],
   providers: [
     BlockchainService,

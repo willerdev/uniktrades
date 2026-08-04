@@ -97,14 +97,14 @@ export default function PayoutsPage() {
                 <div>
                   <p className="font-semibold text-foreground">KYC required for payouts only</p>
                   <p className="text-sm text-muted">
-                    Complete identity verification in Settings before submitting a withdrawal.
+                    Complete identity verification (ID + live selfie) before submitting a withdrawal.
                     {kycStatus === "PENDING" && " Your submission is under review."}
                     {kycStatus === "REJECTED" &&
-                      " Your last submission was rejected — upload new documents and resubmit."}
+                      " Your last submission was rejected — restart verification with new documents."}
                   </p>
                 </div>
               </div>
-              <Link href={kycStatus === "REJECTED" ? "/settings#kyc" : "/settings"}>
+              <Link href="/blockchain">
                 <Button variant="secondary" size="sm">
                   {kycStatus === "REJECTED" ? "Retry KYC" : "Complete KYC"}
                 </Button>

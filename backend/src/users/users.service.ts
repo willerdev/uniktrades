@@ -173,7 +173,7 @@ export class UsersService {
         ),
       },
       profile: user.profile,
-      kyc: user.kyc ?? { status: 'NOT_STARTED' },
+      kyc: await this.effectiveKyc(userId, user.kyc),
       displayCurrency: await this.fxRates.buildDisplayCurrency(
         resolvePreferredDisplayCurrency({
           preferredCurrency: user.profile?.preferredCurrency,
@@ -372,54 +372,10 @@ export class UsersService {
     return this.getSettings(userId);
   }
 
-  async submitKyc(userId: string, dto: SubmitKycDto) {
-    const profile = await this.prisma.userProfile.findUnique({
-      where: { userId },
-    });
-
-    if (
-      !profile?.firstName ||
-      !profile?.lastName ||
-      !profile?.country ||
-      !profile?.addressLine1
-    ) {
-      throw new BadRequestException(
-        'Complete your profile and address before submitting KYC',
-      );
-    }
-
-    const existing = await this.prisma.kycVerification.findUnique({
-      where: { userId },
-    });
-
-    if (existing?.status === 'PENDING') {
-      throw new BadRequestException('KYC submission is already under review');
-    }
-
-    if (existing?.status === 'APPROVED') {
-      throw new BadRequestException('KYC is already approved');
-    }
-
-    const data = {
-      status: 'PENDING' as const,
-      documentType: dto.documentType,
-      documentNumber: dto.documentNumber.trim(),
-      documentFrontUrl: dto.documentFrontUrl,
-      documentBackUrl: dto.documentBackUrl || null,
-      selfieUrl: dto.selfieUrl,
-      rejectionReason: null,
-      submittedAt: new Date(),
-      reviewedAt: null,
-      pendingUploadFilenames: [],
-    };
-
-    const kyc = await this.prisma.kycVerification.upsert({
-      where: { userId },
-      create: { userId, ...data },
-      update: data,
-    });
-
-    return kyc;
+  async submitKyc(_userId: string, _dto: SubmitKycDto) {
+    throw new BadRequestException(
+      'Use the Contract KYC flow (Blockchain → Verify) for identity verification. It includes document AI checks and liveness.',
+    );
   }
 
   async retryKyc(userId: string) {
@@ -453,8 +409,84 @@ export class UsersService {
     const kyc = await this.prisma.kycVerification.findUnique({
       where: { userId },
     });
+    return this.effectiveKyc(userId, kyc);
+  }
 
-    return kyc ?? { status: 'NOT_STARTED' };
+  /**
+   * Prefer chain enrollment status when it is ahead of the legacy KYC row
+   * (unified identity flow).
+   */
+  private async effectiveKyc(
+    userId: string,
+    kyc: {
+      status: string;
+      documentType?: string | null;
+      documentNumber?: string | null;
+      documentFrontUrl?: string | null;
+      documentBackUrl?: string | null;
+      selfieUrl?: string | null;
+      rejectionReason?: string | null;
+      submittedAt?: Date | null;
+      reviewedAt?: Date | null;
+    } | null,
+  ) {
+    const enrollment = await this.prisma.chainContractEnrollment
+      .findUnique({ where: { userId } })
+      .catch(() => null);
+
+    if (
+      enrollment?.status === 'APPROVED' ||
+      enrollment?.status === 'ACTIVE'
+    ) {
+      return {
+        status: 'APPROVED' as const,
+        documentType: enrollment.documentType ?? kyc?.documentType ?? null,
+        documentNumber: enrollment.documentNumber ?? kyc?.documentNumber ?? null,
+        documentFrontUrl:
+          enrollment.documentFrontUrl ?? kyc?.documentFrontUrl ?? null,
+        documentBackUrl:
+          enrollment.documentBackUrl ?? kyc?.documentBackUrl ?? null,
+        selfieUrl: enrollment.livenessSelfieUrl ?? kyc?.selfieUrl ?? null,
+        rejectionReason: null,
+        submittedAt: enrollment.kycSubmittedAt ?? kyc?.submittedAt ?? null,
+        reviewedAt: enrollment.approvedAt ?? kyc?.reviewedAt ?? null,
+        source: 'chain_contract' as const,
+      };
+    }
+
+    if (enrollment?.status === 'KYC_PENDING') {
+      return {
+        status: 'PENDING' as const,
+        documentType: enrollment.documentType,
+        documentNumber: enrollment.documentNumber,
+        documentFrontUrl: enrollment.documentFrontUrl,
+        documentBackUrl: enrollment.documentBackUrl,
+        selfieUrl: enrollment.livenessSelfieUrl,
+        rejectionReason: null,
+        submittedAt: enrollment.kycSubmittedAt,
+        reviewedAt: null,
+        source: 'chain_contract' as const,
+      };
+    }
+
+    if (enrollment?.status === 'KYC_REJECTED') {
+      return {
+        status: 'REJECTED' as const,
+        documentType: enrollment.documentType,
+        documentNumber: enrollment.documentNumber,
+        documentFrontUrl: enrollment.documentFrontUrl,
+        documentBackUrl: enrollment.documentBackUrl,
+        selfieUrl: enrollment.livenessSelfieUrl,
+        rejectionReason: enrollment.rejectionReason,
+        submittedAt: enrollment.kycSubmittedAt,
+        reviewedAt: null,
+        source: 'chain_contract' as const,
+      };
+    }
+
+    return kyc
+      ? { ...kyc, source: 'platform' as const }
+      : { status: 'NOT_STARTED' as const, source: 'platform' as const };
   }
 
   private assertPinFormat(pin: string) {

@@ -9,6 +9,8 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { KycAiService } from './kyc-ai.service';
+import { NotificationService } from '../email/notification.service';
+import { ReferralsService } from '../referrals/referrals.service';
 
 export const CHAIN_CONTRACT_MIN_USD = 2000;
 export const CHAIN_CONTRACT_TIER_CUTOFF_USD = 5000;
@@ -33,6 +35,8 @@ export class ChainEnrollmentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly kycAi: KycAiService,
+    private readonly notifications: NotificationService,
+    private readonly referrals: ReferralsService,
   ) {}
 
   async getEnrollment(userId: string) {
@@ -75,6 +79,53 @@ export class ChainEnrollmentService {
         existing.status === 'ACTIVE')
     ) {
       return this.toDto(existing);
+    }
+
+    const platformKyc = await this.prisma.kycVerification.findUnique({
+      where: { userId },
+      select: {
+        status: true,
+        documentType: true,
+        documentNumber: true,
+        documentFrontUrl: true,
+        documentBackUrl: true,
+        selfieUrl: true,
+        submittedAt: true,
+        reviewedAt: true,
+      },
+    });
+
+    // Already identity-verified via the unified KYC record — skip re-upload.
+    if (platformKyc?.status === 'APPROVED') {
+      const row = await this.prisma.chainContractEnrollment.upsert({
+        where: { userId },
+        create: {
+          userId,
+          status: 'APPROVED',
+          termsAcceptedAt: new Date(),
+          approvedAt: platformKyc.reviewedAt ?? new Date(),
+          kycSubmittedAt: platformKyc.submittedAt ?? new Date(),
+          documentType: platformKyc.documentType,
+          documentNumber: platformKyc.documentNumber,
+          documentFrontUrl: platformKyc.documentFrontUrl,
+          documentBackUrl: platformKyc.documentBackUrl,
+          livenessSelfieUrl: platformKyc.selfieUrl,
+          livenessPassedAt: platformKyc.reviewedAt ?? new Date(),
+          withdrawFeePercent: CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+        },
+        update: {
+          status: 'APPROVED',
+          termsAcceptedAt: new Date(),
+          approvedAt: platformKyc.reviewedAt ?? new Date(),
+          rejectionReason: null,
+          documentType: platformKyc.documentType,
+          documentNumber: platformKyc.documentNumber,
+          documentFrontUrl: platformKyc.documentFrontUrl,
+          documentBackUrl: platformKyc.documentBackUrl,
+          livenessSelfieUrl: platformKyc.selfieUrl,
+        },
+      });
+      return this.toDto(row);
     }
 
     const row = await this.prisma.chainContractEnrollment.upsert({
@@ -165,6 +216,7 @@ export class ChainEnrollmentService {
         rejectionReason: null,
       },
     });
+    await this.syncPlatformKyc(userId, row, 'PENDING');
     return this.toDto(row);
   }
 
@@ -206,6 +258,9 @@ export class ChainEnrollmentService {
         rejectionReason: null,
       },
     });
+    await this.syncPlatformKyc(userId, row, 'APPROVED');
+    this.notifications.kycApproved(userId);
+    await this.referrals.rewardForKyc(userId).catch(() => undefined);
     return this.toDto(row);
   }
 
@@ -224,6 +279,8 @@ export class ChainEnrollmentService {
         rejectionReason: reason.trim() || 'Rejected',
       },
     });
+    await this.syncPlatformKyc(userId, row, 'REJECTED');
+    this.notifications.kycRejected(userId, reason.trim() || 'Rejected');
     return this.toDto(row);
   }
 
@@ -275,6 +332,48 @@ export class ChainEnrollmentService {
       email: r.user.email,
       displayName: r.user.displayName,
     }));
+  }
+
+  /**
+   * Keep platform `KycVerification` in sync so payouts/loans/referrals use one
+   * identity record while chain enrollment remains the user-facing KYC flow.
+   */
+  private async syncPlatformKyc(
+    userId: string,
+    enrollment: {
+      documentType: KycDocumentType | null;
+      documentNumber: string | null;
+      documentFrontUrl: string | null;
+      documentBackUrl: string | null;
+      livenessSelfieUrl: string | null;
+      rejectionReason: string | null;
+      kycSubmittedAt: Date | null;
+      approvedAt: Date | null;
+    },
+    status: 'PENDING' | 'APPROVED' | 'REJECTED',
+  ) {
+    const data = {
+      status,
+      documentType: enrollment.documentType,
+      documentNumber: enrollment.documentNumber,
+      documentFrontUrl: enrollment.documentFrontUrl,
+      documentBackUrl: enrollment.documentBackUrl,
+      selfieUrl: enrollment.livenessSelfieUrl,
+      rejectionReason:
+        status === 'REJECTED' ? enrollment.rejectionReason : null,
+      submittedAt: enrollment.kycSubmittedAt ?? new Date(),
+      reviewedAt:
+        status === 'APPROVED' || status === 'REJECTED'
+          ? enrollment.approvedAt ?? new Date()
+          : null,
+      pendingUploadFilenames: [] as string[],
+    };
+
+    await this.prisma.kycVerification.upsert({
+      where: { userId },
+      create: { userId, ...data },
+      update: data,
+    });
   }
 
   private toDto(row: {
