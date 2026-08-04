@@ -44,8 +44,8 @@ function NavTab({
             ? cn(
                 "-mt-3 h-12 w-12 rounded-2xl shadow-lg",
                 active
-                  ? "bg-primary text-black shadow-primary/40"
-                  : "bg-primary/90 text-black shadow-primary/25",
+                  ? "bg-primary text-white shadow-primary/40"
+                  : "bg-primary/90 text-white shadow-primary/25",
               )
             : cn(
                 "h-8 w-8 rounded-xl",

@@ -38,7 +38,7 @@ export function Logo({
             "group-focus-within/sidebar:max-w-[11rem] group-focus-within/sidebar:opacity-100",
           )}
         >
-          Unik<span className="text-primary">Trades</span>
+          Unik<span className="text-accent">Trades</span>
         </span>
       </>
     );
@@ -48,7 +48,7 @@ export function Logo({
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-2 font-bold tracking-tight text-foreground",
+          "inline-flex items-center gap-2 font-bold tracking-tight text-primary",
           className,
         )}
       >
@@ -59,7 +59,7 @@ export function Logo({
           height={28}
           className="h-7 w-7 rounded-md object-contain"
         />
-        Unik<span className="text-primary">Trades</span>
+        Unik<span className="text-accent">Trades</span>
       </span>
     );
   }
@@ -69,9 +69,9 @@ export function Logo({
       <Image
         src="/uniktrades-logo.png"
         alt="UnikTrades"
-        width={180}
-        height={120}
-        className="h-9 w-auto object-contain sm:h-10"
+        width={320}
+        height={86}
+        className="h-8 w-auto max-w-[11rem] object-contain object-left sm:h-9 sm:max-w-[14rem]"
         priority
       />
     </span>

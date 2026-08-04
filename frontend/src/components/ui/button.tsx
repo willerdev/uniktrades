@@ -8,13 +8,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/25",
+        default: "bg-primary text-white hover:bg-primary/90 shadow-lg shadow-primary/25",
         secondary:
           "bg-foreground/5 text-foreground border border-[var(--color-border)] hover:bg-foreground/10",
         ghost: "text-muted hover:text-foreground hover:bg-foreground/5",
-        success: "bg-success text-black hover:bg-success/90",
+        success: "bg-accent text-white hover:bg-accent/90",
         danger: "bg-danger text-white hover:bg-danger/90",
-        gold: "bg-rank-gold text-black hover:bg-rank-gold/90",
+        gold: "bg-rank-gold text-white hover:bg-rank-gold/90",
       },
       size: {
         default: "h-10 px-5 py-2",

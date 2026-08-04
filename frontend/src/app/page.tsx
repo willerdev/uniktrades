@@ -43,13 +43,13 @@ function RisingMarketVisual() {
     >
       <defs>
         <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#00E676" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#00E676" stopOpacity="0.15" />
+          <stop offset="0%" stopColor="#16435B" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#16435B" stopOpacity="0.15" />
         </linearGradient>
         <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#00E676" stopOpacity="0" />
-          <stop offset="50%" stopColor="#00E676" stopOpacity="0.55" />
-          <stop offset="100%" stopColor="#E8E8E8" stopOpacity="0" />
+          <stop offset="0%" stopColor="#16435B" stopOpacity="0" />
+          <stop offset="50%" stopColor="#16435B" stopOpacity="0.55" />
+          <stop offset="100%" stopColor="#BF5511" stopOpacity="0" />
         </linearGradient>
       </defs>
 
@@ -84,7 +84,7 @@ function RisingMarketVisual() {
 
       <motion.polygon
         points="610,28 640,48 610,48"
-        fill="#00E676"
+        fill="#16435B"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.4, duration: 0.5 }}
@@ -159,7 +159,7 @@ export default function HomePage() {
             className="absolute inset-0 opacity-40"
             style={{
               background:
-                "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(0,230,118,0.18), transparent 60%), radial-gradient(ellipse 50% 40% at 80% 90%, rgba(232,232,232,0.06), transparent 55%)",
+                "radial-gradient(ellipse 70% 55% at 50% 0%, rgba(22,67,91,0.18), transparent 60%), radial-gradient(ellipse 50% 40% at 80% 90%, rgba(232,232,232,0.06), transparent 55%)",
             }}
           />
           <div
@@ -170,7 +170,7 @@ export default function HomePage() {
             }}
           />
           <motion.div
-            className="absolute -right-24 top-1/4 h-[28rem] w-[28rem] rounded-full bg-primary/10 blur-[100px]"
+            className="absolute -right-24 top-1/4 h-[28rem] w-[28rem] rounded-full bg-primary/15 blur-[100px]"
             animate={{ opacity: [0.35, 0.6, 0.35], scale: [1, 1.08, 1] }}
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           />
@@ -190,7 +190,7 @@ export default function HomePage() {
             <img
               src="/uniktrades-logo.png"
               alt="UnikTrades"
-              className="mx-auto h-[clamp(7rem,22vw,12rem)] w-auto max-w-[min(100%,36rem)] object-contain"
+              className="mx-auto h-[clamp(3.25rem,11vw,5.75rem)] w-auto max-w-[min(100%,42rem)] object-contain"
             />
           </motion.div>
 
@@ -351,7 +351,7 @@ export default function HomePage() {
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,230,118,0.16),transparent_65%)]"
+            className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(22,67,91,0.16),transparent_65%)]"
           />
           <div
             aria-hidden

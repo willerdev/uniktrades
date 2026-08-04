@@ -180,7 +180,7 @@ export function InvestScreen() {
               </Text>
             ) : (
               <Text style={{ color: theme.muted, marginTop: 8 }}>
-                VIP (~{formatUsdt(vipFee ?? 20)}/mo) ·{" "}
+                VIP (~{formatUsdt(vipFee ?? 50)}/mo) ·{" "}
                 {status?.vip?.benefits?.dailyYieldPercent ??
                   status?.vipDailyYieldPercent ??
                   10}

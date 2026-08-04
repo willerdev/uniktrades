@@ -1,4 +1,4 @@
-export const INVESTOR_VIP_FEE_USDT = 20;
+export const INVESTOR_VIP_FEE_USDT = 50;
 export const INVESTOR_VIP_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 export const INVESTOR_VIP_REMINDER_DAYS = 3;
 /** Default daily investment yield for active VIP (when no per-user override). */

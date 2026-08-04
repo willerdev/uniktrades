@@ -3,26 +3,28 @@
 @theme inline {
   --color-background: #FFFFFF;
   --color-foreground: #0A0A0A;
-  --color-muted: #71717A;
-  --color-border: rgba(10, 10, 10, 0.1);
+  --color-muted: #5C6B73;
+  --color-border: rgba(22, 67, 91, 0.14);
   --color-surface: rgba(255, 255, 255, 0.96);
-  --color-primary: #00C853;
-  --color-success: #00C853;
+  --color-primary: #16435B;
+  --color-accent: #BF5511;
+  --color-success: #16435B;
   --color-danger: #EF4444;
-  --color-rank-gold: #A0A0A8;
+  --color-rank-gold: #BF5511;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 html.dark {
-  --color-background: #050505;
-  --color-foreground: #F2F2F2;
-  --color-muted: #A8A8B0;
+  --color-background: #0B1520;
+  --color-foreground: #F5F7F8;
+  --color-muted: #A8B4BA;
   --color-border: rgba(255, 255, 255, 0.1);
-  --color-surface: rgba(18, 18, 18, 0.96);
-  --color-primary: #00E676;
-  --color-success: #00E676;
-  --color-rank-gold: #C0C0C8;
+  --color-surface: rgba(18, 32, 42, 0.96);
+  --color-primary: #2A6F8F;
+  --color-accent: #E06A1C;
+  --color-success: #2A6F8F;
+  --color-rank-gold: #E06A1C;
 }
 
 * {
@@ -67,7 +69,7 @@ body {
 
 /* Solid panels for dialogs — overrides .glass-card transparency */
 .modal-overlay {
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(11, 21, 32, 0.55);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -95,7 +97,7 @@ html.dark .modal-panel {
 }
 
 html.dark .mt5-shell {
-  --mt5-bg: #050505;
+  --mt5-bg: #0B1520;
   --mt5-surface: #121212;
   --mt5-row-hover: rgba(255, 255, 255, 0.05);
 }
@@ -103,8 +105,8 @@ html.dark .mt5-shell {
 /* Floating mobile bottom nav */
 .mobile-nav-dock {
   --nav-dock-bg: #ffffff;
-  --nav-dock-border: rgba(15, 23, 42, 0.08);
-  --nav-dock-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+  --nav-dock-border: rgba(22, 67, 91, 0.12);
+  --nav-dock-shadow: 0 8px 28px rgba(22, 67, 91, 0.12);
   --nav-dock-inactive: #64748b;
 }
 
@@ -130,14 +132,14 @@ html.dark .mobile-nav-dock {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #00C853 0%, #14D4A8 45%, #0A0A0A 100%);
+  background: linear-gradient(135deg, #16435B 0%, #BF5511 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 html.dark .text-gradient {
-  background: linear-gradient(135deg, #00E676 0%, #14D4A8 45%, #E8E8E8 100%);
+  background: linear-gradient(135deg, #2A6F8F 0%, #E06A1C 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

@@ -631,7 +631,7 @@ export function InvestHub() {
             <p className="mt-1 text-xs text-gray-400">
               {vip?.active
                 ? `Expires ${vip.expiresAt ? new Date(vip.expiresAt).toLocaleDateString() : "—"} · ${vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`
-                : `$${vip?.feeUsdt ?? 20}/month from wallet · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`}
+                : `$${vip?.feeUsdt ?? 50}/month from wallet · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`}
             </p>
             <ul className="mt-2 space-y-1 text-xs text-gray-400">
               <li>
@@ -648,16 +648,16 @@ export function InvestHub() {
           <Button
             type="button"
             size="sm"
-            disabled={vipLoading || walletBalance < (vip?.feeUsdt ?? 20)}
+            disabled={vipLoading || walletBalance < (vip?.feeUsdt ?? 50)}
             onClick={() => void upgradeVip()}
           >
             {vipLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            {vip?.active ? "Renew VIP" : "Upgrade — $20"}
+            {vip?.active ? "Renew VIP" : `Upgrade — $${vip?.feeUsdt ?? 50}`}
           </Button>
         </div>
-        {!vip?.active && walletBalance < (vip?.feeUsdt ?? 20) && (
+        {!vip?.active && walletBalance < (vip?.feeUsdt ?? 50) && (
           <p className="mt-2 text-xs text-gray-500">
-            Need {formatCurrency(vip?.feeUsdt ?? 20)} in wallet to upgrade.
+            Need {formatCurrency(vip?.feeUsdt ?? 50)} in wallet to upgrade.
           </p>
         )}
       </motion.div>

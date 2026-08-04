@@ -28,7 +28,7 @@ export function LanguageSwitcher({
         className={cn(
           "rounded-md px-2.5 py-1.5 transition-colors",
           locale === "fr"
-            ? "bg-primary text-black"
+            ? "bg-primary text-white"
             : "text-muted hover:text-foreground",
         )}
       >
@@ -40,7 +40,7 @@ export function LanguageSwitcher({
         className={cn(
           "rounded-md px-2.5 py-1.5 transition-colors",
           locale === "en"
-            ? "bg-primary text-black"
+            ? "bg-primary text-white"
             : "text-muted hover:text-foreground",
         )}
       >

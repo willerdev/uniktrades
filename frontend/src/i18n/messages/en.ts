@@ -95,7 +95,7 @@ export const en = {
       "New allocations only earn after funds have been invested for at least 24 hours. Daily credits post",
     vipTitle: "VIP upgrade",
     vipBody:
-      "VIP ($20/month) raises default daily yield to 10%, unlocks weekend earnings, and removes wallet withdrawal fees while active.",
+      "VIP ($50/month) raises default daily yield to 10%, unlocks weekend earnings, and removes wallet withdrawal fees while active.",
     minTitle: "Minimum $500",
     minBody:
       "From 27 July 2026, investments below $500 automatically stop earning. Top up on Invest to stay active.",
