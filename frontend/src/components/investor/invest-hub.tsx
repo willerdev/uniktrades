@@ -387,7 +387,7 @@ export function InvestHub() {
             </h2>
             <p className="mt-2 max-w-lg text-sm text-gray-400">
               Choose your investment size, pay the matching one-time subscription
-              fee, then earn {status?.dailyYieldPercent ?? 8}% daily on investment —
+              fee, then earn {status?.dailyYieldPercent ?? 5}% daily on investment —
               credited to wallet{" "}
               <DailyCreditTimeText
                 country={status?.displayCurrency?.derivedFromCountry}

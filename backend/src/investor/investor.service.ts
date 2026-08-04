@@ -180,7 +180,7 @@ export class InvestorService {
     const config = await this.prisma.platformConfig.findUnique({
       where: { id: 'default' },
     });
-    const platformDailyYield = Number(config?.investorDailyYieldPercent ?? 8);
+    const platformDailyYield = Number(config?.investorDailyYieldPercent ?? 5);
     const vipActive = isInvestorVipActive(user);
     const effectiveDailyYield = resolveInvestorDailyYieldPercent({
       vipActive,
@@ -1217,7 +1217,7 @@ export class InvestorService {
     const config = await this.prisma.platformConfig.findUnique({
       where: { id: 'default' },
     });
-    return Number(config?.investorDailyYieldPercent ?? 8);
+    return Number(config?.investorDailyYieldPercent ?? 5);
   }
 
   async isGlobalInvestorYieldPaused() {

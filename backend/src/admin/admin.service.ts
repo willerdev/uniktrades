@@ -1643,7 +1643,7 @@ export class AdminService {
       investmentMin: INVESTOR_INVESTMENT_MIN,
       investmentMax: INVESTOR_INVESTMENT_MAX,
       investorDailyYieldPercent: Number(
-        config?.investorDailyYieldPercent ?? 8,
+        config?.investorDailyYieldPercent ?? 5,
       ),
       investorYieldPaused: Boolean(config?.investorYieldPaused),
       investorMinBalanceEnforced: config?.investorMinBalanceEnforced !== false,
@@ -1863,7 +1863,7 @@ export class AdminService {
         await this.prisma.platformConfig.findUnique({
           where: { id: 'default' },
         })
-      )?.investorDailyYieldPercent ?? 8,
+      )?.investorDailyYieldPercent ?? 5,
     );
 
     const where = {
@@ -1974,7 +1974,7 @@ export class AdminService {
         await this.prisma.platformConfig.findUnique({
           where: { id: 'default' },
         })
-      )?.investorDailyYieldPercent ?? 8,
+      )?.investorDailyYieldPercent ?? 5,
     );
 
     return {

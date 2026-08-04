@@ -113,7 +113,7 @@ export class LoansService {
       where: { id: 'default' },
     });
     const platformInvestorYield = Number(
-      config?.investorDailyYieldPercent ?? 8,
+      config?.investorDailyYieldPercent ?? 5,
     );
     const unitrustYield = Number(config?.unitrustDailyYieldPercent ?? 5);
 
