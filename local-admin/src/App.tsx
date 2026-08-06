@@ -54,6 +54,7 @@ import { SmsPanel } from "./SmsPanel";
 import { ProductAgentPanel } from "./ProductAgentPanel";
 import { ComposeEmailPanel } from "./ComposeEmailPanel";
 import { AdminWalletPanel } from "./AdminWalletPanel";
+import { EnginePanel } from "./EnginePanel";
 
 function badgeClass(status: string) {
   return `badge ${status.toLowerCase()}`;
@@ -754,6 +755,8 @@ export default function App() {
         /* TransactionsPanel loads its own data */
       } else if (active === "wallet") {
         /* AdminWalletPanel is self-contained */
+      } else if (active === "engine") {
+        /* EnginePanel is self-contained */
       } else if (active === "messages") {
         const res = await api.messageThreads();
         setMessageThreads(res.items);
@@ -2254,6 +2257,8 @@ export default function App() {
             showSensitiveFinance={showSensitiveFinance}
           />
         )}
+
+        {tab === "engine" && <EnginePanel onMessage={setMessage} />}
 
         {tab === "messages" && (
           <>

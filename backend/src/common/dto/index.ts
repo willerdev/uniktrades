@@ -62,6 +62,28 @@ export class UpdateReferralSettingsDto {
   paidRewardUsdt?: number;
 }
 
+export class UpdateEngineSettingsDto {
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  contractPercent: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  tradingPercent: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  reservePercent: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  profitRevenuePercent: number;
+}
+
 export class SettleReferralDto {
   @IsOptional()
   @IsString()

@@ -144,6 +144,17 @@ export const api = {
     ),
 
   overview: () => request<Record<string, unknown>>("/admin/overview"),
+  engine: () => request<EngineAllocation>("/admin/engine"),
+  updateEngineSettings: (data: {
+    contractPercent: number;
+    tradingPercent: number;
+    reservePercent: number;
+    profitRevenuePercent: number;
+  }) =>
+    request<EngineAllocation>("/admin/engine/settings", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   livePresence: () => request<LivePresenceSnapshot>("/admin/presence/live"),
   paymentForecast: () => request<PaymentForecast>("/admin/payment-forecast"),
   users: (params?: {
@@ -1562,6 +1573,27 @@ export type ApprovePayoutResponse = {
   gatewayPayoutId?: string;
   message?: string;
   payout?: { status: string };
+};
+
+export type EngineAllocation = {
+  totalFundsUsdt: number;
+  asOf: string;
+  percents: {
+    contractPercent: number;
+    tradingPercent: number;
+    reservePercent: number;
+    profitRevenuePercent: number;
+  };
+  split: {
+    contractBudgetUsdt: number;
+    tradingFundsUsdt: number;
+    reserveFundsUsdt: number;
+  };
+  profit: {
+    dailyRevenueUsdt: number;
+    paidToUsersTodayUsdt: number;
+    profitFundsUsdt: number;
+  };
 };
 
 export type NowPaymentsWalletSummary = {

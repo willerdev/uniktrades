@@ -1048,6 +1048,12 @@ model PlatformConfig {
   walletWithdrawalFeeUsdt Decimal @default(3) @db.Decimal(10, 2)
   /// Set after the withdrawal schedule / early-exit policy email is broadcast once.
   withdrawalScheduleAnnouncedAt DateTime?
+  /// Capital allocation engine — Contract / Trading / Reserve must sum to 100.
+  engineContractPercent Decimal @default(40) @db.Decimal(5, 2)
+  engineTradingPercent  Decimal @default(40) @db.Decimal(5, 2)
+  engineReservePercent  Decimal @default(20) @db.Decimal(5, 2)
+  /// Daily revenue rate used for Profit Funds = (rate% × total) − paid today.
+  engineProfitRevenuePercent Decimal @default(10) @db.Decimal(5, 2)
 
   @@map("platform_config")
 }

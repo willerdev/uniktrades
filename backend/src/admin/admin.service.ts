@@ -172,6 +172,146 @@ export class AdminService {
     };
   }
 
+  /**
+   * Capital allocation engine: total platform wallets split by configurable %,
+   * plus daily profit = revenueRate% of total − paid to users today.
+   */
+  async getEngineAllocation() {
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+
+    const now = new Date();
+    const dayStart = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    );
+
+    const [walletAgg, paidTodayAgg, config] = await Promise.all([
+      this.prisma.platformWallet.aggregate({
+        _sum: {
+          availableBalance: true,
+          lockedBalance: true,
+          investorBalance: true,
+          unitrustBalance: true,
+        },
+      }),
+      this.prisma.payout.aggregate({
+        where: {
+          status: 'PAID',
+          OR: [
+            { processedAt: { gte: dayStart } },
+            { processedAt: null, requestedAt: { gte: dayStart } },
+          ],
+        },
+        _sum: { traderShare: true },
+      }),
+      this.prisma.platformConfig.findUnique({ where: { id: 'default' } }),
+    ]);
+
+    const contractPercent = Number(config?.engineContractPercent ?? 40);
+    const tradingPercent = Number(config?.engineTradingPercent ?? 40);
+    const reservePercent = Number(config?.engineReservePercent ?? 20);
+    const profitRevenuePercent = Number(
+      config?.engineProfitRevenuePercent ?? 10,
+    );
+
+    const totalFundsUsdt = round2(
+      Number(walletAgg._sum.availableBalance ?? 0) +
+        Number(walletAgg._sum.lockedBalance ?? 0) +
+        Number(walletAgg._sum.investorBalance ?? 0) +
+        Number(walletAgg._sum.unitrustBalance ?? 0),
+    );
+
+    const contractBudgetUsdt = round2(
+      (totalFundsUsdt * contractPercent) / 100,
+    );
+    const tradingFundsUsdt = round2((totalFundsUsdt * tradingPercent) / 100);
+    const reserveFundsUsdt = round2(
+      totalFundsUsdt - contractBudgetUsdt - tradingFundsUsdt,
+    );
+
+    const dailyRevenueUsdt = round2(
+      (totalFundsUsdt * profitRevenuePercent) / 100,
+    );
+    const paidToUsersTodayUsdt = round2(
+      Number(paidTodayAgg._sum.traderShare ?? 0),
+    );
+    const profitFundsUsdt = round2(
+      Math.max(0, dailyRevenueUsdt - paidToUsersTodayUsdt),
+    );
+
+    return {
+      totalFundsUsdt,
+      asOf: now.toISOString(),
+      percents: {
+        contractPercent,
+        tradingPercent,
+        reservePercent,
+        profitRevenuePercent,
+      },
+      split: {
+        contractBudgetUsdt,
+        tradingFundsUsdt,
+        reserveFundsUsdt,
+      },
+      profit: {
+        dailyRevenueUsdt,
+        paidToUsersTodayUsdt,
+        profitFundsUsdt,
+      },
+    };
+  }
+
+  async updateEngineSettings(dto: {
+    contractPercent: number;
+    tradingPercent: number;
+    reservePercent: number;
+    profitRevenuePercent: number;
+  }) {
+    const round2 = (n: number) => Math.round(n * 100) / 100;
+    const contractPercent = round2(Number(dto.contractPercent));
+    const tradingPercent = round2(Number(dto.tradingPercent));
+    const reservePercent = round2(Number(dto.reservePercent));
+    const profitRevenuePercent = round2(Number(dto.profitRevenuePercent));
+
+    for (const [label, value] of [
+      ['Contract', contractPercent],
+      ['Trading', tradingPercent],
+      ['Reserve', reservePercent],
+      ['Profit revenue', profitRevenuePercent],
+    ] as const) {
+      if (!Number.isFinite(value) || value < 0 || value > 100) {
+        throw new BadRequestException(
+          `${label} percent must be between 0 and 100`,
+        );
+      }
+    }
+
+    const sum = round2(contractPercent + tradingPercent + reservePercent);
+    if (Math.abs(sum - 100) > 0.05) {
+      throw new BadRequestException(
+        `Contract + Trading + Reserve must equal 100% (currently ${sum}%)`,
+      );
+    }
+
+    await this.prisma.platformConfig.upsert({
+      where: { id: 'default' },
+      create: {
+        id: 'default',
+        engineContractPercent: contractPercent,
+        engineTradingPercent: tradingPercent,
+        engineReservePercent: reservePercent,
+        engineProfitRevenuePercent: profitRevenuePercent,
+      },
+      update: {
+        engineContractPercent: contractPercent,
+        engineTradingPercent: tradingPercent,
+        engineReservePercent: reservePercent,
+        engineProfitRevenuePercent: profitRevenuePercent,
+      },
+    });
+
+    return this.getEngineAllocation();
+  }
+
   async getPaymentForecast() {
     const now = new Date();
     const projection = await this.getPaymentProjection();

@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AdminService } from './admin.service';
-import { CreatePromoCodeDto, BulkCreatePromoCodesDto, SendMessageDto, AdminRejectReasonDto, UpdateStaffPermissionsDto, ApprovePayoutDto } from '../common/dto';
+import { CreatePromoCodeDto, BulkCreatePromoCodesDto, SendMessageDto, AdminRejectReasonDto, UpdateStaffPermissionsDto, ApprovePayoutDto, UpdateEngineSettingsDto } from '../common/dto';
 import { JwtAuthGuard, AdminPermissionGuard } from '../auth/guards';
 import { RequireAdminPermission } from '../auth/decorators/admin-permission.decorator';
 import { UploadStorageService } from '../uploads/upload-storage.service';
@@ -43,6 +43,16 @@ export class AdminController {
   @Get('overview')
   getOverview() {
     return this.adminService.getOverview();
+  }
+
+  @Get('engine')
+  getEngineAllocation() {
+    return this.adminService.getEngineAllocation();
+  }
+
+  @Patch('engine/settings')
+  updateEngineSettings(@Body() dto: UpdateEngineSettingsDto) {
+    return this.adminService.updateEngineSettings(dto);
   }
 
   @Get('presence/live')
