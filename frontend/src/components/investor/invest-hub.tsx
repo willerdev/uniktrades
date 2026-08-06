@@ -227,21 +227,21 @@ export function InvestHub() {
   const [transferAmount, setTransferAmount] = useState("");
   const [transferLoading, setTransferLoading] = useState(false);
   const [reinvestLoading, setReinvestLoading] = useState(false);
-  const [investmentAmount, setInvestmentAmount] = useState("100");
+  const [investmentAmount, setInvestmentAmount] = useState("");
   const [vipLoading, setVipLoading] = useState(false);
 
   const investmentMin = status?.investmentMin ?? 100;
   const investmentMax = status?.investmentMax ?? 5000;
   const parsedInvestment = Number(investmentAmount);
+  const hasValidParsed =
+    investmentAmount.trim() !== "" && Number.isFinite(parsedInvestment);
   const feeUsdt =
-    (Number.isFinite(parsedInvestment)
-      ? resolveFeeClient(parsedInvestment)
-      : null) ?? 0;
+    (hasValidParsed ? resolveFeeClient(parsedInvestment) : null) ?? 0;
   const netInvested =
-    Number.isFinite(parsedInvestment) && parsedInvestment > feeUsdt
+    hasValidParsed && parsedInvestment > feeUsdt
       ? Math.round((parsedInvestment - feeUsdt) * 100) / 100
       : 0;
-  const depositDue = Number.isFinite(parsedInvestment) ? parsedInvestment : 0;
+  const depositDue = hasValidParsed ? parsedInvestment : 0;
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -550,21 +550,45 @@ export function InvestHub() {
                   min={investmentMin}
                   max={investmentMax}
                   step="1"
+                  placeholder={`Enter amount (min ${formatCurrency(investmentMin)})`}
                   value={investmentAmount}
                   onChange={(e) => setInvestmentAmount(e.target.value)}
                 />
                 <p className="mt-1.5 text-xs text-muted">
-                  Deposit{" "}
-                  <strong className="text-foreground">
-                    {formatCurrency(depositDue || 0)}
-                  </strong>
-                  {" — "}
-                  <strong className="text-emerald-700">$0 enrollment fee</strong>
-                  ,{" "}
-                  <strong className="text-foreground">
-                    {formatCurrency(netInvested || depositDue)}
-                  </strong>{" "}
-                  invested · earn {status?.dailyYieldPercent ?? 5}% daily
+                  {hasValidParsed ? (
+                    <>
+                      Deposit{" "}
+                      <strong className="text-foreground">
+                        {formatCurrency(depositDue)}
+                      </strong>
+                      {" — "}
+                      <strong className="text-emerald-700">
+                        $0 enrollment fee
+                      </strong>
+                      ,{" "}
+                      <strong className="text-foreground">
+                        {formatCurrency(netInvested || depositDue)}
+                      </strong>{" "}
+                      invested · earn {status?.dailyYieldPercent ?? 5}% daily
+                    </>
+                  ) : (
+                    <>
+                      Choose any amount from{" "}
+                      <strong className="text-foreground">
+                        {formatCurrency(investmentMin)}
+                      </strong>
+                      {" – "}
+                      <strong className="text-foreground">
+                        {formatCurrency(investmentMax)}
+                      </strong>
+                      {" · "}
+                      <strong className="text-emerald-700">
+                        $0 enrollment fee
+                      </strong>
+                      {" · earn "}
+                      {status?.dailyYieldPercent ?? 5}% daily
+                    </>
+                  )}
                 </p>
               </div>
               <PaymentSourceSelector
@@ -607,7 +631,9 @@ export function InvestHub() {
                 {payLoading && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {`Invest ${formatCurrency(depositDue || 0)}`}
+                {hasValidParsed
+                  ? `Invest ${formatCurrency(depositDue)}`
+                  : "Invest"}
               </Button>
             </div>
           )}
