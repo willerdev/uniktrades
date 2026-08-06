@@ -502,6 +502,15 @@ export class PaymentsService {
       `Weekly trading access — $${amount.toFixed(2)} USDT`,
       payment.id,
     );
+    if (amount > 0) {
+      await this.walletService.creditFeeProfitToAdmin({
+        feeAmount: amount,
+        sourceUserId: userId,
+        category: 'REGISTRATION_FEE',
+        label: 'Weekly trading access fee',
+        referenceId: payment.id,
+      });
+    }
 
     const result = await this.confirmRegistrationPayment(
       payment.id,

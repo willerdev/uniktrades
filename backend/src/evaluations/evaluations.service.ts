@@ -510,6 +510,15 @@ export class EvaluationsService {
       `Evaluation program — ${tier.evaluationSize} size`,
       payment.id,
     );
+    if (amount > 0) {
+      await this.walletService.creditFeeProfitToAdmin({
+        feeAmount: amount,
+        sourceUserId: userId,
+        category: 'EVALUATION_FEE',
+        label: `Evaluation enrollment — ${tier.evaluationSize} size`,
+        referenceId: payment.id,
+      });
+    }
 
     await this.confirmEnrollment(payment.id, { paymentSource: 'wallet' });
 

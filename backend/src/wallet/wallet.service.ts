@@ -648,19 +648,43 @@ export class WalletService {
   }
 
   /**
-   * Credit Smart Invest (or related) enrollment/invest fees to the admin
-   * platform wallet as FEE_PROFIT — not a user deposit.
+   * Credit a user-paid platform fee to the admin platform wallet as FEE_PROFIT
+   * (not a user deposit). Idempotent when `referenceId` is set.
    */
   async creditFeeProfitToAdmin(opts: {
     feeAmount: number;
     sourceUserId: string;
-    category?: 'INVESTMENT_FEE' | 'VIP_FEE';
+    category?:
+      | 'INVESTMENT_FEE'
+      | 'VIP_FEE'
+      | 'REGISTRATION_FEE'
+      | 'EVALUATION_FEE'
+      | 'WITHDRAWAL_FEE'
+      | 'WITHDRAWAL_PENALTY'
+      | 'AUTO_REINVEST_FEE'
+      | 'LOAN_INTEREST';
     label?: string;
     referenceId?: string;
     depositAmount?: number;
   }): Promise<{ adminUserId: string; balance: number } | null> {
     const feeAmount = Math.round(Number(opts.feeAmount) * 100) / 100;
     if (!Number.isFinite(feeAmount) || feeAmount <= 0) return null;
+
+    const referenceId =
+      opts.referenceId?.trim() ||
+      `fee_profit:${(opts.category ?? 'INVESTMENT_FEE').toLowerCase()}:${opts.sourceUserId}`;
+
+    const existing = await this.prisma.walletTransaction.findFirst({
+      where: { type: 'FEE_PROFIT', referenceId },
+      select: { id: true, userId: true, balanceAfter: true },
+    });
+    if (existing) {
+      return {
+        adminUserId: existing.userId,
+        balance:
+          existing.balanceAfter != null ? Number(existing.balanceAfter) : 0,
+      };
+    }
 
     const adminEmail = this.config.get<string>('ADMIN_EMAIL')?.trim();
     const admin = adminEmail
@@ -706,9 +730,6 @@ export class WalletService {
         ? ` · deposit $${Number(opts.depositAmount).toFixed(2)}`
         : '';
     const description = `[FEE_PROFIT/${category}] ${label} — $${feeAmount.toFixed(2)} USDT from ${sourceLabel}${depositNote}`;
-    const referenceId =
-      opts.referenceId?.trim() ||
-      `fee_profit:${category.toLowerCase()}:${opts.sourceUserId}`;
 
     const { balance } = await this.creditBalance(
       adminUser.id,
@@ -1848,6 +1869,25 @@ export class WalletService {
         },
       });
     });
+
+    if (processingFeeOnly > 0) {
+      await this.creditFeeProfitToAdmin({
+        feeAmount: processingFeeOnly,
+        sourceUserId: userId,
+        category: 'WITHDRAWAL_FEE',
+        label: 'Wallet withdrawal processing fee',
+        referenceId: `${payout.id}:processing`,
+      });
+    }
+    if (penaltyUsdt > 0) {
+      await this.creditFeeProfitToAdmin({
+        feeAmount: penaltyUsdt,
+        sourceUserId: userId,
+        category: 'WITHDRAWAL_PENALTY',
+        label: 'Off-schedule withdrawal penalty',
+        referenceId: `${payout.id}:penalty`,
+      });
+    }
 
     await this.recordLoanWithdraw(userId, grossAmount);
 

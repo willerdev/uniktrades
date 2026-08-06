@@ -131,7 +131,7 @@ enum WalletTxType {
   PROFIT_SHARE
   REFERRAL_REWARD
   INVESTOR_FEE
-  /** Platform/admin profit from enrollment or investment fees (credits admin wallet). */
+  /** Platform/admin profit from user-paid fees (credits admin wallet). */
   FEE_PROFIT
   DEPOSITOR_DEPOSIT
   DEPOSITOR_EARNING

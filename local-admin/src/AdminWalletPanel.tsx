@@ -260,7 +260,8 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
               {loading && !wallet ? "—" : adminBalanceLabel}
             </p>
             <p className="wallet-hero-sub">
-              Enrollment FEE_PROFIT and referral rewards for this admin account
+              Enrollment FEE_PROFIT, withdrawal fees, VIP, registration, and
+              referral rewards for this admin account
             </p>
 
             <div className="wallet-stat-row wallet-stat-row-2">

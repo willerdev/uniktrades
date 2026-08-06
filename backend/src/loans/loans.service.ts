@@ -312,6 +312,17 @@ export class LoansService {
       loan.id,
     );
 
+    const interestAmount = Number(loan.interestAmount);
+    if (interestAmount > 0) {
+      await this.wallet.creditFeeProfitToAdmin({
+        feeAmount: interestAmount,
+        sourceUserId: userId,
+        category: 'LOAN_INTEREST',
+        label: `Loan interest (${loan.term})`,
+        referenceId: `${loan.id}:interest`,
+      });
+    }
+
     const updated = await this.prisma.loan.update({
       where: { id: loanId },
       data: { status: 'REPAID', repaidAt: new Date() },

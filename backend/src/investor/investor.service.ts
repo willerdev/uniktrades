@@ -1417,6 +1417,16 @@ export class InvestorService {
 
         await this.prisma.$transaction(txOps);
 
+        if (feeAmount > 0) {
+          await this.walletService.creditFeeProfitToAdmin({
+            feeAmount,
+            sourceUserId: user.id,
+            category: 'AUTO_REINVEST_FEE',
+            label: `Auto-reinvest fee ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}%`,
+            referenceId: `auto_reinvest_fee:${user.id}:${today.toISOString().slice(0, 10)}`,
+          });
+        }
+
         this.notifications.investorDailyEarning(user.id, {
           amount: earningAmount,
           yieldPercent,
