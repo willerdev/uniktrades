@@ -132,7 +132,7 @@ export class NowPaymentsService {
         err instanceof Error ? err.message : 'Network request failed';
       this.logger.error(`NOWPayments network error ${path}: ${message}`);
       throw new NowPaymentsApiError(
-        'Could not reach NOWPayments — try again in a moment',
+        'Could not reach the payment provider — try again in a moment',
         503,
       );
     }
@@ -185,7 +185,7 @@ export class NowPaymentsService {
       }
     }
 
-    throw lastError ?? new NowPaymentsApiError('NOWPayments request failed', 429);
+    throw lastError ?? new NowPaymentsApiError('Payment request failed', 429);
   }
 
   private normalizeAmount(amount: number): number {
@@ -360,7 +360,7 @@ export class NowPaymentsService {
 
     if (!email || !password) {
       throw new Error(
-        'NOWPayments payout credentials not configured — set NOWPAYMENTS_PAYOUT_EMAIL and NOWPAYMENTS_PAYOUT_PASSWORD on the API server (your NOWPayments account login), then restart',
+        'Payout credentials not configured — set payout email and password on the API server, then restart',
       );
     }
 

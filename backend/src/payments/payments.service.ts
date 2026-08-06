@@ -73,7 +73,7 @@ export class PaymentsService {
     const url = `${base}/api/v1/payments/ipn`;
     if (process.env.NODE_ENV === 'production' && !isPublicHttpsUrl(url)) {
       this.logger.warn(
-        `NOWPayments IPN URL is not public HTTPS (${url}). Set API_PUBLIC_URL on Render.`,
+        `Payment callback URL is not public HTTPS (${url}). Set API_PUBLIC_URL on Render.`,
       );
       return undefined;
     }
@@ -108,7 +108,7 @@ export class PaymentsService {
           gatewayId: String(npPayment.payment_id),
           gatewayResponse: {
             ...(npPayment as object),
-            gateway: 'NOWPayments',
+            gateway: 'Crypto',
             ...(input.promoMeta ?? {}),
           } as object,
           payAddress: npPayment.pay_address,
@@ -128,7 +128,7 @@ export class PaymentsService {
 
       if (err instanceof NowPaymentsApiError) {
         throw new BadRequestException(
-          err.message || 'NOWPayments could not create this payment',
+          err.message || 'Payment provider could not create this payment',
         );
       }
       throw err;
@@ -193,7 +193,7 @@ export class PaymentsService {
         typeof stored.payment_status === 'string'
           ? stored.payment_status
           : 'waiting',
-      gateway: 'NOWPayments',
+      gateway: 'Crypto',
       orderId: payment.id,
     };
   }
@@ -407,8 +407,8 @@ export class PaymentsService {
         amount,
         currency: 'USDT',
         network,
-        gateway: 'NOWPayments',
-        message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
+        gateway: 'Crypto',
+        message: 'Crypto payments are not configured on this server',
       };
     }
 
@@ -697,7 +697,7 @@ export class PaymentsService {
         network,
         purpose,
         plan,
-        message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
+        message: 'Crypto payments are not configured on this server',
       };
     }
 
@@ -718,7 +718,7 @@ export class PaymentsService {
         gatewayId: String(npPayment.payment_id),
         gatewayResponse: {
           ...(npPayment as object),
-          gateway: 'NOWPayments',
+          gateway: 'Crypto',
         } as object,
         payAddress: npPayment.pay_address,
         payAmount: npPayment.pay_amount,
@@ -737,7 +737,7 @@ export class PaymentsService {
       payAddress: npPayment.pay_address,
       gatewayPaymentId: npPayment.payment_id,
       liveStatus: npPayment.payment_status,
-      gateway: 'NOWPayments',
+      gateway: 'Crypto',
       orderId: payment.id,
     };
   }
@@ -778,7 +778,7 @@ export class PaymentsService {
         currency: 'USDT',
         network,
         purpose,
-        message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
+        message: 'Crypto payments are not configured on this server',
       };
     }
 
@@ -796,7 +796,7 @@ export class PaymentsService {
         gatewayId: String(npPayment.payment_id),
         gatewayResponse: {
           ...(npPayment as object),
-          gateway: 'NOWPayments',
+          gateway: 'Crypto',
         } as object,
         payAddress: npPayment.pay_address,
         payAmount: npPayment.pay_amount,
@@ -814,7 +814,7 @@ export class PaymentsService {
       payAddress: npPayment.pay_address,
       gatewayPaymentId: npPayment.payment_id,
       liveStatus: npPayment.payment_status,
-      gateway: 'NOWPayments',
+      gateway: 'Crypto',
       orderId: payment.id,
     };
   }
@@ -1129,7 +1129,7 @@ export class PaymentsService {
         currency: 'USDT',
         network,
         purpose,
-        message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
+        message: 'Crypto payments are not configured on this server',
       };
     }
 
@@ -1147,7 +1147,7 @@ export class PaymentsService {
         gatewayId: String(npPayment.payment_id),
         gatewayResponse: {
           ...(npPayment as object),
-          gateway: 'NOWPayments',
+          gateway: 'Crypto',
         } as object,
         payAddress: npPayment.pay_address,
         payAmount: npPayment.pay_amount,
@@ -1165,7 +1165,7 @@ export class PaymentsService {
       payAddress: npPayment.pay_address,
       gatewayPaymentId: npPayment.payment_id,
       liveStatus: npPayment.payment_status,
-      gateway: 'NOWPayments',
+      gateway: 'Crypto',
       orderId: payment.id,
     };
   }

@@ -414,7 +414,7 @@ export class EvaluationsService {
           gatewayId: String(npPayment.payment_id),
           gatewayResponse: {
             ...(npPayment as object),
-            gateway: 'NOWPayments',
+            gateway: 'Crypto',
           } as object,
           payAddress: npPayment.pay_address,
           payAmount: npPayment.pay_amount,
@@ -433,7 +433,7 @@ export class EvaluationsService {
         payAddress: npPayment.pay_address,
         gatewayPaymentId: npPayment.payment_id,
         liveStatus: npPayment.payment_status,
-        gateway: 'NOWPayments',
+        gateway: 'Crypto',
         orderId: payment.id,
         planId: tier.id,
         evaluationSize: tier.evaluationSize,

@@ -82,7 +82,7 @@ export class CustodyDepositService {
       return {
         configured: false,
         payoutConfigured: false,
-        message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
+        message: 'Crypto payments are not configured on this server',
         /** UnikTrades platform ledger (starts at 0). */
         usdtBalance: ledger.available,
         platformUsdtBalance: ledger.available,
@@ -98,9 +98,9 @@ export class CustodyDepositService {
 
     const payoutStatus = this.nowPayments.getPayoutConfigStatus();
     const missing: string[] = [];
-    if (!payoutStatus.payoutEmailSet) missing.push('NOWPAYMENTS_PAYOUT_EMAIL');
+    if (!payoutStatus.payoutEmailSet) missing.push('payout email');
     if (!payoutStatus.payoutPasswordSet) {
-      missing.push('NOWPAYMENTS_PAYOUT_PASSWORD');
+      missing.push('payout password');
     }
 
     const [balances, pendingAgg] = await Promise.all([
@@ -126,7 +126,7 @@ export class CustodyDepositService {
       message: payoutStatus.payoutConfigured
         ? undefined
         : `Wallet withdrawals need ${missing.join(' and ')} on the API service. Set them, then redeploy.`,
-      /** Shown in admin — UnikTrades deposits − withdrawals (not shared NOWPayments account). */
+      /** Shown in admin — UnikTrades deposits − withdrawals. */
       usdtBalance: ledger.available,
       platformUsdtBalance: ledger.available,
       gatewayUsdtBalance,
@@ -158,7 +158,7 @@ export class CustodyDepositService {
         amount,
         network: deposit.network,
         configured: false,
-        message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
+        message: 'Crypto payments are not configured on this server',
       };
     }
 
@@ -177,7 +177,7 @@ export class CustodyDepositService {
         gatewayId: String(npPayment.payment_id),
         gatewayResponse: {
           ...(npPayment as object),
-          gateway: 'NOWPayments',
+          gateway: 'Crypto',
         } as object,
         payAddress: npPayment.pay_address,
         payAmount: npPayment.pay_amount,
@@ -196,7 +196,7 @@ export class CustodyDepositService {
       invoiceUrl: npPayment.invoice_url,
       configured: true,
       message:
-        'Send the exact pay amount to the address below. Funds credit your NOWPayments custody balance for trader payouts.',
+        'Send the exact pay amount to the address below. Funds credit your UnikTrades custody balance for trader payouts.',
     };
   }
 
@@ -531,13 +531,13 @@ export class CustodyDepositService {
       throw new BadRequestException('Enter a valid destination wallet address');
     }
     if (!this.nowPayments.isConfigured) {
-      throw new BadRequestException('NOWPayments is not configured');
+      throw new BadRequestException('Crypto payments are not configured');
     }
     const payoutStatus = this.nowPayments.getPayoutConfigStatus();
     if (!payoutStatus.payoutConfigured) {
       const missing = [
-        !payoutStatus.payoutEmailSet ? 'NOWPAYMENTS_PAYOUT_EMAIL' : null,
-        !payoutStatus.payoutPasswordSet ? 'NOWPAYMENTS_PAYOUT_PASSWORD' : null,
+        !payoutStatus.payoutEmailSet ? 'payout email' : null,
+        !payoutStatus.payoutPasswordSet ? 'payout password' : null,
       ].filter(Boolean);
       throw new BadRequestException(
         `Wallet withdrawals need ${missing.join(' and ')} on the API service.`,
@@ -552,7 +552,7 @@ export class CustodyDepositService {
     }
     if (amount > summary.gatewayUsdtBalance) {
       throw new BadRequestException(
-        `Insufficient NOWPayments gateway balance (available $${summary.gatewayUsdtBalance.toFixed(2)} USDT)`,
+        `Insufficient gateway balance (available $${summary.gatewayUsdtBalance.toFixed(2)} USDT)`,
       );
     }
 
@@ -567,7 +567,7 @@ export class CustodyDepositService {
       });
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'NOWPayments payout failed';
+        err instanceof Error ? err.message : 'Payout failed';
       throw new BadRequestException(
         `Could not queue withdrawal: ${message}`,
       );
@@ -593,7 +593,7 @@ export class CustodyDepositService {
       network: row.network,
       needsVerification: true,
       message:
-        'Withdrawal queued. Enter the 2FA / email verification code from NOWPayments to confirm.',
+        'Withdrawal queued. Enter the verification code from your email to confirm.',
     };
   }
 

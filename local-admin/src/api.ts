@@ -1573,7 +1573,7 @@ export type NowPaymentsWalletSummary = {
   /** UnikTrades platform ledger (deposits − withdrawals). */
   usdtBalance: number;
   platformUsdtBalance?: number;
-  /** Shared NOWPayments account balance (may include other apps). */
+  /** Shared payment-gateway account balance (may include other apps). */
   gatewayUsdtBalance?: number;
   depositedTotal?: number;
   withdrawnTotal?: number;

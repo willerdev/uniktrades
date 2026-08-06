@@ -841,7 +841,7 @@ export class WalletService {
         payAddress: npPayment.pay_address,
         gatewayPaymentId: npPayment.payment_id,
         liveStatus: npPayment.payment_status,
-        gateway: 'NOWPayments',
+        gateway: 'Crypto',
         orderId: payment.id,
       };
     } catch (err) {

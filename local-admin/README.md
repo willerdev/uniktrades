@@ -93,4 +93,4 @@ On the **API** service, set `FRONTEND_URL` / `PUBLIC_APP_URL` / `API_PUBLIC_URL`
 
 ## Wallet tab
 
-Full admins see a custody wallet (NOWPayments balance) with **Deposit** and **Withdraw**. This funds platform payouts — it does not credit user wallets.
+Full admins see a custody wallet with **Deposit** and **Withdraw**. This funds platform payouts — it does not credit user wallets.

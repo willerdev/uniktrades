@@ -591,20 +591,20 @@ export class PayoutService {
 
     if (!this.nowPayments.isConfigured) {
       throw new BadRequestException(
-        'NOWPayments is not configured — set NOWPAYMENTS_API_KEY before approving wallet withdrawals',
+        'Crypto payouts are not configured — set the payment API key before approving wallet withdrawals',
       );
     }
 
     if (!this.nowPayments.isPayoutConfigured) {
       const status = this.nowPayments.getPayoutConfigStatus();
       const missing = [
-        !status.payoutEmailSet ? 'NOWPAYMENTS_PAYOUT_EMAIL' : null,
-        !status.payoutPasswordSet ? 'NOWPAYMENTS_PAYOUT_PASSWORD' : null,
+        !status.payoutEmailSet ? 'payout email' : null,
+        !status.payoutPasswordSet ? 'payout password' : null,
       ].filter(Boolean);
       throw new BadRequestException(
-        `NOWPayments payout login is not configured on traders-api — set ${missing.join(
+        `Payout login is not configured on the API — set ${missing.join(
           ' and ',
-        )} on the Render backend service (not the frontend), then Manual Deploy / restart`,
+        )} on the backend service, then redeploy / restart`,
       );
     }
 
@@ -619,12 +619,12 @@ export class PayoutService {
       });
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'NOWPayments payout failed';
+        err instanceof Error ? err.message : 'Payout failed';
       this.logger.error(
-        `NOWPayments payout failed for ${payout.id}: ${message}`,
+        `Gateway payout failed for ${payout.id}: ${message}`,
       );
       throw new BadRequestException(
-        `Could not queue payout on NOWPayments: ${message}`,
+        `Could not queue payout: ${message}`,
       );
     }
 
@@ -633,7 +633,7 @@ export class PayoutService {
       data: {
         gatewayPayoutId: result.id,
         status: 'APPROVED',
-        notes: `${payout.notes ?? ''} — NOWPayments batch ${result.id} (admin ${adminId})`.trim(),
+        notes: `${payout.notes ?? ''} — payout batch ${result.id} (admin ${adminId})`.trim(),
       },
     });
 
@@ -650,7 +650,7 @@ export class PayoutService {
       gatewayPayoutId: result.id,
       creditedToWallet: false,
       message:
-        'Payout queued on NOWPayments — funds will be sent to the destination wallet shortly.',
+        'Payout queued — funds will be sent to the destination wallet shortly.',
     };
   }
 
@@ -661,7 +661,7 @@ export class PayoutService {
   ) {
     const code = verificationCode?.trim();
     if (!code) {
-      throw new BadRequestException('NOWPayments 2FA verification code is required');
+      throw new BadRequestException('Verification code is required');
     }
 
     const payout = await this.prisma.payout.findUnique({
@@ -670,7 +670,7 @@ export class PayoutService {
     if (!payout) throw new NotFoundException('Payout not found');
     if (!payout.gatewayPayoutId) {
       throw new BadRequestException(
-        'This payout has no pending NOWPayments batch — approve it first',
+        'This payout has no pending gateway batch — approve it first',
       );
     }
 
@@ -686,7 +686,7 @@ export class PayoutService {
     return {
       payout: updated,
       message:
-        'Payout verified. NOWPayments will send USDT to the trader wallet shortly.',
+        'Payout verified. USDT will be sent to the trader wallet shortly.',
     };
   }
 

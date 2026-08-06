@@ -2704,7 +2704,7 @@ export class NotificationService {
 
     const html = this.email.layout(
       'Wallet withdrawal pending approval',
-      `<p>A user requested a platform wallet withdrawal. Approve it in the admin hub to send via NOWPayments (VIP users can also ask the AI after 30 minutes).</p>
+      `<p>A user requested a platform wallet withdrawal. Approve it in the admin hub to send USDT (VIP users can also ask the AI after 30 minutes).</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         <tr><td style="padding:6px 0;color:#94a3b8;">User</td><td style="padding:6px 0;"><strong>${userLine}</strong></td></tr>
         <tr><td style="padding:6px 0;color:#94a3b8;">Amount</td><td style="padding:6px 0;"><strong>$${data.amount.toFixed(2)} USDT</strong></td></tr>

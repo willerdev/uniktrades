@@ -1092,7 +1092,7 @@ export class AdminService {
           /nowpayments/i.test(rawGateway) ||
           ['TRC20', 'ERC20', 'BEP20', 'SOL'].includes(networkUpper)
         ) {
-          return 'NOWPayments';
+          return 'Crypto';
         }
         return rawGateway;
       })();

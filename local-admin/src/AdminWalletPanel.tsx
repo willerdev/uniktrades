@@ -6,7 +6,7 @@ import {
   type CustodyWithdrawRow,
   type NowPaymentsWalletSummary,
 } from "./api";
-import { STATIC_NOWPAYMENTS_BALANCE_LABEL } from "./Sidebar";
+import { STATIC_CUSTODY_BALANCE_LABEL } from "./Sidebar";
 
 function fmtMoney(n: number | string | null | undefined) {
   const v = Number(n);
@@ -75,7 +75,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
 
   const balanceLabel = showSensitiveFinance
     ? fmtMoney(platformBalance)
-    : STATIC_NOWPAYMENTS_BALANCE_LABEL;
+    : STATIC_CUSTODY_BALANCE_LABEL;
 
   const activity = useMemo<ActivityItem[]>(() => {
     const items: ActivityItem[] = [
@@ -139,7 +139,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
 
   async function submitVerify() {
     if (!pendingPayoutId || !verifyCode.trim()) {
-      onMessage("Enter the NOWPayments verification code");
+      onMessage("Enter the verification code");
       return;
     }
     setBusy(true);
@@ -184,7 +184,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
       <section className="wallet-app">
         <div className="wallet-hero">
           <p className="wallet-hero-label">Available balance</p>
-          <p className="wallet-hero-balance">{STATIC_NOWPAYMENTS_BALANCE_LABEL}</p>
+          <p className="wallet-hero-balance">{STATIC_CUSTODY_BALANCE_LABEL}</p>
           <p className="wallet-hero-sub muted">
             Sensitive wallet controls are hidden for this admin account.
           </p>
@@ -230,7 +230,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
             </p>
             <p className="wallet-hero-sub">
               {wallet?.configured === false
-                ? (wallet.message ?? "NOWPayments not configured")
+                ? (wallet.message ?? "Crypto payouts not configured")
                 : "Deposits and withdrawals on UnikTrades only"}
             </p>
 
@@ -244,7 +244,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
                 <strong>{fmtMoney(wallet?.withdrawnTotal ?? 0)}</strong>
               </div>
               <div className="wallet-stat">
-                <span>Gateway (NOWPayments)</span>
+                <span>Gateway balance</span>
                 <strong>{fmtMoney(wallet?.gatewayUsdtBalance ?? 0)}</strong>
               </div>
             </div>
@@ -419,8 +419,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
               {sheet === "withdraw" && pendingPayoutId && (
                 <>
                   <p className="muted">
-                    Confirm with the code NOWPayments emailed / showed for this
-                    payout.
+                    Confirm with the verification code emailed for this payout.
                   </p>
                   <label className="wallet-field">
                     <span>Verification code</span>

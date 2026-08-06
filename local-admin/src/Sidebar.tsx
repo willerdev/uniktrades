@@ -59,7 +59,7 @@ export type AdminPermissions = {
   tpClaim: boolean;
   setup: boolean;
   managePermissions: boolean;
-  /** When false, hide credit wallet / whitelist / real NOWPayments balance / yield save. */
+  /** When false, hide credit wallet / whitelist / real custody balance / yield save. */
   sensitiveFinance?: boolean;
 };
 
@@ -72,7 +72,9 @@ export const RESTRICTED_FINANCE_ADMIN_EMAILS = [
   "viewer@traderrank.pro",
 ] as const;
 
-export const STATIC_NOWPAYMENTS_BALANCE_LABEL = "21,500 Usdt";
+export const STATIC_CUSTODY_BALANCE_LABEL = "21,500 Usdt";
+/** @deprecated Use STATIC_CUSTODY_BALANCE_LABEL */
+export const STATIC_NOWPAYMENTS_BALANCE_LABEL = STATIC_CUSTODY_BALANCE_LABEL;
 
 export function canSeeSensitiveFinance(opts: {
   email?: string | null;

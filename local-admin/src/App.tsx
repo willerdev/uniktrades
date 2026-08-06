@@ -43,7 +43,7 @@ import {
   resolveTabForPermissions,
   staffRoleSummary,
   canSeeSensitiveFinance,
-  STATIC_NOWPAYMENTS_BALANCE_LABEL,
+  STATIC_CUSTODY_BALANCE_LABEL,
   type AdminPermissions,
 } from "./Sidebar";
 import { UserDetailModal } from "./UserDetailModal";
@@ -958,7 +958,7 @@ export default function App() {
         const watched = res.items.find((d) => d.id === watchingDepositId);
         if (watched?.status === "CONFIRMED") {
           setMessage(
-            `Custody deposit confirmed — ${fmtMoney(watched.amount)} added to NOWPayments balance.`,
+            `Custody deposit confirmed — ${fmtMoney(watched.amount)} added to platform balance.`,
           );
           setWatchingDepositId(null);
           setActiveDeposit(null);
@@ -1417,7 +1417,7 @@ export default function App() {
       if (res.verificationRequired) {
         setMessage(
           res.message ??
-            "Payout queued on NOWPayments — enter the 2FA code to release funds.",
+            "Payout queued — enter the verification code to release funds.",
         );
         setVerifyPayoutId(payout.id);
         setVerifyCode("");
@@ -3355,7 +3355,7 @@ export default function App() {
             </div>
 
             <div className="kyc-card" style={{ marginBottom: "1rem" }}>
-              <h3 style={{ margin: "0 0 0.5rem" }}>NOWPayments custody wallet</h3>
+              <h3 style={{ margin: "0 0 0.5rem" }}>Custody wallet</h3>
               {npWallet ? (
                 <>
                   <p>
@@ -3363,7 +3363,7 @@ export default function App() {
                     <strong>
                       {showSensitiveFinance
                         ? fmtMoney(npWallet.usdtBalance)
-                        : STATIC_NOWPAYMENTS_BALANCE_LABEL}
+                        : STATIC_CUSTODY_BALANCE_LABEL}
                     </strong>
                     {showSensitiveFinance &&
                       npWallet.pendingCryptoPayoutCount > 0 && (
@@ -3381,7 +3381,7 @@ export default function App() {
                   {npWallet.configured && npWallet.payoutConfigured === false && (
                     <p className="message error" style={{ marginTop: "0.5rem" }}>
                       {npWallet.message ??
-                        "Set NOWPAYMENTS_PAYOUT_EMAIL and NOWPAYMENTS_PAYOUT_PASSWORD on traders-api (backend), then restart."}
+                        "Set payout email and password on the API service, then restart."}
                       <br />
                       <span className="muted">
                         Detected: email{" "}
@@ -3487,7 +3487,7 @@ export default function App() {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        Open NOWPayments invoice
+                        Open payment invoice
                       </a>
                     </p>
                   )}
@@ -3526,7 +3526,7 @@ export default function App() {
                         setDepositSyncLoading(true);
                         void refreshCustodyDeposits(true)
                           .then(() => api.nowPaymentsWallet().then(setNpWallet))
-                          .then(() => setMessage("Deposits synced with NOWPayments and blockchain."))
+                          .then(() => setMessage("Deposits synced with payment gateway and blockchain."))
                           .catch((err: Error) => setMessage(err.message))
                           .finally(() => setDepositSyncLoading(false));
                       }}
@@ -3759,9 +3759,9 @@ export default function App() {
             {verifyPayoutId && (
               <div className="modal-backdrop" role="dialog" aria-modal="true">
                 <div className="modal">
-                  <h3>NOWPayments 2FA verification</h3>
+                  <h3>Payout verification</h3>
                   <p className="muted">
-                    Enter the verification code sent to your NOWPayments payout account
+                    Enter the verification code sent to your payout account
                     email to release this payout.
                   </p>
                   <input
@@ -6859,8 +6859,8 @@ export default function App() {
             <p className="muted">
               {payoutNeedsDestination(approvePayoutModal)
                 ? approvePayoutExternal
-                  ? "Marks this withdrawal PAID without sending via NOWPayments. Use only after you already paid the destination yourself. The user gets the normal approved email."
-                  : "This will send USDT from NOWPayments to the user's saved payout destination."
+                  ? "Marks this withdrawal PAID without sending via the payment gateway. Use only after you already paid the destination yourself. The user gets the normal approved email."
+                  : "This will send USDT from the custody wallet to the user's saved payout destination."
                 : approvePayoutModal.source === "TP_REWARD" &&
                     approvePayoutModal.tpClaim?.status === "PENDING_REVIEW"
                   ? "This verifies the TP claim screenshots and credits the reward to the platform wallet."
@@ -6884,7 +6884,7 @@ export default function App() {
                   style={{ marginTop: "0.2rem" }}
                 />
                 <span>
-                  Already paid externally (skip NOWPayments — marks PAID)
+                  Already paid externally (skip gateway send — marks PAID)
                 </span>
               </label>
             )}
@@ -6906,15 +6906,15 @@ export default function App() {
                 {payoutNeedsDestination(approvePayoutModal) &&
                 !approvePayoutExternal &&
                 npWallet?.payoutConfigured === false
-                  ? ` NOWPayments payout login missing on traders-api${
+                  ? ` Payout login missing on the API service${
                       npWallet.payoutEmailSet === false
-                        ? " (NOWPAYMENTS_PAYOUT_EMAIL)"
+                        ? " (payout email)"
                         : ""
                     }${
                       npWallet.payoutPasswordSet === false
-                        ? " (NOWPAYMENTS_PAYOUT_PASSWORD)"
+                        ? " (payout password)"
                         : ""
-                    }. Set on the backend service, then redeploy — or check “Already paid externally”.`
+                    }. Configure the backend, then redeploy — or check “Already paid externally”.`
                   : ""}
               </p>
             )}
