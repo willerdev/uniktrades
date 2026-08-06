@@ -45,7 +45,7 @@ export class MarketingController {
   @Post('test-email')
   sendTestEmail(@Body() dto: MarketingTestEmailDto) {
     return this.marketingService.sendTestEmail(
-      dto.email?.trim() || 'willeratmit12@gmail.com',
+      dto.email?.trim() || 'ntakrium@gmail.com',
     );
   }
 

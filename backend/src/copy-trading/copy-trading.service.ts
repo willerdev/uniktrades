@@ -26,7 +26,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ProfitShareService } from '../profit-share/profit-share.service';
 import { CopyTradeRiskService } from './copy-trade-risk.service';
 
-const DEFAULT_COPY_NOTIFY_EMAIL = 'willeratmit12@gmail.com';
+const DEFAULT_COPY_NOTIFY_EMAIL = 'ntakrium@gmail.com';
 
 export type CopyMirrorInput = {
   signalDbId: string;

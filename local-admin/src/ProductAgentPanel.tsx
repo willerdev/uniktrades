@@ -206,8 +206,9 @@ export function ProductAgentPanel() {
         >
           <strong style={{ color: "#fbbf24" }}>Email not configured</strong>
           <p className="muted" style={{ margin: "0.4rem 0 0" }}>
-            Plans still appear below. Sending needs RESEND_API_KEY on the API.
-            From: {overview?.emailFrom ?? "—"}
+            Plans still appear below. Set <code>RESEND_API_KEY</code> on the{" "}
+            <strong>uniktrades-api</strong> Render service (redeploy after). From:{" "}
+            {overview?.emailFrom ?? "—"}
           </p>
         </div>
       )}

@@ -531,7 +531,7 @@ export default function App() {
   >("unpaid_registration");
   const [marketingRunLoading, setMarketingRunLoading] = useState(false);
   const [marketingTestLoading, setMarketingTestLoading] = useState(false);
-  const [marketingTestEmail, setMarketingTestEmail] = useState("willeratmit12@gmail.com");
+  const [marketingTestEmail, setMarketingTestEmail] = useState("ntakrium@gmail.com");
   const [referralSettings, setReferralSettings] =
     useState<ReferralSettings | null>(null);
   const [referrers, setReferrers] = useState<ReferrerRow[]>([]);
@@ -672,7 +672,7 @@ export default function App() {
           setCopyRiskAmount(
             String(fast.copyRiskPercent ?? fast.riskPercent ?? 5),
           );
-          setCopyNotifyEmail(fast.copyNotifyEmail ?? "willeratmit12@gmail.com");
+          setCopyNotifyEmail(fast.copyNotifyEmail ?? "ntakrium@gmail.com");
         setCopyUseTwoToOneRr(fast.copyUseTwoToOneRr ?? true);
         setCopyAutoBreakeven(fast.copyAutoBreakevenEnabled ?? true);
         setCopyEmailAlerts(fast.copyEmailAlertsEnabled ?? true);
@@ -3425,8 +3425,8 @@ export default function App() {
                         Detected: email{" "}
                         {npWallet.payoutEmailSet ? "set" : "missing"} · password{" "}
                         {npWallet.payoutPasswordSet ? "set" : "missing"}. These
-                        must be on the API service (traders-c53s / traders-api),
-                        not traders-web.
+                        must be on the API service (uniktrades-api),
+                        not the frontend web service.
                       </span>
                     </p>
                   )}
@@ -4937,10 +4937,12 @@ export default function App() {
                       {marketingSchedule.apiServer
                         ? `Connected to ${marketingSchedule.apiServer}. `
                         : ""}
-                      Add <code>RESEND_API_KEY</code> to that backend service, or point local admin
-                      at production: set{" "}
-                      <code>VITE_PROXY_TARGET=https://traders-c53s.onrender.com</code> in{" "}
-                      <code>local-admin/.env</code> and restart <code>npm run dev</code>.
+                      Add <code>RESEND_API_KEY</code> (and optionally <code>EMAIL_FROM</code>) on the{" "}
+                      <strong>uniktrades-api</strong> Render service, then redeploy. For local
+                      admin against a working API: set{" "}
+                      <code>VITE_PROXY_TARGET=https://uniktrades-api.onrender.com</code> in{" "}
+                      <code>local-admin/.env</code> and restart <code>npm run dev</code> — deploy
+                      alone will not fix this without the secret.
                     </p>
                   </div>
                 ) : (

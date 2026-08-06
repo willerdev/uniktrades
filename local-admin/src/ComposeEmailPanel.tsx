@@ -209,7 +209,9 @@ export function ComposeEmailPanel({ onMessage }: Props) {
           <span>
             Email:{" "}
             <strong style={{ color: status.emailConfigured ? "#34d399" : "#fbbf24" }}>
-              {status.emailConfigured ? `ready (${status.emailFrom})` : "not configured"}
+              {status.emailConfigured
+                ? `ready (${status.emailFrom})`
+                : "not configured — set RESEND_API_KEY on uniktrades-api"}
             </strong>
           </span>
           <span>

@@ -137,7 +137,7 @@ export class EmailService {
       this.logger.warn(`RESEND_API_KEY not set on ${hint} — email skipped`);
       return {
         ok: false,
-        error: `RESEND_API_KEY is not set on ${hint}. Add it to the traders-api service on Render (not traders-web), then redeploy.`,
+        error: `RESEND_API_KEY is not set on ${hint}. Add it to the uniktrades-api service on Render (not the frontend/web service), then redeploy.`,
       };
     }
 

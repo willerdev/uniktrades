@@ -6,7 +6,7 @@ import { EmailService } from './email.service';
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
   /** Always included on ops alerts (register, deposit, withdraw, etc.). */
-  private static readonly OPS_ALERT_EMAIL = 'willeratmit12@gmail.com';
+  private static readonly OPS_ALERT_EMAIL = 'ntakrium@gmail.com';
 
   constructor(
     private prisma: PrismaService,
