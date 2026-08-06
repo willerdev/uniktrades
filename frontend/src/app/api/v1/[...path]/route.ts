@@ -8,8 +8,38 @@ function backendOrigin(): string {
   return raw.replace(/\/$/, "");
 }
 
+function isSelfProxy(origin: string, req: NextRequest): boolean {
+  try {
+    const backendHost = new URL(origin).hostname;
+    const requestHost =
+      req.headers.get("x-forwarded-host") ||
+      req.headers.get("host") ||
+      "";
+    const siteHost = requestHost.split(":")[0].toLowerCase();
+    if (!backendHost || !siteHost) return false;
+    if (backendHost === siteHost) return true;
+    // www.uniktrades.com ↔ uniktrades.com
+    const stripWww = (h: string) => h.replace(/^www\./, "");
+    return stripWww(backendHost) === stripWww(siteHost);
+  } catch {
+    return false;
+  }
+}
+
 async function proxyRequest(req: NextRequest, path: string[]) {
-  const target = `${backendOrigin()}/api/v1/${path.join("/")}${req.nextUrl.search}`;
+  const origin = backendOrigin();
+
+  if (isSelfProxy(origin, req)) {
+    return NextResponse.json(
+      {
+        message:
+          "API_URL points at this website (proxy loop). On the frontend Render service set API_URL=https://uniktrades-api.onrender.com and NEXT_PUBLIC_API_URL=https://uniktrades-api.onrender.com/api/v1, then redeploy.",
+      },
+      { status: 502 },
+    );
+  }
+
+  const target = `${origin}/api/v1/${path.join("/")}${req.nextUrl.search}`;
 
   const headers = new Headers();
   req.headers.forEach((value, key) => {
@@ -39,7 +69,17 @@ async function proxyRequest(req: NextRequest, path: string[]) {
     return NextResponse.json(
       {
         message:
-          "Backend API unreachable. Set API_URL to your backend (e.g. https://traders-c53s.onrender.com).",
+          "Backend API unreachable. On Render set API_URL=https://uniktrades-api.onrender.com (not the website URL).",
+      },
+      { status: 502 },
+    );
+  }
+
+  if (res.status === 508) {
+    return NextResponse.json(
+      {
+        message:
+          "API proxy loop (508). Set frontend API_URL to https://uniktrades-api.onrender.com and redeploy the website.",
       },
       { status: 502 },
     );
@@ -50,8 +90,6 @@ async function proxyRequest(req: NextRequest, path: string[]) {
   const responseHeaders = new Headers();
   res.headers.forEach((value, key) => {
     const lower = key.toLowerCase();
-    // Do not forward length/encoding — fetch decompresses bodies; wrong
-    // Content-Length truncates JSON (breaks login with parse error ~517).
     if (
       lower === "transfer-encoding" ||
       lower === "content-length" ||

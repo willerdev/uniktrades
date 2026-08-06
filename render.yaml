@@ -131,9 +131,9 @@ services:
       - key: NODE_ENV
         value: production
       - key: API_URL
-        value: https://traders-c53s.onrender.com
+        value: https://uniktrades-api.onrender.com
       - key: NEXT_PUBLIC_API_URL
-        value: https://traders-c53s.onrender.com/api/v1
+        value: https://uniktrades-api.onrender.com/api/v1
       - key: NEXT_PUBLIC_CONTRACT_ADDRESS
         sync: false
       - key: NEXT_PUBLIC_CHAIN_ID
