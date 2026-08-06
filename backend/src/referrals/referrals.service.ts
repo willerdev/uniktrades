@@ -681,7 +681,7 @@ export class ReferralsService {
   }
 
   private normalizeInviteCode(raw: string): string {
-    return raw.trim().toUpperCase();
+    return raw.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
   }
 
   private async assertInviteCodeAvailable(code: string) {
@@ -700,15 +700,20 @@ export class ReferralsService {
     }
   }
 
+  /** Always 8 alphanumeric chars — matches /register invite boxes. */
   private async randomInviteCode(prefix = ''): Promise<string> {
     const cleanPrefix = prefix
       .trim()
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '')
-      .slice(0, 12);
+      .slice(0, 4);
     for (let attempt = 0; attempt < 8; attempt += 1) {
-      const suffix = randomBytes(3).toString('hex').toUpperCase();
-      const code = cleanPrefix ? `${cleanPrefix}-${suffix}` : suffix;
+      const need = 8 - cleanPrefix.length;
+      const suffix = randomBytes(4)
+        .toString('hex')
+        .toUpperCase()
+        .slice(0, need);
+      const code = `${cleanPrefix}${suffix}`;
       try {
         await this.assertInviteCodeAvailable(code);
         return code;
@@ -837,8 +842,10 @@ export class ReferralsService {
     const code = dto.code?.trim()
       ? this.normalizeInviteCode(dto.code)
       : await this.randomInviteCode();
-    if (code.length < 4 || code.length > 32) {
-      throw new BadRequestException('Code must be 4–32 characters');
+    if (code.length !== 8) {
+      throw new BadRequestException(
+        'Invite codes must be exactly 8 letters/numbers (same as the register page)',
+      );
     }
     await this.assertInviteCodeAvailable(code);
 
@@ -879,7 +886,9 @@ export class ReferralsService {
       ReturnType<ReferralsService['createRegistrationInvite']>
     >[] = [];
     for (let i = 0; i < count; i += 1) {
-      const code = await this.randomInviteCode(dto.prefix ?? 'INVITE');
+      const code = await this.randomInviteCode(
+        (dto.prefix ?? '').trim() ? dto.prefix : '',
+      );
       items.push(
         await this.createRegistrationInvite(adminId, {
           code,

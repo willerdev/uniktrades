@@ -461,7 +461,7 @@ export default function App() {
   const [newInviteDays, setNewInviteDays] = useState("30");
   const [newInviteSingleUse, setNewInviteSingleUse] = useState(true);
   const [bulkInviteCount, setBulkInviteCount] = useState("5");
-  const [bulkInvitePrefix, setBulkInvitePrefix] = useState("INVITE");
+  const [bulkInvitePrefix, setBulkInvitePrefix] = useState("");
   const [bulkInviteDays, setBulkInviteDays] = useState("30");
   const [bulkInviteLoading, setBulkInviteLoading] = useState(false);
   const [hubReport, setHubReport] = useState<HubSenderReport | null>(null);
@@ -4212,12 +4212,13 @@ export default function App() {
             >
               <h3 style={{ marginTop: 0 }}>Create invite code</h3>
               <p className="muted" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-                People enter this on the registration page to create an account.
+                Users enter this on /register (exactly 8 characters, like A1B2C3D4).
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <input
-                  placeholder="Code (optional — leave blank to auto-generate)"
+                  placeholder="8-char code (optional — leave blank to auto-generate)"
                   value={newInviteCode}
+                  maxLength={8}
                   onChange={(e) => setNewInviteCode(e.target.value)}
                   style={{
                     padding: "0.5rem",
@@ -4291,7 +4292,8 @@ export default function App() {
             >
               <h3 style={{ marginTop: 0 }}>Bulk invite codes</h3>
               <p className="muted" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
-                Generate unique single-use signup codes (default 30 days).
+                Generate unique single-use 8-character signup codes (default 30 days).
+                Optional short prefix (max 4 letters) is included inside the 8 chars.
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <input
@@ -4310,8 +4312,9 @@ export default function App() {
                   }}
                 />
                 <input
-                  placeholder="Prefix (default INVITE)"
+                  placeholder="Prefix up to 4 chars (optional)"
                   value={bulkInvitePrefix}
+                  maxLength={4}
                   onChange={(e) => setBulkInvitePrefix(e.target.value)}
                   style={{
                     padding: "0.5rem",
@@ -4350,7 +4353,7 @@ export default function App() {
                     void api
                       .bulkCreateInviteCodes({
                         count,
-                        prefix: bulkInvitePrefix.trim() || "INVITE",
+                        prefix: bulkInvitePrefix.trim() || undefined,
                         maxUses: 1,
                         expiresInDays: Number(bulkInviteDays) || 30,
                       })
