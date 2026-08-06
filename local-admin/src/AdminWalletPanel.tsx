@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   api,
+  type AdminWalletLedgerRow,
   type CustodyDepositCreated,
   type CustodyDepositRow,
   type CustodyWithdrawRow,
@@ -18,9 +19,16 @@ function fmtDate(iso: string | null | undefined) {
   return new Date(iso).toLocaleString();
 }
 
+function ledgerLabel(type: string) {
+  if (type === "FEE_PROFIT") return "Fee profit";
+  if (type === "REFERRAL_REWARD") return "Referral reward";
+  return type.replace(/_/g, " ");
+}
+
 type Sheet = "none" | "deposit" | "withdraw";
 
 type ActivityItem =
+  | { kind: "ledger"; at: string; row: AdminWalletLedgerRow }
   | { kind: "deposit"; at: string; row: CustodyDepositRow }
   | { kind: "withdraw"; at: string; row: CustodyWithdrawRow };
 
@@ -83,8 +91,20 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
     ? fmtMoney(custodyBalance)
     : STATIC_CUSTODY_BALANCE_LABEL;
 
+  const feeProfitTotal = useMemo(() => {
+    const rows = wallet?.adminWalletLedger ?? [];
+    return rows
+      .filter((r) => r.type === "FEE_PROFIT")
+      .reduce((sum, r) => sum + Number(r.amount || 0), 0);
+  }, [wallet?.adminWalletLedger]);
+
   const activity = useMemo<ActivityItem[]>(() => {
     const items: ActivityItem[] = [
+      ...(wallet?.adminWalletLedger ?? []).map((row) => ({
+        kind: "ledger" as const,
+        at: row.createdAt,
+        row,
+      })),
       ...deposits.map((row) => ({
         kind: "deposit" as const,
         at: row.createdAt,
@@ -99,7 +119,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
     return items.sort(
       (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime(),
     );
-  }, [deposits, withdrawals]);
+  }, [deposits, withdrawals, wallet?.adminWalletLedger]);
 
   async function submitDeposit() {
     const amt = Number(amount);
@@ -206,8 +226,8 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
           <p className="wallet-page-eyebrow">Treasury</p>
           <h2 className="wallet-page-title">Platform wallet</h2>
           <p className="wallet-page-desc muted">
-            Fee profits and referral rewards credit the admin platform wallet.
-            Custody deposits below fund on-chain trader payouts.
+            Primary balance is admin platform funds (FEE_PROFIT &amp; rewards).
+            Custody crypto below is separate and funds on-chain trader payouts.
           </p>
         </div>
         <button
@@ -227,7 +247,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
             <div className="wallet-hero-top">
               <div>
                 <p className="wallet-hero-label">
-                  Admin platform wallet · USDT
+                  Admin platform · availableBalance
                   {wallet?.adminWalletEmail
                     ? ` · ${wallet.adminWalletEmail}`
                     : ""}
@@ -245,14 +265,14 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
 
             <div className="wallet-stat-row wallet-stat-row-2">
               <div className="wallet-stat">
+                <span>Fee profit (ledger)</span>
+                <strong>{fmtMoney(feeProfitTotal)}</strong>
+              </div>
+              <div className="wallet-stat">
                 <span>Custody (crypto)</span>
                 <strong>
                   {loading && !wallet ? "—" : custodyBalanceLabel}
                 </strong>
-              </div>
-              <div className="wallet-stat">
-                <span>Custody deposited</span>
-                <strong>{fmtMoney(wallet?.depositedTotal ?? 0)}</strong>
               </div>
             </div>
 
@@ -264,7 +284,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
                 onClick={() => openSheet("deposit")}
               >
                 <span className="wallet-action-icon">↓</span>
-                Deposit
+                Deposit custody
               </button>
               <button
                 type="button"
@@ -277,7 +297,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
                 onClick={() => openSheet("withdraw")}
               >
                 <span className="wallet-action-icon">↑</span>
-                Withdraw
+                Withdraw custody
               </button>
             </div>
 
@@ -289,7 +309,11 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
           {sheet !== "none" && (
             <div className="wallet-sheet">
               <div className="wallet-sheet-head">
-                <h3>{sheet === "deposit" ? "Deposit USDT" : "Withdraw USDT"}</h3>
+                <h3>
+                  {sheet === "deposit"
+                    ? "Deposit custody USDT"
+                    : "Withdraw custody USDT"}
+                </h3>
                 <button
                   type="button"
                   className="wallet-icon-btn"
@@ -464,16 +488,31 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
           </div>
           {activity.length === 0 ? (
             <p className="muted wallet-empty">
-              No activity yet. Deposit to fund this UnikTrades ledger.
+              No activity yet. Fee profits and custody deposits appear here.
             </p>
           ) : (
             <ul className="wallet-tx-list">
               {activity.map((item) =>
-                item.kind === "deposit" ? (
+                item.kind === "ledger" ? (
+                  <li key={`l-${item.row.id}`} className="wallet-tx">
+                    <div className="wallet-tx-icon in">$</div>
+                    <div className="wallet-tx-body">
+                      <strong>{ledgerLabel(item.row.type)}</strong>
+                      <span className="muted">{item.row.description}</span>
+                      <span className="muted">{fmtDate(item.row.createdAt)}</span>
+                    </div>
+                    <div className="wallet-tx-right">
+                      <strong>+{fmtMoney(item.row.amount)}</strong>
+                      <span className="wallet-pill confirmed">
+                        {item.row.type === "FEE_PROFIT" ? "FEE" : "LEDGER"}
+                      </span>
+                    </div>
+                  </li>
+                ) : item.kind === "deposit" ? (
                   <li key={`d-${item.row.id}`} className="wallet-tx">
                     <div className="wallet-tx-icon in">↓</div>
                     <div className="wallet-tx-body">
-                      <strong>Deposit · {item.row.network}</strong>
+                      <strong>Custody deposit · {item.row.network}</strong>
                       <span className="muted">{fmtDate(item.row.createdAt)}</span>
                     </div>
                     <div className="wallet-tx-right">
@@ -489,7 +528,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
                   <li key={`w-${item.row.id}`} className="wallet-tx">
                     <div className="wallet-tx-icon out">↑</div>
                     <div className="wallet-tx-body">
-                      <strong>Withdraw · {item.row.network}</strong>
+                      <strong>Custody withdraw · {item.row.network}</strong>
                       <span className="muted">{fmtDate(item.row.createdAt)}</span>
                     </div>
                     <div className="wallet-tx-right">

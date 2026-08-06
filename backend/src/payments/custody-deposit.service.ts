@@ -79,10 +79,18 @@ export class CustodyDepositService {
    * Admin platform wallet (FEE_PROFIT, referral rewards, etc.) — separate from
    * the custody crypto ledger used for trader payouts.
    */
-  private async getAdminPlatformWalletBalance(): Promise<{
+  private async getAdminPlatformWallet(): Promise<{
     adminUserId: string | null;
     adminEmail: string | null;
     adminWalletBalance: number;
+    adminWalletLedger: Array<{
+      id: string;
+      type: string;
+      amount: number;
+      description: string;
+      balanceAfter: number | null;
+      createdAt: string;
+    }>;
   }> {
     const adminEmail = this.config.get<string>('ADMIN_EMAIL')?.trim();
     const byEmail = adminEmail
@@ -109,20 +117,54 @@ export class CustodyDepositService {
             },
           });
 
+    const ledgerRows = adminUser
+      ? await this.prisma.walletTransaction.findMany({
+          where: { userId: adminUser.id },
+          orderBy: { createdAt: 'desc' },
+          take: 40,
+          select: {
+            id: true,
+            type: true,
+            amount: true,
+            description: true,
+            balanceAfter: true,
+            createdAt: true,
+          },
+        })
+      : [];
+
     return {
       adminUserId: adminUser?.id ?? null,
       adminEmail: adminUser?.email ?? null,
       adminWalletBalance: Number(
         adminUser?.platformWallet?.availableBalance ?? 0,
       ),
+      adminWalletLedger: ledgerRows.map((row) => ({
+        id: row.id,
+        type: row.type,
+        amount: Number(row.amount),
+        description: row.description,
+        balanceAfter:
+          row.balanceAfter == null ? null : Number(row.balanceAfter),
+        createdAt: row.createdAt.toISOString(),
+      })),
     };
   }
 
   async getWalletSummary() {
     const [ledger, adminWallet] = await Promise.all([
       this.getPlatformLedger(),
-      this.getAdminPlatformWalletBalance(),
+      this.getAdminPlatformWallet(),
     ]);
+
+    const adminFields = {
+      /** Admin user platform wallet — enrollment FEE_PROFIT, referrals, etc. */
+      adminWalletBalance: adminWallet.adminWalletBalance,
+      adminWalletEmail: adminWallet.adminEmail,
+      adminWalletUserId: adminWallet.adminUserId,
+      /** Recent platform-wallet ledger (FEE_PROFIT, REFERRAL_REWARD, …). */
+      adminWalletLedger: adminWallet.adminWalletLedger,
+    };
 
     if (!this.nowPayments.isConfigured) {
       return {
@@ -132,10 +174,7 @@ export class CustodyDepositService {
         /** Custody crypto ledger (confirmed deposits − withdrawals). */
         usdtBalance: ledger.available,
         platformUsdtBalance: ledger.available,
-        /** Admin user platform wallet — enrollment FEE_PROFIT, referrals, etc. */
-        adminWalletBalance: adminWallet.adminWalletBalance,
-        adminWalletEmail: adminWallet.adminEmail,
-        adminWalletUserId: adminWallet.adminUserId,
+        ...adminFields,
         gatewayUsdtBalance: 0,
         depositedTotal: ledger.depositedTotal,
         withdrawnTotal: ledger.withdrawnTotal,
@@ -179,10 +218,7 @@ export class CustodyDepositService {
       /** Custody crypto ledger — deposits confirmed here for trader payouts. */
       usdtBalance: ledger.available,
       platformUsdtBalance: ledger.available,
-      /** Admin platform wallet (FEE_PROFIT / referrals) — not custody crypto. */
-      adminWalletBalance: adminWallet.adminWalletBalance,
-      adminWalletEmail: adminWallet.adminEmail,
-      adminWalletUserId: adminWallet.adminUserId,
+      ...adminFields,
       gatewayUsdtBalance,
       depositedTotal: ledger.depositedTotal,
       withdrawnTotal: ledger.withdrawnTotal,

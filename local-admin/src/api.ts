@@ -1596,6 +1596,15 @@ export type EngineAllocation = {
   };
 };
 
+export type AdminWalletLedgerRow = {
+  id: string;
+  type: string;
+  amount: number;
+  description: string;
+  balanceAfter: number | null;
+  createdAt: string;
+};
+
 export type NowPaymentsWalletSummary = {
   configured: boolean;
   payoutConfigured?: boolean;
@@ -1612,6 +1621,8 @@ export type NowPaymentsWalletSummary = {
   adminWalletBalance?: number;
   adminWalletEmail?: string | null;
   adminWalletUserId?: string | null;
+  /** Recent admin platform-wallet ledger rows (FEE_PROFIT, REFERRAL_REWARD, …). */
+  adminWalletLedger?: AdminWalletLedgerRow[];
   /** Shared payment-gateway account balance (may include other apps). */
   gatewayUsdtBalance?: number;
   depositedTotal?: number;
