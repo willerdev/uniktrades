@@ -70,13 +70,13 @@ export const fr = {
       "Déposez des USDT dans votre portefeuille. Le capital reste le vôtre jusqu’à l’allocation.",
     pathAllocate: "Allouer",
     pathAllocateBody:
-      "Passez dans Smart Investment, déposez sans frais d’inscription et définissez votre montant.",
+      "Passez dans Smart Investment — les frais d’inscription sont prélevés sur le transfert, le reste est investi.",
     pathCompound: "Composer",
     pathCompoundBody:
       "Après le délai de 24 h, le solde éligible génère un rendement",
     pathExit: "Sortir",
     pathExitBody:
-      "Retirez après KYC — ou réinvestissez automatiquement 90 % pour continuer à croître.",
+      "Retirez après KYC — ou réinvestissez automatiquement 100 % pour continuer à croître.",
     inviteOnly: "Sur invitation",
     readyTitle: "Prêt quand vous l’êtes",
     readyBody:
@@ -86,9 +86,9 @@ export const fr = {
   rules: {
     eyebrow: "Les règles",
     title: "Claires avant d’engager du capital",
-    feeTitle: "Pas de frais d’inscription",
+    feeTitle: "Frais d’inscription selon le montant",
     feeBody:
-      "Smart Investment n’a pas de frais d’inscription — votre dépôt entier travaille et génère un rendement quotidien sur le solde éligible.",
+      "Les frais d’inscription Smart Investment sont déduits du transfert : 10 $ (100–200 $), 50 $ (201–999,99 $) ou 200 $ (1 000–5 000 $). Exemple : 560 $ → 50 $ de frais → 510 $ investis.",
     holdTitle: "Délai de rendement de 24 h",
     holdBody: "yield-hold",
     holdIntro:
@@ -101,13 +101,13 @@ export const fr = {
       "À partir du 27 juillet 2026, les investissements inférieurs à 500 $ cessent automatiquement de rapporter. Rechargez sur Investir pour rester actif.",
     reinvestTitle: "Réinvestissement automatique optionnel",
     reinvestBody:
-      "Composez les gains quotidiens dans l’investissement : 10 % de frais sur le rendement journalier, 90 % ajoutés au principal. Désactivez à tout moment.",
+      "Composez les gains quotidiens dans l’investissement — 100 % de chaque rendement journalier se compose lorsque le réinvestissement auto est activé. Désactivez à tout moment.",
     kycTitle: "KYC pour les retraits",
     kycBody:
       "Vous pouvez vous inscrire et gagner sans KYC. La vérification d’identité n’est requise qu’avant un retrait vers un portefeuille externe.",
     subtitle:
       "Smart Investment et coffre on-chain — rendements quotidiens, délai, VIP et retraits.",
-    feeBySize: "Frais d’inscription selon le montant (0 $)",
+    feeBySize: "Frais d’inscription selon le montant",
     paidOut: "versés jusqu’ici",
     received: "a reçu",
   },

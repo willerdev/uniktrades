@@ -25,10 +25,13 @@ import {
 } from "@/lib/utils";
 import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
 
-/** Enrollment fee waived — amount must still be in range. */
+/** Enrollment fee by deposit size — deducted from transfer amount. */
 function resolveFeeClient(amount: number): number | null {
   if (!Number.isFinite(amount) || amount < 100 || amount > 5000) return null;
-  return 0;
+  if (amount <= 200) return 10;
+  if (amount <= 500) return 50;
+  if (amount < 1000) return 50;
+  return 200;
 }
 
 const fadeUp = {
@@ -145,7 +148,11 @@ function PortfolioSummary({
           </p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
             {autoReinvest ? (
-              <>Auto-reinvest on ({autoReinvestFeePercent ?? 10}% fee)</>
+              <>
+                {(autoReinvestFeePercent ?? 0) > 0
+                  ? `Auto-reinvest on (${autoReinvestFeePercent}% fee)`
+                  : "Auto-reinvest on (100% compounds)"}
+              </>
             ) : (
               <>
                 Credited to wallet{" "}
@@ -321,7 +328,8 @@ export function InvestHub() {
             </h2>
             <p className="mt-2 max-w-lg text-sm text-white/75">
               Fund your platform wallet first, then transfer ${investmentMin}+
-              USDT here with no enrollment fee. Earn{" "}
+              USDT here. Enrollment fee is deducted from the amount you transfer
+              (example: $560 → $50 fee → $510 invested). Earn{" "}
               {status?.dailyYieldPercent ?? 5}% daily on invested capital —
               credited to your wallet{" "}
               <DailyCreditTimeText
@@ -333,7 +341,7 @@ export function InvestHub() {
             <ul className="mt-5 grid gap-3 sm:grid-cols-3">
               {[
                 { icon: TrendingUp, text: `${status?.dailyYieldPercent ?? 5}% daily yield` },
-                { icon: Shield, text: "No enrollment fee" },
+                { icon: Shield, text: "Fee from transfer amount" },
                 { icon: Wallet, text: "Fund via Wallet page" },
               ].map(({ icon: Icon, text }) => (
                 <li
@@ -371,8 +379,25 @@ export function InvestHub() {
         <motion.div
           {...fadeUp}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+          className="rounded-2xl border-2 border-primary/40 bg-[var(--color-surface)] p-5 shadow-sm"
         >
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h3 className="text-base font-semibold text-foreground">
+                Transfer wallet → Smart Invest
+              </h3>
+              <p className="mt-1 text-xs text-muted">
+                Enter how much to move from your wallet. Fee comes out of that
+                amount; the rest becomes your investment balance.
+              </p>
+            </div>
+            <Link
+              href="/blockchain"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              Prefer on-chain contract?
+            </Link>
+          </div>
           <div className="space-y-4">
             <div className="rounded-xl border border-[var(--color-border)] bg-background px-4 py-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
@@ -391,7 +416,7 @@ export function InvestHub() {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-muted">
+              <label className="mb-1 block text-xs font-medium text-foreground">
                 Transfer amount (USDT)
               </label>
               <Input
@@ -410,23 +435,29 @@ export function InvestHub() {
 
             <div className="rounded-xl border border-[var(--color-border)] bg-background px-4 py-3 text-sm text-foreground">
               <div className="flex justify-between gap-3">
+                <span className="text-muted">Wallet debit</span>
+                <span className="font-semibold text-foreground">
+                  {hasValidParsed ? formatCurrency(depositDue) : "—"}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between gap-3">
                 <span className="text-muted">Enrollment fee</span>
-                <span className="font-semibold text-emerald-700">
-                  {formatCurrency(0)}
+                <span className="font-semibold text-foreground">
+                  {hasValidParsed ? formatCurrency(feeUsdt) : "—"}
                 </span>
               </div>
               <div className="mt-2 flex justify-between gap-3 border-t border-[var(--color-border)] pt-2">
-                <span className="text-muted">Invested after transfer</span>
-                <span className="font-semibold text-foreground">
-                  {hasValidParsed
-                    ? formatCurrency(netInvested || depositDue)
+                <span className="text-muted">Invested after fee</span>
+                <span className="font-semibold text-emerald-700">
+                  {hasValidParsed && netInvested > 0
+                    ? formatCurrency(netInvested)
                     : "—"}
                 </span>
               </div>
               {hasValidParsed && (
                 <p className="mt-2 text-xs text-muted">
                   Earn {status?.dailyYieldPercent ?? 5}% daily on invested
-                  capital
+                  capital · tiers $10 / $50 / $50 / $200 by size
                 </p>
               )}
             </div>
@@ -455,15 +486,16 @@ export function InvestHub() {
                 !hasValidParsed ||
                 insufficientWallet ||
                 parsedInvestment < investmentMin ||
-                parsedInvestment > investmentMax
+                parsedInvestment > investmentMax ||
+                netInvested <= 0
               }
             >
               {payLoading && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               {hasValidParsed
-                ? `Transfer ${formatCurrency(depositDue)} from wallet`
-                : "Transfer from wallet"}
+                ? `Confirm transfer ${formatCurrency(depositDue)} → invest ${formatCurrency(netInvested)}`
+                : "Confirm transfer from wallet"}
             </Button>
           </div>
         </motion.div>
@@ -570,14 +602,20 @@ export function InvestHub() {
       <motion.div
         {...fadeUp}
         transition={{ delay: 0.18 }}
-        className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 xl:col-span-5 xl:row-start-3"
+        className="rounded-2xl border-2 border-primary/35 bg-[var(--color-surface)] p-4 xl:col-span-5 xl:row-start-3"
       >
-        <h3 className="text-sm font-semibold text-foreground">Move funds</h3>
+        <h3 className="text-base font-semibold text-foreground">
+          Transfer wallet ↔ Smart Invest
+        </h3>
         <p className="mt-1 text-xs text-muted">
-          Transfer between your platform wallet and Smart Investment. Deposit
-          crypto only on{" "}
+          Move funds between your platform wallet and investment balance.
+          Deposit crypto only on{" "}
           <Link href="/wallet" className="text-primary hover:underline">
             Wallet
+          </Link>
+          . On-chain vault funding is on{" "}
+          <Link href="/blockchain" className="text-primary hover:underline">
+            Contract
           </Link>
           . Daily yield only applies to capital invested for at least 24 hours.
         </p>
@@ -596,30 +634,33 @@ export function InvestHub() {
             </span>
           </div>
           <div className="mt-1.5 flex justify-between gap-3 border-t border-[var(--color-border)] pt-1.5">
-            <span className="text-muted">Transfer fee</span>
-            <span className="font-semibold text-emerald-700">
+            <span className="text-muted">Top-up transfer fee</span>
+            <span className="font-semibold text-foreground">
               {formatCurrency(0)}
             </span>
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-end gap-2">
-          <div className="min-w-[140px] flex-1">
-            <label className="mb-1 block text-xs text-muted">Amount (USDT)</label>
-            <Input
-              type="number"
-              min={0.01}
-              step="0.01"
-              value={transferAmount}
-              onChange={(e) => {
-                setTransferAmount(e.target.value);
-                setError("");
-              }}
-            />
-          </div>
+        <div className="mt-3">
+          <label className="mb-1 block text-xs font-medium text-foreground">
+            Amount (USDT)
+          </label>
+          <Input
+            type="number"
+            min={0.01}
+            step="0.01"
+            value={transferAmount}
+            onChange={(e) => {
+              setTransferAmount(e.target.value);
+              setError("");
+            }}
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
           <Button
             type="button"
-            disabled={transferLoading || insufficientAllocate}
+            className="flex-1 sm:flex-none"
+            disabled={transferLoading || insufficientAllocate || !hasValidTransfer}
             onClick={() => {
               const amount = Number(transferAmount);
               if (!Number.isFinite(amount) || amount <= 0) {
@@ -646,12 +687,16 @@ export function InvestHub() {
                 .finally(() => setTransferLoading(false));
             }}
           >
-            Wallet → Investment
+            {transferLoading ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            Confirm wallet → investment
           </Button>
           <Button
             type="button"
             variant="secondary"
-            disabled={transferLoading}
+            className="flex-1 sm:flex-none"
+            disabled={transferLoading || !hasValidTransfer}
             onClick={() => {
               const amount = Number(transferAmount);
               if (!Number.isFinite(amount) || amount <= 0) {
@@ -672,7 +717,7 @@ export function InvestHub() {
                 .finally(() => setTransferLoading(false));
             }}
           >
-            Investment → Wallet
+            Investment → wallet
           </Button>
         </div>
         {insufficientAllocate && (
@@ -693,8 +738,12 @@ export function InvestHub() {
               </h4>
               <p className="mt-1 text-xs text-muted">
                 {status.settings?.autoReinvestEarnings
-                  ? `On — ${status.autoReinvestFeePercent ?? 10}% of each daily earning is charged as a fee; the remaining 90% compounds into your investment.`
-                  : `Off — daily earnings go to your wallet. Enable to compound: ${status.autoReinvestFeePercent ?? 10}% fee on the full daily return, 90% added to investment.`}
+                  ? (status.autoReinvestFeePercent ?? 0) > 0
+                    ? `On — ${status.autoReinvestFeePercent}% of each daily earning is charged as a fee; the rest compounds into your investment.`
+                    : "On — 100% of each daily earning compounds into your investment (no auto-reinvest fee)."
+                  : (status.autoReinvestFeePercent ?? 0) > 0
+                    ? `Off — daily earnings go to your wallet. Enable to compound after a ${status.autoReinvestFeePercent}% fee.`
+                    : "Off — daily earnings go to your wallet. Enable to compound 100% of each daily return into investment."}
               </p>
             </div>
             <Button

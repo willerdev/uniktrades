@@ -3035,10 +3035,10 @@ export class NotificationService {
         ? `<p>Earned on investment principal: <strong>$${data.baseBalance.toFixed(2)} USDT</strong></p>`
         : '';
     const compoundBlock =
-      data.autoReinvested &&
-      data.reinvestAmount != null &&
-      data.feeAmount != null
-        ? `<p>Auto-reinvest: <strong>$${data.reinvestAmount.toFixed(2)} USDT</strong> compounded into investment after a <strong>${data.feePercent ?? 10}%</strong> fee ($${data.feeAmount.toFixed(2)} USDT).</p>`
+      data.autoReinvested && data.reinvestAmount != null
+        ? data.feeAmount != null && data.feeAmount > 0
+          ? `<p>Auto-reinvest: <strong>$${data.reinvestAmount.toFixed(2)} USDT</strong> compounded into investment after a <strong>${data.feePercent ?? 0}%</strong> fee ($${data.feeAmount.toFixed(2)} USDT).</p>`
+          : `<p>Auto-reinvest: <strong>$${data.reinvestAmount.toFixed(2)} USDT</strong> compounded into investment (100% of daily earning, no fee).</p>`
         : '';
     const footerNote = data.autoReinvested
       ? `<p style="color:#94a3b8;font-size:14px;">Auto-reinvest is on. Turn it off anytime on Invest if you want earnings in your wallet instead.</p>`
@@ -3063,7 +3063,9 @@ export class NotificationService {
         : `Investor earning — $${data.amount.toFixed(2)} USDT (${data.yieldPercent}%)`,
       html,
       text: data.autoReinvested
-        ? `Investor daily earning: $${data.amount.toFixed(2)} USDT at ${data.yieldPercent}%. Auto-reinvested $${(data.reinvestAmount ?? 0).toFixed(2)} after $${(data.feeAmount ?? 0).toFixed(2)} fee. Investment: $${(data.investmentBalance ?? 0).toFixed(2)}.`
+        ? data.feeAmount != null && data.feeAmount > 0
+          ? `Investor daily earning: $${data.amount.toFixed(2)} USDT at ${data.yieldPercent}%. Auto-reinvested $${(data.reinvestAmount ?? 0).toFixed(2)} after $${(data.feeAmount ?? 0).toFixed(2)} fee. Investment: $${(data.investmentBalance ?? 0).toFixed(2)}.`
+          : `Investor daily earning: $${data.amount.toFixed(2)} USDT at ${data.yieldPercent}%. Auto-reinvested $${(data.reinvestAmount ?? data.amount).toFixed(2)} (100%, no fee). Investment: $${(data.investmentBalance ?? 0).toFixed(2)}.`
         : `Investor daily earning: $${data.amount.toFixed(2)} USDT at ${data.yieldPercent}%. Wallet: $${data.balance.toFixed(2)}.`,
     });
   }
@@ -3224,7 +3226,7 @@ export class NotificationService {
     const complimentary = data.source === 'comp';
     const feeLine = complimentary
       ? `<p>Enrollment fee: <strong>waived</strong> (complimentary activation).</p>`
-      : `<p>Enrollment fee: <strong>$${data.feeUsdt.toFixed(2)} USDT</strong> (charged from your wallet).</p>`;
+      : `<p>Enrollment fee: <strong>$${data.feeUsdt.toFixed(2)} USDT</strong> (deducted from your deposit; net invested $${data.netInvested.toFixed(2)}).</p>`;
     const noteLine =
       data.note?.trim()
         ? `<p style="color:#94a3b8;font-size:14px;">Note: ${this.escape(data.note.trim())}</p>`

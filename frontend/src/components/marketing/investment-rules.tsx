@@ -6,10 +6,10 @@ import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
 import { useT, type MessageKey } from "@/i18n";
 
 const FEE_TIERS = [
-  { range: "$100 – $200", fee: "$0" },
-  { range: "$201 – $500", fee: "$0" },
-  { range: "$501 – under $1,000", fee: "$0" },
-  { range: "$1,000 – $5,000", fee: "$0" },
+  { range: "$100 – $200", fee: "$10" },
+  { range: "$201 – $500", fee: "$50" },
+  { range: "$501 – under $1,000", fee: "$50" },
+  { range: "$1,000 – $5,000", fee: "$200" },
 ] as const;
 
 const RULE_DEFS: {

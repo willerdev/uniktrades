@@ -163,7 +163,7 @@ const SUPPORT_TOOLS = [
     function: {
       name: 'set_auto_reinvest',
       description:
-        'Enable or disable auto-reinvest of investor daily earnings for compounding. When enabled, 90% of each daily return compounds into investment and 10% is charged as a platform fee on the full daily earning. Requires confirmed: true. User must be an enrolled investor.',
+        'Enable or disable auto-reinvest of investor daily earnings for compounding. When enabled, 100% of each daily return compounds into investment (no auto-reinvest fee). Requires confirmed: true. User must be an enrolled investor.',
       parameters: {
         type: 'object',
         properties: {
@@ -302,7 +302,7 @@ Account tools:
 - Investor VIP active for this user: ${vipActive ? 'YES' : 'NO'}.
 - If VIP is YES, you may approve_withdrawal for their own PENDING wallet withdrawals that have been pending 30+ minutes, and you may move funds wallet↔investment when they ask.
 - If VIP is NO, explain they need Investor VIP ($50/month from Invest) for AI withdrawal approval (and $0 withdraw fee). They can still request_withdrawal without VIP (standard $${WALLET_WITHDRAWAL_FEE_USD} fee). Transfers still require an enrolled investor account.
-- Enrolled investors can set_auto_reinvest (compounding): 10% fee on the full daily earning, 90% added to investment. Confirm the fee before enabling.
+- Enrolled investors can set_auto_reinvest (compounding): 100% of each daily earning compounds into investment (no auto-reinvest fee). Confirm before enabling.
 - For request_withdrawal, approve_withdrawal, transfers, or set_auto_reinvest: only pass confirmed:true when the user clearly asked to confirm. If unclear, ask them to confirm first.
 - After tools run, summarize what happened in plain language (amounts, new balances, payout status, fees).
 - Keep replies concise. Plain text, no markdown headers. Bullet lists OK.
@@ -612,7 +612,7 @@ Account tools:
       return {
         ok: false,
         error:
-          'Confirm that the user understands the 10% fee on full daily earnings, then call again with confirmed: true',
+          'Confirm that the user wants auto-reinvest (100% of daily earnings compound; no fee), then call again with confirmed: true',
       };
     }
     if (typeof args.enabled !== 'boolean') {
@@ -632,7 +632,7 @@ Account tools:
       return 'KYC is submitted in Settings under the verification section. Upload your ID and a selfie. Approval is required before payouts. Check your KYC status on the Settings or Payouts page.';
     }
     if (lower.includes('reinvest') || lower.includes('compound')) {
-      return 'On Invest you can turn on auto-reinvest so daily earnings compound into your investment. A 10% fee applies to the full daily return (90% is reinvested). Ask me to enable or disable it, or toggle it on Invest.';
+      return 'On Invest you can turn on auto-reinvest so daily earnings compound 100% into your investment (no auto-reinvest fee). Ask me to enable or disable it, or toggle it on Invest.';
     }
     if (lower.includes('vip') || lower.includes('withdraw')) {
       return 'I can request a wallet withdrawal for you after KYC — say how much and which saved wallet, then confirm. Investor VIP ($50/month on Invest) unlocks $0 withdrawal fees and lets me approve pending withdrawals after 30 minutes. Or tap Speak to admin.';

@@ -3844,7 +3844,7 @@ export default function App() {
             <div className="kyc-card" style={{ marginBottom: "1rem" }}>
               <p className="muted" style={{ margin: "0 0 0.75rem" }}>
                 Whitelisted users get instant crypto withdraws,{" "}
-                <strong>$0 invest enrollment fee</strong>,{" "}
+                <strong>waived invest enrollment fee</strong>,{" "}
                 <strong>free VIP</strong> upgrades, and{" "}
                 <strong>no 24h yield hold</strong> on new capital.
               </p>

@@ -28,17 +28,17 @@ const PRODUCTS = [
     title: "Smart Investment",
     tagline: `${SMART_INVEST_DAILY_YIELD_PERCENT}% daily · min $${SMART_INVEST_MIN_USD.toLocaleString()}`,
     how: [
-      `Minimum deposit $${SMART_INVEST_MIN_USD.toLocaleString()} USDT — $0 enrollment fee.`,
+      `Minimum deposit $${SMART_INVEST_MIN_USD.toLocaleString()} USDT — enrollment fee deducted from transfer (e.g. $560 → $50 fee → $510 invested).`,
       `${SMART_INVEST_DAILY_YIELD_PERCENT}% daily yield (VIP up to 10%) credited to your wallet.`,
       "New allocations earn after a 24-hour hold.",
-      "Optional auto-reinvest compounds most of each day’s return.",
+      "Optional auto-reinvest compounds 100% of each day’s return.",
     ],
     start: [
       "Open Invest and choose Smart Investment.",
-      "Deposit with wallet balance or crypto.",
+      "Deposit USDT on Wallet, then transfer into Smart Invest.",
       "Complete KYC only when you are ready to withdraw.",
     ],
-    cta: "Deposit to Smart Investment",
+    cta: "Transfer to Smart Investment",
   },
   {
     id: "chain",

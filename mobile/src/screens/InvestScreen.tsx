@@ -206,7 +206,13 @@ export function InvestScreen() {
           </SectionCard>
 
           {!status?.active ? (
-            <PrimaryButton label={busy ? "…" : "Enroll from wallet"} onPress={() => void enroll()} disabled={busy} />
+            <SectionCard title="Enroll from wallet">
+              <Field label="Amount USDT" value={amount} onChangeText={setAmount} keyboardType="numeric" />
+              <Text style={{ color: theme.muted, fontSize: 12, marginBottom: 8 }}>
+                Fee is deducted from the amount (e.g. $560 → $50 fee → $510 invested). Deposit on Wallet first if balance is low.
+              </Text>
+              <PrimaryButton label={busy ? "…" : "Confirm transfer → Smart Invest"} onPress={() => void enroll()} disabled={busy} />
+            </SectionCard>
           ) : (
             <>
               <SectionCard title="Transfer">

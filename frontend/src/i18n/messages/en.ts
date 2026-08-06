@@ -70,13 +70,13 @@ export const en = {
       "Deposit USDT to your wallet. Capital stays yours until you allocate.",
     pathAllocate: "Allocate",
     pathAllocateBody:
-      "Move into Smart Investment, deposit with $0 enrollment fee, and set your size.",
+      "Move into Smart Investment — enrollment fee comes out of your transfer, and the rest is invested.",
     pathCompound: "Compound",
     pathCompoundBody:
       "After the 24-hour hold, eligible balance earns yield",
     pathExit: "Exit",
     pathExitBody:
-      "Withdraw after KYC — or auto-reinvest 90% and keep growing.",
+      "Withdraw after KYC — or auto-reinvest 100% and keep growing.",
     inviteOnly: "Invite only",
     readyTitle: "Ready when you are",
     readyBody:
@@ -86,9 +86,9 @@ export const en = {
   rules: {
     eyebrow: "The rules",
     title: "Clear before you commit capital",
-    feeTitle: "No enrollment fee",
+    feeTitle: "Enrollment fee by size",
     feeBody:
-      "Smart Investment has no platform enrollment fee — your full deposit goes to work and earns daily yield on eligible balance.",
+      "Smart Investment enrollment fee is deducted from your transfer: $10 ($100–$200), $50 ($201–$999.99), or $200 ($1,000–$5,000). Example: $560 → $50 fee → $510 invested.",
     holdTitle: "24-hour yield hold",
     holdBody: "yield-hold",
     holdIntro:
@@ -101,13 +101,13 @@ export const en = {
       "From 27 July 2026, investments below $500 automatically stop earning. Top up on Invest to stay active.",
     reinvestTitle: "Optional auto-reinvest",
     reinvestBody:
-      "Compound daily earnings into investment: 10% fee on the full daily return, 90% added back to principal. Turn off anytime.",
+      "Compound daily earnings into investment — 100% of each daily return compounds when auto-reinvest is on. Turn off anytime.",
     kycTitle: "KYC for withdrawals",
     kycBody:
       "You can enroll and earn without KYC. Identity verification is required only before withdrawing to an external wallet.",
     subtitle:
       "Smart Investment and on-chain vault — daily yields, hold period, VIP, and withdrawals.",
-    feeBySize: "Enrollment fee by size ($0)",
+    feeBySize: "Enrollment fee by size",
     paidOut: "paid out so far",
     received: "received",
   },

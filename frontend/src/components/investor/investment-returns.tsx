@@ -51,7 +51,7 @@ export function InvestmentReturnsPanel({
   walletEarnings,
   yieldPaused,
   autoReinvest,
-  autoReinvestFeePercent = 10,
+  autoReinvestFeePercent = 0,
   compact,
   displayCurrency,
 }: Props) {
@@ -144,7 +144,9 @@ export function InvestmentReturnsPanel({
               {yieldPaused
                 ? " · yield paused"
                 : autoReinvest
-                  ? ` · auto-reinvest (${autoReinvestFeePercent}% fee, 90% compounds)`
+                  ? (autoReinvestFeePercent ?? 0) > 0
+                    ? ` · auto-reinvest (${autoReinvestFeePercent}% fee)`
+                    : " · auto-reinvest (100% compounds)"
                   : (
                       <>
                         {" · credited "}

@@ -647,6 +647,79 @@ export class WalletService {
     return { balance: newBalance };
   }
 
+  /**
+   * Credit Smart Invest (or related) enrollment/invest fees to the admin
+   * platform wallet as FEE_PROFIT — not a user deposit.
+   */
+  async creditFeeProfitToAdmin(opts: {
+    feeAmount: number;
+    sourceUserId: string;
+    category?: 'INVESTMENT_FEE' | 'VIP_FEE';
+    label?: string;
+    referenceId?: string;
+    depositAmount?: number;
+  }): Promise<{ adminUserId: string; balance: number } | null> {
+    const feeAmount = Math.round(Number(opts.feeAmount) * 100) / 100;
+    if (!Number.isFinite(feeAmount) || feeAmount <= 0) return null;
+
+    const adminEmail = this.config.get<string>('ADMIN_EMAIL')?.trim();
+    const admin = adminEmail
+      ? await this.prisma.user.findUnique({
+          where: { email: adminEmail },
+          select: { id: true, email: true, role: true },
+        })
+      : null;
+    const adminUser =
+      admin?.role === 'ADMIN'
+        ? admin
+        : await this.prisma.user.findFirst({
+            where: { role: 'ADMIN' },
+            orderBy: { createdAt: 'asc' },
+            select: { id: true, email: true },
+          });
+
+    if (!adminUser) {
+      this.logger.warn(
+        `FEE_PROFIT skipped — no ADMIN user to credit $${feeAmount.toFixed(2)} from ${opts.sourceUserId}`,
+      );
+      return null;
+    }
+    if (adminUser.id === opts.sourceUserId) {
+      this.logger.warn(
+        `FEE_PROFIT skipped — source user is the admin wallet (${opts.sourceUserId})`,
+      );
+      return null;
+    }
+
+    const source = await this.prisma.user.findUnique({
+      where: { id: opts.sourceUserId },
+      select: { email: true, displayName: true },
+    });
+    const category = opts.category ?? 'INVESTMENT_FEE';
+    const label = opts.label ?? 'Smart Invest enrollment fee';
+    const sourceLabel =
+      source?.email?.trim() ||
+      source?.displayName?.trim() ||
+      opts.sourceUserId;
+    const depositNote =
+      opts.depositAmount != null && Number.isFinite(opts.depositAmount)
+        ? ` · deposit $${Number(opts.depositAmount).toFixed(2)}`
+        : '';
+    const description = `[FEE_PROFIT/${category}] ${label} — $${feeAmount.toFixed(2)} USDT from ${sourceLabel}${depositNote}`;
+    const referenceId =
+      opts.referenceId?.trim() ||
+      `fee_profit:${category.toLowerCase()}:${opts.sourceUserId}`;
+
+    const { balance } = await this.creditBalance(
+      adminUser.id,
+      feeAmount,
+      'FEE_PROFIT',
+      description,
+      referenceId,
+    );
+    return { adminUserId: adminUser.id, balance };
+  }
+
   async adminCreditWallet(
     userId: string,
     amount: number,

@@ -484,6 +484,14 @@ export class InvestorService {
         `Investor subscription fee — $${fee.toFixed(2)} USDT deducted from $${deposit.toFixed(2)} deposit`,
         payment.id,
       );
+      await this.walletService.creditFeeProfitToAdmin({
+        feeAmount: fee,
+        sourceUserId: userId,
+        category: 'INVESTMENT_FEE',
+        label: 'Smart Invest enrollment fee',
+        referenceId: payment.id,
+        depositAmount: deposit,
+      });
     }
 
     await this.confirmEnrollment(
@@ -753,6 +761,14 @@ export class InvestorService {
           `Investor subscription fee — $${fee.toFixed(2)} USDT deducted from deposit`,
           paymentId,
         );
+        await this.walletService.creditFeeProfitToAdmin({
+          feeAmount: fee,
+          sourceUserId: payment.userId,
+          category: 'INVESTMENT_FEE',
+          label: 'Smart Invest enrollment fee',
+          referenceId: paymentId,
+          depositAmount: deposit,
+        });
       }
       await this.transferInvestment(
         payment.userId,
@@ -892,11 +908,14 @@ export class InvestorService {
       update: { autoReinvestEarnings: Boolean(autoReinvestEarnings) },
     });
 
+    const feePercent = INVESTOR_AUTO_REINVEST_FEE_PERCENT;
     return {
       autoReinvestEarnings: settings.autoReinvestEarnings,
-      feePercent: INVESTOR_AUTO_REINVEST_FEE_PERCENT,
+      feePercent,
       note: settings.autoReinvestEarnings
-        ? `Daily earnings compound into investment after a ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% fee on the full daily return`
+        ? feePercent > 0
+          ? `Daily earnings compound into investment after a ${feePercent}% fee on the full daily return`
+          : 'Daily earnings compound 100% into investment (no auto-reinvest fee)'
         : 'Daily earnings credit to available wallet balance',
     };
   }
@@ -1123,6 +1142,13 @@ export class InvestorService {
         `Investor VIP — $${fee.toFixed(2)} USDT / 30 days`,
         payment.id,
       );
+      await this.walletService.creditFeeProfitToAdmin({
+        feeAmount: fee,
+        sourceUserId: userId,
+        category: 'VIP_FEE',
+        label: 'Smart Invest VIP fee',
+        referenceId: payment.id,
+      });
     }
 
     await this.prisma.user.update({
@@ -1333,16 +1359,23 @@ export class InvestorService {
 
       if (autoReinvest) {
         const feeAmount =
-          Math.round(
-            ((earningAmount * INVESTOR_AUTO_REINVEST_FEE_PERCENT) / 100) * 100,
-          ) / 100;
+          INVESTOR_AUTO_REINVEST_FEE_PERCENT > 0
+            ? Math.round(
+                ((earningAmount * INVESTOR_AUTO_REINVEST_FEE_PERCENT) / 100) *
+                  100,
+              ) / 100
+            : 0;
         const reinvestAmount =
           Math.round((earningAmount - feeAmount) * 100) / 100;
         if (reinvestAmount <= 0) continue;
 
         const newInvestmentBalance = investmentBalance + reinvestAmount;
+        const compoundNote =
+          feeAmount > 0
+            ? `$${feeAmount.toFixed(2)} ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% fee, $${reinvestAmount.toFixed(2)} compounded`
+            : `$${reinvestAmount.toFixed(2)} compounded (100%, no fee)`;
 
-        await this.prisma.$transaction([
+        const txOps = [
           this.prisma.investorDailyCredit.create({
             data: {
               userId: user.id,
@@ -1362,21 +1395,27 @@ export class InvestorService {
               amount: earningAmount,
               type: 'INVESTOR_EARNING',
               referenceId: user.id,
-              description: `Investor daily earning ${yieldPercent}% on $${eligibleBalance.toFixed(2)} — $${earningAmount.toFixed(2)} USDT auto-reinvested ($${feeAmount.toFixed(2)} ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% fee, $${reinvestAmount.toFixed(2)} compounded)${isWeekend ? ' (VIP weekend)' : ''}${holdNote}`,
+              description: `Investor daily earning ${yieldPercent}% on $${eligibleBalance.toFixed(2)} — $${earningAmount.toFixed(2)} USDT auto-reinvested (${compoundNote})${isWeekend ? ' (VIP weekend)' : ''}${holdNote}`,
               balanceAfter: availableBalance,
             },
           }),
-          this.prisma.walletTransaction.create({
-            data: {
-              userId: user.id,
-              amount: -feeAmount,
-              type: 'INVESTOR_REINVEST_FEE',
-              referenceId: user.id,
-              description: `Auto-reinvest fee ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% of $${earningAmount.toFixed(2)} daily return — $${feeAmount.toFixed(2)} USDT`,
-              balanceAfter: availableBalance,
-            },
-          }),
-        ]);
+        ];
+        if (feeAmount > 0) {
+          txOps.push(
+            this.prisma.walletTransaction.create({
+              data: {
+                userId: user.id,
+                amount: -feeAmount,
+                type: 'INVESTOR_REINVEST_FEE',
+                referenceId: user.id,
+                description: `Auto-reinvest fee ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% of $${earningAmount.toFixed(2)} daily return — $${feeAmount.toFixed(2)} USDT`,
+                balanceAfter: availableBalance,
+              },
+            }),
+          );
+        }
+
+        await this.prisma.$transaction(txOps);
 
         this.notifications.investorDailyEarning(user.id, {
           amount: earningAmount,
