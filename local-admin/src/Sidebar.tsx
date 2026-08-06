@@ -141,7 +141,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "engine", label: "Engine", icon: "engine" },
   { id: "users", label: "Users", icon: "users" },
-  { id: "promos", label: "Registration codes", icon: "promos" },
+  { id: "promos", label: "Invite codes", icon: "promos" },
   { id: "platform", label: "Investor & depositor", icon: "forecast" },
   { id: "wallet", label: "Wallet", icon: "wallet" },
   { id: "payouts", label: "Payouts", icon: "payouts" },

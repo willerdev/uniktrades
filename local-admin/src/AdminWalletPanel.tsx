@@ -234,7 +234,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
                 : "Deposits and withdrawals on UnikTrades only"}
             </p>
 
-            <div className="wallet-stat-row">
+            <div className="wallet-stat-row wallet-stat-row-2">
               <div className="wallet-stat">
                 <span>Deposited</span>
                 <strong>{fmtMoney(wallet?.depositedTotal ?? 0)}</strong>
@@ -242,10 +242,6 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
               <div className="wallet-stat">
                 <span>Withdrawn</span>
                 <strong>{fmtMoney(wallet?.withdrawnTotal ?? 0)}</strong>
-              </div>
-              <div className="wallet-stat">
-                <span>Gateway balance</span>
-                <strong>{fmtMoney(wallet?.gatewayUsdtBalance ?? 0)}</strong>
               </div>
             </div>
 

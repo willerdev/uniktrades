@@ -861,14 +861,27 @@ export default function App() {
       } else if (active === "tpClaims") {
         setTpClaims(await api.tpClaimsPending());
       } else if (active === "promos") {
-        const [codes, usage, invites] = await Promise.all([
+        const [codes, usage, invitesResult] = await Promise.all([
           api.promoCodes(),
           api.promoUsage().catch(() => []),
-          api.inviteCodes().catch(() => []),
+          api.inviteCodes().then(
+            (items) => ({ ok: true as const, items }),
+            (err: unknown) => ({
+              ok: false as const,
+              error: err instanceof Error ? err.message : "Invite codes failed",
+            }),
+          ),
         ]);
         setPromoCodes(codes);
         setPromoUsage(usage);
-        setInviteCodes(invites);
+        if (invitesResult.ok) {
+          setInviteCodes(invitesResult.items);
+        } else {
+          setInviteCodes([]);
+          setMessage(
+            `Invite codes API unavailable — redeploy the API if /admin/invite-codes is missing. (${invitesResult.error})`,
+          );
+        }
       } else if (active === "marketing") {
         const [schedule, history] = await Promise.all([
           api.marketingSchedule(),
@@ -2020,6 +2033,13 @@ export default function App() {
                 </h2>
               </div>
               <div className="toolbar-actions toolbar-actions-wrap">
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() => changeTab("promos")}
+                >
+                  Generate invite codes
+                </button>
                 <form
                   className="users-search"
                   onSubmit={(e) => {
@@ -4178,12 +4198,12 @@ export default function App() {
         {tab === "promos" && (
           <>
             <div className="toolbar">
-              <h2>Registration codes</h2>
+              <h2>Invite codes</h2>
             </div>
             <p className="muted" style={{ marginBottom: "1rem" }}>
-              <strong>Invite codes</strong> unlock signup at /register.
-              <strong> Promo codes</strong> waive or discount the registration fee
-              at checkout (after signup).
+              Create codes users enter on <strong>/register</strong> to open an
+              account. Promo codes below only discount the registration fee after
+              signup.
             </p>
 
             <div

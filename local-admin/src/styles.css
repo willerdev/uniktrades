@@ -2289,6 +2289,10 @@ button.secondary,
   margin-bottom: 1.15rem;
 }
 
+.wallet-stat-row-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (max-width: 640px) {
   .wallet-stat-row {
     grid-template-columns: 1fr;
