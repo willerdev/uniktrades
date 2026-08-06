@@ -105,11 +105,22 @@ export function InvestScreen() {
   async function enroll() {
     setBusy(true);
     try {
-      const res = await api.investor.enrollCheckout("TRC20", "wallet", Number(amount) || undefined);
-      Alert.alert("Enroll", res.message || (res.success ? "Enrolled from wallet" : "Checkout created"));
+      const value = Number(amount);
+      if (!Number.isFinite(value) || value <= 0) {
+        Alert.alert("Error", "Enter a valid investment amount");
+        return;
+      }
+      const res = await api.investor.enrollCheckout("TRC20", "wallet", value);
+      Alert.alert("Enroll", res.message || (res.success ? "Enrolled from wallet" : "Enrollment complete"));
       await load();
     } catch (err) {
-      Alert.alert("Error", err instanceof Error ? err.message : "Enroll failed");
+      const msg = err instanceof Error ? err.message : "Enroll failed";
+      Alert.alert(
+        "Error",
+        msg.includes("Insufficient") || msg.includes("Wallet")
+          ? `${msg}\n\nDeposit USDT on the Wallet screen first, then return here.`
+          : msg,
+      );
     } finally {
       setBusy(false);
     }

@@ -229,9 +229,10 @@ function PhaseTerms({
           On-chain vault contract
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          Enroll once, complete identity + liveness, then deposit after approval.
-          The contract only launches when your KYC is approved and you fund the
-          vault — until then your dashboard stays empty.
+          Enroll once, complete identity + liveness, then launch after approval.
+          Platform USDT invoices stay on the Wallet page — vault funding after
+          activation uses your connected wallet (MetaMask). Until then your
+          dashboard stays empty.
         </p>
       </div>
 
@@ -239,7 +240,7 @@ function PhaseTerms({
         {[
           {
             title: "How it works",
-            body: "Agree → verify ID & liveness → wait for approval → deposit USDT → vault activates at your tier yield.",
+            body: "Agree → verify ID & liveness → wait for approval → launch tier → deposit USDT on-chain via MetaMask at your yield band.",
           },
           {
             title: `$${t.minDepositUsd.toLocaleString()}–$${t.midTierMaxUsd.toLocaleString()}`,
@@ -305,8 +306,9 @@ function PhaseTerms({
             )}
           </li>
           <li>
-            Contract does not start until KYC is approved and your first deposit
-            is confirmed.
+            Contract does not start until KYC is approved and you launch your
+            tier. Fund the vault with MetaMask after activation — platform
+            wallet crypto deposits are separate (Wallet page only).
           </li>
           <li>
             You also agree to the platform{" "}
@@ -651,7 +653,7 @@ export function ContractNullDashboard({
           {enrollment.status === "KYC_PENDING"
             ? "Under review"
             : enrollment.status === "APPROVED"
-              ? "Approved — deposit to launch"
+              ? "Approved — launch your contract"
               : enrollment.status === "KYC_REJECTED"
                 ? "Verification rejected"
                 : "Awaiting activation"}
@@ -660,7 +662,7 @@ export function ContractNullDashboard({
           {enrollment.status === "KYC_PENDING"
             ? "Your documents and liveness are with the team. Balances, yield, and activity stay empty until approval."
             : enrollment.status === "APPROVED"
-              ? "KYC passed. Deposit at least $2,000 USDT to launch your vault contract. Live stats appear after activation."
+              ? "KYC passed. Choose your launch amount (min $2,000) to set your yield tier, then deposit USDT on-chain via MetaMask on the live dashboard. Platform wallet deposits stay on the Wallet page."
               : "Complete verification to continue."}
         </p>
       </div>
@@ -686,9 +688,15 @@ export function ContractNullDashboard({
 
       {enrollment.status === "APPROVED" && (
         <div className="rounded-2xl border border-primary/25 bg-primary/5 p-5 space-y-4">
-          <p className="text-sm font-semibold text-foreground">Launch deposit</p>
+          <p className="text-sm font-semibold text-foreground">Launch contract</p>
           <p className="text-xs text-muted">
-            ${t.minDepositUsd.toLocaleString()}–$
+            Sets your yield tier from the amount below — no platform invoice.
+            After launch, deposit USDT to the vault with MetaMask. Crypto
+            custody deposits for the platform wallet are only on{" "}
+            <Link href="/wallet" className="text-primary hover:underline">
+              Wallet
+            </Link>
+            . ${t.minDepositUsd.toLocaleString()}–$
             {t.midTierMaxUsd.toLocaleString()} → indicative {t.midTierYieldPercent}% ·
             above ${t.midTierMaxUsd.toLocaleString()} → indicative{" "}
             {t.highTierYieldPercent}% ·{" "}
@@ -699,7 +707,7 @@ export function ContractNullDashboard({
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">
-              <Label>Deposit amount (USDT)</Label>
+              <Label>Launch amount (USDT)</Label>
               <Input
                 type="number"
                 min={t.minDepositUsd}

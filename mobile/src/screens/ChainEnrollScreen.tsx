@@ -469,7 +469,7 @@ export function ChainEnrollScreen() {
             {enrollment.status === "KYC_PENDING"
               ? "Under review"
               : enrollment.status === "APPROVED"
-                ? "Approved — deposit to launch"
+                ? "Approved — launch your contract"
                 : enrollment.status === "ACTIVE"
                   ? "Contract active"
                   : "Dashboard"}
@@ -478,7 +478,7 @@ export function ChainEnrollScreen() {
             {enrollment.status === "KYC_PENDING"
               ? "Balances stay empty until approval."
               : enrollment.status === "APPROVED"
-                ? `Deposit at least ${formatUsdt(t.minDepositUsd)} to launch. Rates are indicative.`
+                ? `Choose at least ${formatUsdt(t.minDepositUsd)} to set your yield tier, then deposit on-chain via MetaMask on the web vault. Platform crypto deposits stay on Wallet.`
                 : enrollment.status === "ACTIVE"
                   ? `Yield band ${enrollment.yieldPercent ?? "—"}%. Withdrawals: ${enrollment.withdrawFeePercent}% fee.`
                   : ""}

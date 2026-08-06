@@ -4,8 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  CheckCircle2,
-  Copy,
   Loader2,
   RefreshCw,
   Shield,
@@ -20,10 +18,6 @@ import { InvestmentReturnsPanel } from "@/components/investor/investment-returns
 import { InvestorPolicyBanners } from "@/components/investor/investor-policy-banners";
 import { CurrencySwitcher } from "@/components/currency-switcher";
 import {
-  PaymentSourceSelector,
-  type PaymentSource,
-} from "@/components/wallet/payment-source-selector";
-import {
   cn,
   formatCurrency,
   formatMoney,
@@ -31,15 +25,11 @@ import {
 } from "@/lib/utils";
 import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
 
-const NETWORKS = ["TRC20", "BEP20", "ERC20"] as const;
-
 /** Enrollment fee waived — amount must still be in range. */
 function resolveFeeClient(amount: number): number | null {
   if (!Number.isFinite(amount) || amount < 100 || amount > 5000) return null;
   return 0;
 }
-
-type Progress = "waiting" | "confirming" | "complete" | "failed";
 
 const fadeUp = {
   initial: { opacity: 0, y: 12 },
@@ -155,9 +145,7 @@ function PortfolioSummary({
           </p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
             {autoReinvest ? (
-              <>
-                Auto-reinvest on ({autoReinvestFeePercent ?? 10}% fee)
-              </>
+              <>Auto-reinvest on ({autoReinvestFeePercent ?? 10}% fee)</>
             ) : (
               <>
                 Credited to wallet{" "}
@@ -213,17 +201,8 @@ export function InvestHub() {
   const [status, setStatus] = useState<InvestorStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [payLoading, setPayLoading] = useState(false);
-  const [source, setSource] = useState<PaymentSource>("wallet");
-  const [network, setNetwork] = useState("TRC20");
   const [walletBalance, setWalletBalance] = useState(0);
   const [error, setError] = useState("");
-  const [checkout, setCheckout] = useState<{
-    payAddress?: string;
-    payAmount?: number;
-    paymentId?: string;
-  } | null>(null);
-  const [progress, setProgress] = useState<Progress>("waiting");
-  const [copied, setCopied] = useState(false);
   const [transferAmount, setTransferAmount] = useState("");
   const [transferLoading, setTransferLoading] = useState(false);
   const [reinvestLoading, setReinvestLoading] = useState(false);
@@ -242,6 +221,8 @@ export function InvestHub() {
       ? Math.round((parsedInvestment - feeUsdt) * 100) / 100
       : 0;
   const depositDue = hasValidParsed ? parsedInvestment : 0;
+  const insufficientWallet =
+    hasValidParsed && walletBalance < depositDue;
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -263,56 +244,6 @@ export function InvestHub() {
     void refresh();
   }, [refresh]);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function restorePending() {
-      try {
-        const res = await api.investor.pendingEnrollment();
-        if (cancelled || res.active || !res.pending?.payAddress || !res.pending.paymentId) {
-          return;
-        }
-        setSource("crypto");
-        if (res.pending.network) setNetwork(res.pending.network);
-        if (res.pending.investmentAmount != null) {
-          setInvestmentAmount(String(res.pending.investmentAmount));
-        }
-        setCheckout({
-          payAddress: res.pending.payAddress,
-          payAmount: res.pending.payAmount ?? res.pending.amount,
-          paymentId: res.pending.paymentId,
-        });
-        setProgress("waiting");
-      } catch {
-        /* no pending enrollment */
-      }
-    }
-    void restorePending();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const pollStatus = useCallback(async () => {
-    if (!checkout?.paymentId) return;
-    try {
-      const s = await api.payments.getStatus(checkout.paymentId);
-      setProgress((s.progress as Progress) || "waiting");
-      if (s.confirmed) {
-        setProgress("complete");
-        await refresh();
-      }
-    } catch {
-      /* polling */
-    }
-  }, [checkout?.paymentId, refresh]);
-
-  useEffect(() => {
-    if (!checkout?.paymentId || progress === "complete") return;
-    const t = setInterval(() => void pollStatus(), 8000);
-    void pollStatus();
-    return () => clearInterval(t);
-  }, [checkout?.paymentId, progress, pollStatus]);
-
   async function enroll() {
     setPayLoading(true);
     setError("");
@@ -326,22 +257,18 @@ export function InvestHub() {
       if (resolveFeeClient(amount) == null) {
         throw new Error("Investment amount is outside a fee tier");
       }
-      const paySource = source === "wallet" ? "wallet" : "crypto";
-      const res = await api.investor.enrollCheckout(network, paySource, amount);
+      if (walletBalance < amount) {
+        throw new Error(
+          `Insufficient wallet balance — need ${formatCurrency(amount)} but have ${formatCurrency(walletBalance)}. Deposit on the Wallet page first.`,
+        );
+      }
+      const res = await api.investor.enrollCheckout("TRC20", "wallet", amount);
       if (res.active || res.success) {
         await refresh();
-        setCheckout(null);
+        setInvestmentAmount("");
         return;
       }
-      if (!res.payAddress || !res.paymentId) {
-        throw new Error(res.message || "Could not start enrollment");
-      }
-      setCheckout({
-        payAddress: res.payAddress,
-        payAmount: res.payAmount ?? res.amount,
-        paymentId: res.paymentId,
-      });
-      setProgress("waiting");
+      throw new Error(res.message || "Could not enroll from wallet");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Enrollment failed");
     } finally {
@@ -393,7 +320,8 @@ export function InvestHub() {
               Start Smart Investment
             </h2>
             <p className="mt-2 max-w-lg text-sm text-white/75">
-              Deposit from ${investmentMin} USDT with no enrollment fee. Earn{" "}
+              Fund your platform wallet first, then transfer ${investmentMin}+
+              USDT here with no enrollment fee. Earn{" "}
               {status?.dailyYieldPercent ?? 5}% daily on invested capital —
               credited to your wallet{" "}
               <DailyCreditTimeText
@@ -406,7 +334,7 @@ export function InvestHub() {
               {[
                 { icon: TrendingUp, text: `${status?.dailyYieldPercent ?? 5}% daily yield` },
                 { icon: Shield, text: "No enrollment fee" },
-                { icon: Wallet, text: "Credits to platform wallet" },
+                { icon: Wallet, text: "Fund via Wallet page" },
               ].map(({ icon: Icon, text }) => (
                 <li
                   key={text}
@@ -419,7 +347,7 @@ export function InvestHub() {
             </ul>
             <div className="mt-5 rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm text-white/80">
               <p>
-                Minimum deposit{" "}
+                Minimum{" "}
                 <strong className="text-white">
                   {formatCurrency(investmentMin)}
                 </strong>
@@ -445,198 +373,99 @@ export function InvestHub() {
           transition={{ delay: 0.1 }}
           className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
         >
-          {checkout?.payAddress ? (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between gap-2">
-                <Badge variant={progress === "complete" ? "success" : "gold"}>
-                  {progress === "complete"
-                    ? "Enrollment confirmed"
-                    : progress === "confirming"
-                      ? "Confirming on chain"
-                      : "Waiting for transfer"}
-                </Badge>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => void pollStatus()}
-                  className="gap-1"
-                >
-                  <RefreshCw className="h-3.5 w-3.5" />
-                  Refresh
-                </Button>
-              </div>
-              {progress === "complete" ? (
-                <div className="flex items-center gap-2 text-success">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="text-sm">Investor program activated</span>
-                </div>
-              ) : (
-                <>
-                  <div className="rounded-xl border border-[var(--color-border)] bg-background p-4">
-                    <p className="text-sm text-foreground">
-                      Send exactly{" "}
-                      <strong className="font-semibold text-foreground">
-                        {Number(checkout.payAmount ?? depositDue).toFixed(6)} USDT
-                      </strong>{" "}
-                      on{" "}
-                      <strong className="font-semibold text-foreground">
-                        {network}
-                      </strong>{" "}
-                      to:
-                    </p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(checkout.payAddress)}`}
-                      alt="Payment QR code"
-                      width={180}
-                      height={180}
-                      className="mx-auto mt-3 rounded-lg border border-[var(--color-border)] bg-white p-2"
-                    />
-                    <code className="mt-3 block break-all rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] p-3 font-mono text-xs text-foreground">
-                      {checkout.payAddress}
-                    </code>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="secondary"
-                      className="gap-1"
-                      onClick={async () => {
-                        if (!checkout.payAddress) return;
-                        try {
-                          await navigator.clipboard.writeText(checkout.payAddress);
-                          setCopied(true);
-                          setTimeout(() => setCopied(false), 2000);
-                        } catch {
-                          setError("Could not copy — select the address manually");
-                        }
-                      }}
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                      {copied ? "Copied!" : "Copy address"}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setCheckout(null);
-                        setProgress("waiting");
-                        setError("");
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted">
-                    After payment confirms, the full{" "}
-                    {formatCurrency(netInvested || parsedInvestment)} is invested
-                    automatically (no enrollment fee). Keep this page open or
-                    reload — your invoice is restored if you leave.
-                  </p>
-                </>
-              )}
+          <div className="space-y-4">
+            <div className="rounded-xl border border-[var(--color-border)] bg-background px-4 py-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
+                Available wallet balance
+              </p>
+              <p className="mt-1 text-2xl font-bold tabular-nums text-foreground">
+                {formatCurrency(walletBalance)}
+              </p>
+              <p className="mt-1 text-xs text-muted">
+                Crypto and MoMo deposits are created only on the{" "}
+                <Link href="/wallet" className="text-primary hover:underline">
+                  Wallet
+                </Link>{" "}
+                page.
+              </p>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="mb-1 block text-xs text-muted">
-                  Investment amount (USDT)
-                </label>
-                <Input
-                  type="number"
-                  min={investmentMin}
-                  max={investmentMax}
-                  step="1"
-                  placeholder={`Enter amount (min ${formatCurrency(investmentMin)})`}
-                  value={investmentAmount}
-                  onChange={(e) => setInvestmentAmount(e.target.value)}
-                />
-                <p className="mt-1.5 text-xs text-muted">
-                  {hasValidParsed ? (
-                    <>
-                      Deposit{" "}
-                      <strong className="text-foreground">
-                        {formatCurrency(depositDue)}
-                      </strong>
-                      {" — "}
-                      <strong className="text-emerald-700">
-                        $0 enrollment fee
-                      </strong>
-                      ,{" "}
-                      <strong className="text-foreground">
-                        {formatCurrency(netInvested || depositDue)}
-                      </strong>{" "}
-                      invested · earn {status?.dailyYieldPercent ?? 5}% daily
-                    </>
-                  ) : (
-                    <>
-                      Choose any amount from{" "}
-                      <strong className="text-foreground">
-                        {formatCurrency(investmentMin)}
-                      </strong>
-                      {" – "}
-                      <strong className="text-foreground">
-                        {formatCurrency(investmentMax)}
-                      </strong>
-                      {" · "}
-                      <strong className="text-emerald-700">
-                        $0 enrollment fee
-                      </strong>
-                      {" · earn "}
-                      {status?.dailyYieldPercent ?? 5}% daily
-                    </>
-                  )}
-                </p>
-              </div>
-              <PaymentSourceSelector
-                walletBalance={walletBalance}
-                amountDue={depositDue}
-                source={source}
-                onSourceChange={setSource}
+
+            <div>
+              <label className="mb-1 block text-xs text-muted">
+                Transfer amount (USDT)
+              </label>
+              <Input
+                type="number"
+                min={investmentMin}
+                max={investmentMax}
+                step="1"
+                placeholder={`Enter amount (min ${formatCurrency(investmentMin)})`}
+                value={investmentAmount}
+                onChange={(e) => {
+                  setInvestmentAmount(e.target.value);
+                  setError("");
+                }}
               />
-              {source === "crypto" && (
-                <div className="flex flex-wrap gap-2">
-                  {NETWORKS.map((n) => (
-                    <Button
-                      key={n}
-                      type="button"
-                      size="sm"
-                      variant={network === n ? "default" : "secondary"}
-                      onClick={() => setNetwork(n)}
-                    >
-                      {n}
-                    </Button>
-                  ))}
-                </div>
-              )}
-              {source === "wallet" && walletBalance < depositDue && (
-                <p className="text-sm text-muted">
-                  <Link href="/wallet" className="text-primary hover:underline">
-                    Deposit to wallet
-                  </Link>{" "}
-                  at least {formatCurrency(depositDue)} to start.
+            </div>
+
+            <div className="rounded-xl border border-[var(--color-border)] bg-background px-4 py-3 text-sm text-foreground">
+              <div className="flex justify-between gap-3">
+                <span className="text-muted">Enrollment fee</span>
+                <span className="font-semibold text-emerald-700">
+                  {formatCurrency(0)}
+                </span>
+              </div>
+              <div className="mt-2 flex justify-between gap-3 border-t border-[var(--color-border)] pt-2">
+                <span className="text-muted">Invested after transfer</span>
+                <span className="font-semibold text-foreground">
+                  {hasValidParsed
+                    ? formatCurrency(netInvested || depositDue)
+                    : "—"}
+                </span>
+              </div>
+              {hasValidParsed && (
+                <p className="mt-2 text-xs text-muted">
+                  Earn {status?.dailyYieldPercent ?? 5}% daily on invested
+                  capital
                 </p>
               )}
-              {error && <p className="text-sm text-danger">{error}</p>}
-              <Button
-                type="button"
-                className="w-full sm:w-auto"
-                size="lg"
-                onClick={() => void enroll()}
-                disabled={payLoading}
-              >
-                {payLoading && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {hasValidParsed
-                  ? `Invest ${formatCurrency(depositDue)}`
-                  : "Invest"}
-              </Button>
             </div>
-          )}
+
+            {insufficientWallet && (
+              <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-foreground">
+                Insufficient wallet balance — need{" "}
+                <strong>{formatCurrency(depositDue)}</strong> but have{" "}
+                <strong>{formatCurrency(walletBalance)}</strong>.{" "}
+                <Link href="/wallet" className="font-medium text-primary hover:underline">
+                  Deposit on Wallet
+                </Link>{" "}
+                first, then return here to transfer.
+              </p>
+            )}
+
+            {error && <p className="text-sm text-danger">{error}</p>}
+
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              size="lg"
+              onClick={() => void enroll()}
+              disabled={
+                payLoading ||
+                !hasValidParsed ||
+                insufficientWallet ||
+                parsedInvestment < investmentMin ||
+                parsedInvestment > investmentMax
+              }
+            >
+              {payLoading && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              {hasValidParsed
+                ? `Transfer ${formatCurrency(depositDue)} from wallet`
+                : "Transfer from wallet"}
+            </Button>
+          </div>
         </motion.div>
       </div>
     );
@@ -645,6 +474,13 @@ export function InvestHub() {
   const display = status.displayCurrency;
   const vip = status.vip;
   const localCurrency = isLocalCurrencyDisplay(display);
+  const parsedTransfer = Number(transferAmount);
+  const hasValidTransfer =
+    transferAmount.trim() !== "" &&
+    Number.isFinite(parsedTransfer) &&
+    parsedTransfer > 0;
+  const insufficientAllocate =
+    hasValidTransfer && walletBalance < parsedTransfer;
 
   return (
     <div className="space-y-5">
@@ -723,7 +559,10 @@ export function InvestHub() {
         </div>
         {!vip?.active && walletBalance < (vip?.feeUsdt ?? 50) && (
           <p className="mt-2 text-xs text-muted">
-            Need {formatCurrency(vip?.feeUsdt ?? 50)} in wallet to upgrade.
+            Need {formatCurrency(vip?.feeUsdt ?? 50)} in wallet to upgrade.{" "}
+            <Link href="/wallet" className="text-primary hover:underline">
+              Deposit on Wallet
+            </Link>
           </p>
         )}
       </motion.div>
@@ -735,10 +574,35 @@ export function InvestHub() {
       >
         <h3 className="text-sm font-semibold text-foreground">Move funds</h3>
         <p className="mt-1 text-xs text-muted">
-          Wallet {formatMoney(status.walletBalance, display)} · Investment{" "}
-          {formatMoney(status.investmentBalance ?? 0, display)}. Daily yield only
-          applies to capital that has been invested for at least 24 hours.
+          Transfer between your platform wallet and Smart Investment. Deposit
+          crypto only on{" "}
+          <Link href="/wallet" className="text-primary hover:underline">
+            Wallet
+          </Link>
+          . Daily yield only applies to capital invested for at least 24 hours.
         </p>
+
+        <div className="mt-3 rounded-xl border border-[var(--color-border)] bg-background px-3 py-2.5 text-sm">
+          <div className="flex justify-between gap-3">
+            <span className="text-muted">Available wallet</span>
+            <span className="font-semibold tabular-nums text-foreground">
+              {formatMoney(status.walletBalance, display)}
+            </span>
+          </div>
+          <div className="mt-1.5 flex justify-between gap-3">
+            <span className="text-muted">Investment balance</span>
+            <span className="font-semibold tabular-nums text-foreground">
+              {formatMoney(status.investmentBalance ?? 0, display)}
+            </span>
+          </div>
+          <div className="mt-1.5 flex justify-between gap-3 border-t border-[var(--color-border)] pt-1.5">
+            <span className="text-muted">Transfer fee</span>
+            <span className="font-semibold text-emerald-700">
+              {formatCurrency(0)}
+            </span>
+          </div>
+        </div>
+
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <div className="min-w-[140px] flex-1">
             <label className="mb-1 block text-xs text-muted">Amount (USDT)</label>
@@ -747,14 +611,27 @@ export function InvestHub() {
               min={0.01}
               step="0.01"
               value={transferAmount}
-              onChange={(e) => setTransferAmount(e.target.value)}
+              onChange={(e) => {
+                setTransferAmount(e.target.value);
+                setError("");
+              }}
             />
           </div>
           <Button
             type="button"
-            disabled={transferLoading}
+            disabled={transferLoading || insufficientAllocate}
             onClick={() => {
               const amount = Number(transferAmount);
+              if (!Number.isFinite(amount) || amount <= 0) {
+                setError("Enter a valid transfer amount");
+                return;
+              }
+              if (walletBalance < amount) {
+                setError(
+                  `Insufficient wallet balance — need ${formatCurrency(amount)} but have ${formatCurrency(walletBalance)}. Deposit on Wallet first.`,
+                );
+                return;
+              }
               setTransferLoading(true);
               setError("");
               void api.investor
@@ -777,6 +654,10 @@ export function InvestHub() {
             disabled={transferLoading}
             onClick={() => {
               const amount = Number(transferAmount);
+              if (!Number.isFinite(amount) || amount <= 0) {
+                setError("Enter a valid transfer amount");
+                return;
+              }
               setTransferLoading(true);
               setError("");
               void api.investor
@@ -794,6 +675,15 @@ export function InvestHub() {
             Investment → Wallet
           </Button>
         </div>
+        {insufficientAllocate && (
+          <p className="mt-2 text-sm text-foreground">
+            Insufficient wallet balance.{" "}
+            <Link href="/wallet" className="text-primary hover:underline">
+              Deposit on Wallet
+            </Link>{" "}
+            first.
+          </p>
+        )}
         {error && <p className="mt-2 text-sm text-danger">{error}</p>}
         <div className="mt-4 border-t border-[var(--color-border)] pt-4">
           <div className="flex flex-wrap items-start justify-between gap-3">

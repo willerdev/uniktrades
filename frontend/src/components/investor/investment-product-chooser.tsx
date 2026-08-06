@@ -24,7 +24,7 @@ type Props = {
 
 /**
  * Choose between Smart Investment (platform) and on-chain vault contract.
- * Smart → local deposit UI; On-chain → /blockchain enrollment + deposit.
+ * Smart → wallet transfer UI; On-chain → /blockchain enrollment + MetaMask deposit.
  */
 export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
   return (
@@ -34,8 +34,8 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
           Choose how to invest
         </h2>
         <p className="text-sm text-muted">
-          Pick a product, then deposit. No platform enrollment fee on either
-          path.
+          Fund your platform wallet first for Smart Investment. On-chain vault
+          uses MetaMask after KYC. No platform enrollment fee on either path.
         </p>
       </motion.div>
 
@@ -52,7 +52,8 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
             Smart Investment
           </h3>
           <p className="mt-1 text-sm text-muted">
-            Platform Smart-Invest with daily yield credits to your wallet.
+            Transfer from your platform wallet. Daily yield credits back to
+            wallet.
           </p>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-3 border-b border-[var(--color-border)] pb-2">
@@ -78,7 +79,7 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
             size="lg"
             onClick={onChooseSmart}
           >
-            Deposit to Smart Investment
+            Fund from wallet
             <ArrowRight className="h-4 w-4" />
           </Button>
         </motion.div>
@@ -95,8 +96,8 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
             On-chain contract
           </h3>
           <p className="mt-1 text-sm text-muted">
-            Vault contract on-chain — verify once, then deposit USDT to activate
-            your yield tier.
+            Vault on-chain — verify once, launch your tier, then deposit USDT
+            via MetaMask (not the platform wallet invoice).
           </p>
           <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-3 border-b border-[var(--color-border)] pb-2">
@@ -118,7 +119,7 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
           </dl>
           <Link href="/blockchain" className="mt-5 block">
             <Button type="button" className="w-full gap-1.5" size="lg" variant="secondary">
-              Deposit on-chain
+              Enroll on-chain
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>

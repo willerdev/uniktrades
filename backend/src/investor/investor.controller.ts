@@ -56,7 +56,7 @@ export class InvestorController {
     return this.investor.createEnrollmentCheckout(
       req.user.id,
       body.network ?? 'TRC20',
-      body.source ?? 'crypto',
+      body.source ?? 'wallet',
       body.investmentAmount,
     );
   }

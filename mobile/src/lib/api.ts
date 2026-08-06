@@ -463,7 +463,7 @@ export class ApiClient {
       }>("/investor/vip/upgrade", { method: "POST" }),
     enrollCheckout: (
       network: string,
-      source?: "wallet" | "crypto",
+      source: "wallet" | "crypto" = "wallet",
       investmentAmount?: number,
     ) =>
       this.request<InvestorCheckout>("/investor/enroll/checkout", {

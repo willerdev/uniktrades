@@ -3,20 +3,10 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-  ServiceUnavailableException,
   Inject,
   forwardRef,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  NowPaymentsApiError,
-  NowPaymentsService,
-} from '../payments/nowpayments.service';
-import {
-  isPublicHttpsUrl,
-  resolvePublicApiBaseUrl,
-} from '../common/public-url.util';
 import { NotificationService } from '../email/notification.service';
 import { MetaApiService } from '../metaapi/metaapi.service';
 import { WalletService } from '../wallet/wallet.service';
@@ -54,23 +44,12 @@ export class InvestorService {
 
   constructor(
     private prisma: PrismaService,
-    private nowPayments: NowPaymentsService,
-    private config: ConfigService,
     private notifications: NotificationService,
     private metaApi: MetaApiService,
     @Inject(forwardRef(() => WalletService))
     private walletService: WalletService,
     private fxRates: FxRatesService,
   ) {}
-
-  private ipnUrl() {
-    const base = resolvePublicApiBaseUrl(this.config);
-    const url = `${base}/api/v1/payments/ipn`;
-    if (process.env.NODE_ENV === 'production' && !isPublicHttpsUrl(url)) {
-      return undefined;
-    }
-    return url;
-  }
 
   /** @deprecated Prefer resolveFeeForInvestment — flat config is no longer the source of truth. */
   async investorFee(): Promise<number> {
@@ -397,25 +376,10 @@ export class InvestorService {
     };
   }
 
-  private async findReusableEnrollmentPayment(
-    userId: string,
-    network: string,
-    amount: number,
-  ) {
-    return this.prisma.payment.findFirst({
-      where: {
-        userId,
-        purpose: 'investor_enrollment',
-        status: 'PENDING',
-        network,
-        amount,
-        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  /** Restore an in-flight crypto enrollment invoice after a page crash/reload. */
+  /**
+   * Legacy crypto enrollment invoices are no longer created from the API.
+   * Kept so any in-flight invoice can still be inspected; Smart Invest UI no longer restores them.
+   */
   async getPendingEnrollmentCheckout(userId: string, network?: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
@@ -449,7 +413,7 @@ export class InvestorService {
   async createEnrollmentCheckout(
     userId: string,
     network: string,
-    source: 'wallet' | 'crypto' = 'crypto',
+    source: 'wallet' | 'crypto' = 'wallet',
     investmentAmountRaw?: number,
   ) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -465,91 +429,18 @@ export class InvestorService {
     const { deposit, fee, netInvested, feeWaived } =
       await this.splitDepositForUser(userId, investmentAmountRaw);
 
-    if (source === 'wallet') {
-      return this.payEnrollmentFromWallet(userId, deposit, fee, netInvested, {
-        feeWaived,
-      });
-    }
-
-    if (!this.nowPayments.isConfigured) {
-      throw new ServiceUnavailableException(
-        'Crypto payments are not configured — contact support',
+    // Crypto invoices for Smart Invest are disabled — deposit USDT on /wallet only,
+    // then enroll/allocate from platform wallet balance.
+    if (source === 'crypto') {
+      throw new BadRequestException(
+        'Smart Investment no longer accepts direct crypto deposits. Deposit USDT on the Wallet page, then transfer from your wallet balance to enroll.',
       );
     }
 
-    const existing = await this.findReusableEnrollmentPayment(
-      userId,
-      network,
-      deposit,
-    );
-    if (
-      existing?.payAddress &&
-      existing.gatewayId &&
-      !existing.gatewayId.startsWith('pending_')
-    ) {
-      return this.formatEnrollmentCheckout(existing);
-    }
-
-    const payment =
-      existing ??
-      (await this.prisma.payment.create({
-        data: {
-          userId,
-          amount: deposit,
-          currency: 'USDT',
-          network,
-          purpose: 'investor_enrollment',
-          gatewayId: `pending_${Date.now()}`,
-          gatewayResponse: {
-            investmentAmount: deposit,
-            feeUsdt: fee,
-            netInvested,
-            feeWaived,
-          } as object,
-        },
-      }));
-
-    try {
-      const npPayment = await this.nowPayments.createPayment({
-        amount: deposit,
-        orderId: payment.id,
-        network,
-        description: `TraderRank invest $${deposit} (fee $${fee} → net $${netInvested})`,
-        ipnCallbackUrl: this.ipnUrl(),
-      });
-
-      await this.prisma.payment.update({
-        where: { id: payment.id },
-        data: {
-          gatewayId: String(npPayment.payment_id),
-          gatewayResponse: {
-            ...(npPayment as object),
-            investmentAmount: deposit,
-            feeUsdt: fee,
-            netInvested,
-          } as object,
-          payAddress: npPayment.pay_address,
-          payAmount: npPayment.pay_amount,
-        },
-      });
-
-      const updated = await this.prisma.payment.findUniqueOrThrow({
-        where: { id: payment.id },
-      });
-      return this.formatEnrollmentCheckout(updated);
-    } catch (err) {
-      if (!existing) {
-        await this.prisma.payment
-          .delete({ where: { id: payment.id } })
-          .catch(() => undefined);
-      }
-      if (err instanceof NowPaymentsApiError) {
-        throw new BadRequestException(
-          err.message || 'Could not create enrollment payment',
-        );
-      }
-      throw err;
-    }
+    void network;
+    return this.payEnrollmentFromWallet(userId, deposit, fee, netInvested, {
+      feeWaived,
+    });
   }
 
   private async payEnrollmentFromWallet(
