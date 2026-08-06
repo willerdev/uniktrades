@@ -4,6 +4,7 @@ import {
   Get,
   Patch,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -30,6 +31,15 @@ export class InvestorController {
   @UseGuards(JwtAuthGuard)
   vipUpgrade(@Request() req: { user: { id: string } }) {
     return this.investor.upgradeVip(req.user.id);
+  }
+
+  @Get('enroll/pending')
+  @UseGuards(JwtAuthGuard)
+  pendingEnrollment(
+    @Request() req: { user: { id: string } },
+    @Query('network') network?: string,
+  ) {
+    return this.investor.getPendingEnrollmentCheckout(req.user.id, network);
   }
 
   @Post('enroll/checkout')

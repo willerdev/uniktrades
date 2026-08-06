@@ -271,6 +271,8 @@ export function InvestHub() {
       setStatus(s);
       setWalletBalance(w.availableBalance);
       if (s.settings) setRisk(String(s.settings.riskPercent));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load investment status");
     } finally {
       setLoading(false);
     }
@@ -279,6 +281,35 @@ export function InvestHub() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function restorePending() {
+      try {
+        const res = await api.investor.pendingEnrollment();
+        if (cancelled || res.active || !res.pending?.payAddress || !res.pending.paymentId) {
+          return;
+        }
+        setSource("crypto");
+        if (res.pending.network) setNetwork(res.pending.network);
+        if (res.pending.investmentAmount != null) {
+          setInvestmentAmount(String(res.pending.investmentAmount));
+        }
+        setCheckout({
+          payAddress: res.pending.payAddress,
+          payAmount: res.pending.payAmount ?? res.pending.amount,
+          paymentId: res.pending.paymentId,
+        });
+        setProgress("waiting");
+      } catch {
+        /* no pending enrollment */
+      }
+    }
+    void restorePending();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const pollStatus = useCallback(async () => {
     if (!checkout?.paymentId) return;
@@ -440,7 +471,7 @@ export function InvestHub() {
         >
           {checkout?.payAddress ? (
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <Badge variant={progress === "complete" ? "success" : "gold"}>
                   {progress === "complete"
                     ? "Enrollment confirmed"
@@ -449,6 +480,7 @@ export function InvestHub() {
                       : "Waiting for transfer"}
                 </Badge>
                 <Button
+                  type="button"
                   size="sm"
                   variant="ghost"
                   onClick={() => void pollStatus()}
@@ -466,34 +498,62 @@ export function InvestHub() {
               ) : (
                 <>
                   <p className="text-sm text-gray-300">
-                    Send{" "}
+                    Send exactly{" "}
                     <strong className="text-white">
-                      {checkout.payAmount} USDT
+                      {Number(checkout.payAmount ?? depositDue).toFixed(6)} USDT
                     </strong>{" "}
-                    fee on {network} to:
+                    on {network} to:
                   </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(checkout.payAddress)}`}
+                    alt="Payment QR code"
+                    width={180}
+                    height={180}
+                    className="mx-auto rounded-lg bg-white p-2"
+                  />
                   <code className="block break-all rounded-lg bg-black/40 p-3 text-xs text-primary">
                     {checkout.payAddress}
                   </code>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="gap-1"
-                    onClick={async () => {
-                      if (!checkout.payAddress) return;
-                      await navigator.clipboard.writeText(checkout.payAddress);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                    {copied ? "Copied!" : "Copy address"}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      className="gap-1"
+                      onClick={async () => {
+                        if (!checkout.payAddress) return;
+                        try {
+                          await navigator.clipboard.writeText(checkout.payAddress);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        } catch {
+                          setError("Could not copy — select the address manually");
+                        }
+                      }}
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      {copied ? "Copied!" : "Copy address"}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setCheckout(null);
+                        setProgress("waiting");
+                        setError("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                   <p className="text-xs text-gray-500">
                     After payment confirms,{" "}
                     {formatCurrency(feeUsdt)} fee is deducted and{" "}
                     {formatCurrency(netInvested || parsedInvestment)} is invested
-                    automatically.
+                    automatically. Keep this page open or reload — your invoice
+                    is restored if you leave.
                   </p>
                 </>
               )}
@@ -557,6 +617,7 @@ export function InvestHub() {
               )}
               {error && <p className="text-sm text-danger">{error}</p>}
               <Button
+                type="button"
                 className="w-full sm:w-auto"
                 size="lg"
                 onClick={() => void enroll()}

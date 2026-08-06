@@ -344,6 +344,108 @@ export class InvestorService {
     };
   }
 
+  private formatEnrollmentCheckout(
+    payment: {
+      id: string;
+      amount: { toString(): string } | number;
+      network: string;
+      payAddress?: string | null;
+      payAmount?: { toString(): string } | number | null;
+      gatewayId?: string | null;
+      gatewayResponse: unknown;
+    },
+  ) {
+    const stored = (payment.gatewayResponse ?? {}) as Record<string, unknown>;
+    const deposit = Number(payment.amount);
+    const fee =
+      typeof stored.feeUsdt === 'number'
+        ? stored.feeUsdt
+        : Number(stored.feeUsdt ?? 0);
+    const netInvested =
+      typeof stored.netInvested === 'number'
+        ? stored.netInvested
+        : Number(stored.netInvested ?? Math.max(0, deposit - fee));
+    const payCurrency =
+      typeof stored.pay_currency === 'string' ? stored.pay_currency : 'usdt';
+    const gatewayPaymentId =
+      payment.gatewayId && !payment.gatewayId.startsWith('pending_')
+        ? Number(payment.gatewayId)
+        : undefined;
+
+    return {
+      paymentId: payment.id,
+      amount: deposit,
+      investmentAmount: deposit,
+      feeUsdt: fee,
+      netInvested,
+      currency: 'USDT',
+      network: payment.network,
+      purpose: 'investor_enrollment' as const,
+      payCurrency,
+      payAmount:
+        payment.payAmount != null
+          ? Number(payment.payAmount)
+          : deposit,
+      payAddress: payment.payAddress ?? undefined,
+      gatewayPaymentId,
+      liveStatus:
+        typeof stored.payment_status === 'string'
+          ? stored.payment_status
+          : 'waiting',
+      gateway: 'Crypto',
+      orderId: payment.id,
+    };
+  }
+
+  private async findReusableEnrollmentPayment(
+    userId: string,
+    network: string,
+    amount: number,
+  ) {
+    return this.prisma.payment.findFirst({
+      where: {
+        userId,
+        purpose: 'investor_enrollment',
+        status: 'PENDING',
+        network,
+        amount,
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  /** Restore an in-flight crypto enrollment invoice after a page crash/reload. */
+  async getPendingEnrollmentCheckout(userId: string, network?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    if (user.investorActive) {
+      return { pending: null, active: true };
+    }
+
+    const payment = await this.prisma.payment.findFirst({
+      where: {
+        userId,
+        purpose: 'investor_enrollment',
+        status: 'PENDING',
+        payAddress: { not: null },
+        ...(network ? { network: network.toUpperCase() } : {}),
+        createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (
+      !payment?.payAddress ||
+      !payment.gatewayId ||
+      payment.gatewayId.startsWith('pending_')
+    ) {
+      return { pending: null };
+    }
+
+    return { pending: this.formatEnrollmentCheckout(payment) };
+  }
+
   async createEnrollmentCheckout(
     userId: string,
     network: string,
@@ -369,28 +471,43 @@ export class InvestorService {
       });
     }
 
-    const payment = await this.prisma.payment.create({
-      data: {
-        userId,
-        amount: deposit,
-        currency: 'USDT',
-        network,
-        purpose: 'investor_enrollment',
-        gatewayId: `pending_${Date.now()}`,
-        gatewayResponse: {
-          investmentAmount: deposit,
-          feeUsdt: fee,
-          netInvested,
-          feeWaived,
-        } as object,
-      },
-    });
-
     if (!this.nowPayments.isConfigured) {
       throw new ServiceUnavailableException(
         'Crypto payments are not configured — contact support',
       );
     }
+
+    const existing = await this.findReusableEnrollmentPayment(
+      userId,
+      network,
+      deposit,
+    );
+    if (
+      existing?.payAddress &&
+      existing.gatewayId &&
+      !existing.gatewayId.startsWith('pending_')
+    ) {
+      return this.formatEnrollmentCheckout(existing);
+    }
+
+    const payment =
+      existing ??
+      (await this.prisma.payment.create({
+        data: {
+          userId,
+          amount: deposit,
+          currency: 'USDT',
+          network,
+          purpose: 'investor_enrollment',
+          gatewayId: `pending_${Date.now()}`,
+          gatewayResponse: {
+            investmentAmount: deposit,
+            feeUsdt: fee,
+            netInvested,
+            feeWaived,
+          } as object,
+        },
+      }));
 
     try {
       const npPayment = await this.nowPayments.createPayment({
@@ -416,27 +533,16 @@ export class InvestorService {
         },
       });
 
-      return {
-        paymentId: payment.id,
-        amount: deposit,
-        investmentAmount: deposit,
-        feeUsdt: fee,
-        netInvested,
-        currency: 'USDT',
-        network,
-        purpose: 'investor_enrollment',
-        payCurrency: npPayment.pay_currency,
-        payAmount: npPayment.pay_amount,
-        payAddress: npPayment.pay_address,
-        gatewayPaymentId: npPayment.payment_id,
-        liveStatus: npPayment.payment_status,
-        gateway: 'Crypto',
-        orderId: payment.id,
-      };
+      const updated = await this.prisma.payment.findUniqueOrThrow({
+        where: { id: payment.id },
+      });
+      return this.formatEnrollmentCheckout(updated);
     } catch (err) {
-      await this.prisma.payment
-        .delete({ where: { id: payment.id } })
-        .catch(() => undefined);
+      if (!existing) {
+        await this.prisma.payment
+          .delete({ where: { id: payment.id } })
+          .catch(() => undefined);
+      }
       if (err instanceof NowPaymentsApiError) {
         throw new BadRequestException(
           err.message || 'Could not create enrollment payment',

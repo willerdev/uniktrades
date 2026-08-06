@@ -1150,6 +1150,15 @@ class ApiClient {
         method: "POST",
         body: JSON.stringify({ network, source, investmentAmount }),
       }),
+    pendingEnrollment: (network?: string) =>
+      this.request<{
+        pending: InvestorCheckout | null;
+        active?: boolean;
+      }>(
+        `/investor/enroll/pending${
+          network ? `?network=${encodeURIComponent(network)}` : ""
+        }`,
+      ),
     updateSettings: (riskPercent: number) =>
       this.request<{ riskPercent: number; paused: boolean }>(
         "/investor/settings",
