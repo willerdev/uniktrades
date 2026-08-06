@@ -110,7 +110,7 @@ export function InvestorList({
           <tbody>
             {pageRows.map((r) => (
               <tr key={r.wallet} className="border-b border-white/5 last:border-0">
-                <td className="py-2.5 pr-3 font-mono text-xs text-sky-300">
+                <td className="py-2.5 pr-3 font-mono text-xs text-primary">
                   {shortAddr(r.wallet, 6)}
                 </td>
                 <td className="py-2.5 pr-3 text-xs text-muted">

@@ -15,18 +15,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-html.dark {
-  --color-background: #0B1520;
-  --color-foreground: #F5F7F8;
-  /* Brighter muted so nav/labels stay readable on navy surfaces */
-  --color-muted: #C5D0D6;
-  --color-border: rgba(255, 255, 255, 0.14);
-  --color-surface: rgba(22, 36, 48, 0.98);
-  --color-primary: #3B8BB0;
-  --color-accent: #E06A1C;
-  --color-success: #3B8BB0;
-  --color-rank-gold: #E06A1C;
+html.light {
+  color-scheme: light;
 }
+
+/* Dark theme removed — keep tokens only on :root / @theme (light). */
 
 * {
   box-sizing: border-box;

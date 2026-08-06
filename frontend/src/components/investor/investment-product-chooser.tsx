@@ -30,10 +30,10 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
   return (
     <div className={cn("space-y-4", className)}>
       <motion.div {...fade} className="space-y-1">
-        <h2 className="text-xl font-bold text-white sm:text-2xl">
+        <h2 className="text-xl font-bold text-foreground sm:text-2xl">
           Choose how to invest
         </h2>
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-muted">
           Pick a product, then deposit. No platform enrollment fee on either
           path.
         </p>
@@ -45,31 +45,31 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
           transition={{ delay: 0.05 }}
           className="flex flex-col rounded-2xl border border-indigo-500/35 bg-gradient-to-br from-indigo-950/70 via-[#0f1419] to-cyan-950/30 p-5"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-primary">
             <TrendingUp className="h-5 w-5" />
           </div>
-          <h3 className="mt-3 text-lg font-semibold text-white">
+          <h3 className="mt-3 text-lg font-semibold text-foreground">
             Smart Investment
           </h3>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-muted">
             Platform Smart-Invest with daily yield credits to your wallet.
           </p>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between gap-3 border-b border-white/5 pb-2">
-              <dt className="text-gray-500">Minimum</dt>
-              <dd className="font-semibold text-white">
+            <div className="flex justify-between gap-3 border-b border-[var(--color-border)] pb-2">
+              <dt className="text-muted">Minimum</dt>
+              <dd className="font-semibold text-foreground">
                 ${SMART_INVEST_MIN_USD.toLocaleString()} USDT
               </dd>
             </div>
-            <div className="flex justify-between gap-3 border-b border-white/5 pb-2">
-              <dt className="text-gray-500">Daily yield</dt>
-              <dd className="font-semibold text-emerald-300">
+            <div className="flex justify-between gap-3 border-b border-[var(--color-border)] pb-2">
+              <dt className="text-muted">Daily yield</dt>
+              <dd className="font-semibold text-emerald-700">
                 {SMART_INVEST_DAILY_YIELD_PERCENT}% (VIP up to 10%)
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500">Enrollment fee</dt>
-              <dd className="font-semibold text-white">$0</dd>
+              <dt className="text-muted">Enrollment fee</dt>
+              <dd className="font-semibold text-foreground">$0</dd>
             </div>
           </dl>
           <Button
@@ -88,32 +88,32 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
           transition={{ delay: 0.1 }}
           className="flex flex-col rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-950/40 via-[#0f1419] to-orange-950/20 p-5"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-800">
             <Blocks className="h-5 w-5" />
           </div>
-          <h3 className="mt-3 text-lg font-semibold text-white">
+          <h3 className="mt-3 text-lg font-semibold text-foreground">
             On-chain contract
           </h3>
-          <p className="mt-1 text-sm text-gray-400">
+          <p className="mt-1 text-sm text-muted">
             Vault contract on-chain — verify once, then deposit USDT to activate
             your yield tier.
           </p>
           <dl className="mt-4 space-y-2 text-sm">
-            <div className="flex justify-between gap-3 border-b border-white/5 pb-2">
-              <dt className="text-gray-500">Minimum</dt>
-              <dd className="font-semibold text-white">
+            <div className="flex justify-between gap-3 border-b border-[var(--color-border)] pb-2">
+              <dt className="text-muted">Minimum</dt>
+              <dd className="font-semibold text-foreground">
                 ${CHAIN_CONTRACT_MIN_USD.toLocaleString()} USDT
               </dd>
             </div>
-            <div className="flex justify-between gap-3 border-b border-white/5 pb-2">
-              <dt className="text-gray-500">Daily yield</dt>
-              <dd className="font-semibold text-emerald-300">
+            <div className="flex justify-between gap-3 border-b border-[var(--color-border)] pb-2">
+              <dt className="text-muted">Daily yield</dt>
+              <dd className="font-semibold text-emerald-700">
                 {CHAIN_MID_YIELD_PERCENT}%–{CHAIN_HIGH_YIELD_PERCENT}% by tier
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-gray-500">Withdrawal fee</dt>
-              <dd className="font-semibold text-white">$0</dd>
+              <dt className="text-muted">Withdrawal fee</dt>
+              <dd className="font-semibold text-foreground">$0</dd>
             </div>
           </dl>
           <Link href="/blockchain" className="mt-5 block">

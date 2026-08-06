@@ -62,10 +62,10 @@ export function InvestorPolicyBanners({
       {showVip && (
         <div className="rounded-xl border border-amber-400/40 bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent p-3.5 text-sm text-amber-50">
           <div className="flex items-start gap-2.5">
-            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" />
+            <Crown className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
             <div className="space-y-1">
-              <p className="font-semibold text-amber-100">VIP privilege</p>
-              <p className="text-amber-100/85 leading-relaxed">
+              <p className="font-semibold text-amber-900">VIP privilege</p>
+              <p className="text-amber-900/85 leading-relaxed">
                 As a VIP investor you earn{" "}
                 <strong>{vipDailyYieldPercent}% daily</strong> on your investment
                 by default (vs standard platform yield), plus weekend earnings and{" "}
@@ -81,12 +81,12 @@ export function InvestorPolicyBanners({
           <div className="flex items-start gap-2.5">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
             <div className="space-y-1">
-              <p className="font-semibold text-amber-100">
+              <p className="font-semibold text-amber-900">
                 {blockedNow
                   ? "Investment below minimum — not earning"
                   : "Minimum investment update"}
               </p>
-              <p className="text-amber-100/85 leading-relaxed">
+              <p className="text-amber-900/85 leading-relaxed">
                 {blockedNow ? (
                   <>
                     Your Smart-Invest balance is{" "}
@@ -129,7 +129,7 @@ export function InvestorPolicyBanners({
                 keeps earning while the loan is open.{" "}
                 <a
                   href="/loans"
-                  className="font-semibold text-sky-200 underline underline-offset-2 hover:text-white"
+                  className="font-semibold text-sky-200 underline underline-offset-2 hover:text-foreground"
                 >
                   Request a loan
                 </a>

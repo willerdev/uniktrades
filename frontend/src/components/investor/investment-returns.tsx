@@ -132,13 +132,13 @@ export function InvestmentReturnsPanel({
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-300/90">
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700/90">
               Smart investment returns
             </p>
-            <h3 className="mt-1 text-lg font-semibold text-white">
+            <h3 className="mt-1 text-lg font-semibold text-foreground">
               Daily yield & projections
             </h3>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-muted">
               {dailyYieldPercent}% daily on{" "}
               {money(investmentBalance)}
               {yieldPaused
@@ -167,12 +167,12 @@ export function InvestmentReturnsPanel({
           ].map((row) => (
             <div
               key={row.label}
-              className="rounded-xl border border-white/10 bg-black/25 px-3 py-3"
+              className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] px-3 py-3"
             >
-              <p className="text-xs text-gray-500">{row.label}</p>
+              <p className="text-xs text-muted">{row.label}</p>
               <p
                 className={cn(
-                  "mt-1 font-semibold tabular-nums text-emerald-300",
+                  "mt-1 font-semibold tabular-nums text-emerald-700",
                   localCurrency ? "text-sm xl:text-base" : "text-lg",
                 )}
               >
@@ -182,14 +182,14 @@ export function InvestmentReturnsPanel({
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-400">
+        <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted">
           <span>
             Lifetime yield:{" "}
-            <strong className="text-white">{money(walletEarnings)}</strong>
+            <strong className="text-foreground">{money(walletEarnings)}</strong>
           </span>
           <span>
             Last 7 days:{" "}
-            <strong className="text-emerald-300">
+            <strong className="text-emerald-700">
               +{money(last7)}
             </strong>
           </span>
@@ -197,19 +197,19 @@ export function InvestmentReturnsPanel({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] p-4">
+        <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-semibold text-foreground">
                 Daily returns
               </h4>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-xs text-muted">
                 Actual yield credited over 14 days
               </p>
             </div>
             <span
               className={cn(
-                "rounded-full bg-emerald-500/10 px-2 py-1 font-medium text-emerald-300",
+                "rounded-full bg-emerald-500/10 px-2 py-1 font-medium text-emerald-700",
                 localCurrency ? "text-[10px]" : "text-xs",
               )}
             >
@@ -266,7 +266,7 @@ export function InvestmentReturnsPanel({
               })}
             </svg>
           </div>
-          <div className="flex justify-between text-[10px] text-gray-600">
+          <div className="flex justify-between text-[10px] text-muted">
             <span>{historyPoints[0]?.label}</span>
             <span>{historyPoints[6]?.label}</span>
             <span>{historyPoints[13]?.label}</span>
@@ -276,16 +276,16 @@ export function InvestmentReturnsPanel({
         <div className="overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/30 to-white/[0.02] p-4">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h4 className="text-sm font-semibold text-white">
+              <h4 className="text-sm font-semibold text-foreground">
                 30-day growth projection
               </h4>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-xs text-muted">
                 Balance plus estimated wallet yield
               </p>
             </div>
             <span
               className={cn(
-                "rounded-full bg-indigo-500/10 px-2 py-1 font-medium text-indigo-300",
+                "rounded-full bg-indigo-500/10 px-2 py-1 font-medium text-primary",
                 localCurrency ? "text-[10px]" : "text-xs",
               )}
             >
@@ -348,23 +348,23 @@ export function InvestmentReturnsPanel({
               })}
             </svg>
           </div>
-          <div className="flex justify-between text-[10px] text-gray-600">
+          <div className="flex justify-between text-[10px] text-muted">
             {growthPoints.map((point) => (
               <span key={point.label}>{point.label}</span>
             ))}
           </div>
-          <p className="mt-2 text-[10px] text-gray-600">
+          <p className="mt-2 text-[10px] text-muted">
             Projection assumes the current daily rate and balance; actual returns
             may vary.
           </p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
-        <div className="flex items-center justify-between gap-2 border-b border-white/5 px-4 py-3">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] overflow-hidden">
+        <div className="flex items-center justify-between gap-2 border-b border-[var(--color-border)] px-4 py-3">
           <div>
-            <h4 className="text-sm font-semibold text-white">Yield history</h4>
-            <p className="text-xs text-gray-500">
+            <h4 className="text-sm font-semibold text-foreground">Yield history</h4>
+            <p className="text-xs text-muted">
               Daily interest credited to your wallet
             </p>
           </div>
@@ -377,11 +377,11 @@ export function InvestmentReturnsPanel({
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-10 text-gray-500">
+          <div className="flex justify-center py-10 text-muted">
             <Loader2 className="h-5 w-5 animate-spin" />
           </div>
         ) : entries.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-gray-500">
+          <p className="px-4 py-8 text-center text-sm text-muted">
             No daily credits yet. Yield posts once per day while you have an
             investment balance.
           </p>
@@ -393,8 +393,8 @@ export function InvestmentReturnsPanel({
                 className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
               >
                 <div>
-                  <p className="font-medium text-white">{e.creditDate}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-medium text-foreground">{e.creditDate}</p>
+                  <p className="text-xs text-muted">
                     {e.yieldPercent}% on {money(e.baseBalance)}
                   </p>
                 </div>

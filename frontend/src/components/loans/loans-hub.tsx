@@ -44,7 +44,9 @@ export function LoansHub() {
     setMessage("");
     try {
       await api.loans.request(term);
-      setMessage("Loan request submitted — check your email. Waiting for admin approval.");
+      setMessage(
+        "Loan request submitted — check your email. Waiting for admin approval.",
+      );
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Request failed");
@@ -91,14 +93,14 @@ export function LoansHub() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-        <p className="text-xs uppercase tracking-[0.16em] text-sky-300/80">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Earnings advance
         </p>
-        <h2 className="mt-1 text-xl font-semibold text-white">
+        <h2 className="mt-1 text-xl font-semibold text-foreground">
           Borrow 80% of projected earnings
         </h2>
-        <p className="mt-2 text-sm text-gray-400">
+        <p className="mt-2 text-sm text-muted">
           Daily / weekly / monthly based on your Smart-Invest + Unitrust daily
           yield. You receive 80% in advance and repay with 20% interest on that
           advance. KYC required. Admin must approve. While the loan is open you
@@ -106,39 +108,39 @@ export function LoansHub() {
         </p>
         {quote && (
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl bg-black/20 p-3">
-              <div className="text-xs text-gray-500">Est. daily earning</div>
-              <div className="font-medium text-white">
+            <div className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.03] p-3">
+              <div className="text-xs text-muted">Est. daily earning</div>
+              <div className="font-semibold text-foreground">
                 {formatCurrency(quote.dailyEarning)}
               </div>
             </div>
-            <div className="rounded-xl bg-black/20 p-3">
-              <div className="text-xs text-gray-500">Invested corpus</div>
-              <div className="font-medium text-white">
+            <div className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.03] p-3">
+              <div className="text-xs text-muted">Invested corpus</div>
+              <div className="font-semibold text-foreground">
                 {formatCurrency(quote.corpus)}
               </div>
             </div>
           </div>
         )}
         {quote && !quote.eligible && (
-          <p className="mt-3 text-sm text-amber-300">
+          <p className="mt-3 text-sm text-amber-700">
             Need at least {formatCurrency(quote.minCorpusUsdt)} invested and ~
             {formatCurrency(quote.minDailyEarningUsdt)}/day projected earnings.
           </p>
         )}
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-4">
+      <div className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
         <div className="flex flex-wrap gap-2">
           {TERMS.map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTerm(t)}
-              className={`rounded-lg px-3 py-1.5 text-sm ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
                 term === t
                   ? "bg-primary text-white"
-                  : "bg-white/5 text-gray-300 hover:bg-white/10"
+                  : "bg-foreground/5 text-foreground hover:bg-foreground/10"
               }`}
             >
               {t.charAt(0) + t.slice(1).toLowerCase()}
@@ -147,26 +149,30 @@ export function LoansHub() {
         </div>
 
         {quote && (
-          <ul className="space-y-2 text-sm text-gray-300">
+          <ul className="space-y-2 text-sm text-foreground">
             <li className="flex justify-between">
-              <span>Period</span>
-              <span>{quote.periodDays} day(s)</span>
+              <span className="text-muted">Period</span>
+              <span className="font-medium">{quote.periodDays} day(s)</span>
             </li>
             <li className="flex justify-between">
-              <span>Projected earnings</span>
-              <span>{formatCurrency(quote.projectedEarnings)}</span>
+              <span className="text-muted">Projected earnings</span>
+              <span className="font-medium">
+                {formatCurrency(quote.projectedEarnings)}
+              </span>
             </li>
-            <li className="flex justify-between text-white">
-              <span>You receive (80%)</span>
+            <li className="flex justify-between">
+              <span className="text-muted">You receive (80%)</span>
               <span className="font-semibold">
                 {formatCurrency(quote.principal)}
               </span>
             </li>
             <li className="flex justify-between">
-              <span>Interest (20% of advance)</span>
-              <span>{formatCurrency(quote.interestAmount)}</span>
+              <span className="text-muted">Interest (20% of advance)</span>
+              <span className="font-medium">
+                {formatCurrency(quote.interestAmount)}
+              </span>
             </li>
-            <li className="flex justify-between text-emerald-300">
+            <li className="flex justify-between text-primary">
               <span>Total to repay</span>
               <span className="font-semibold">
                 {formatCurrency(quote.totalDue)}
@@ -175,7 +181,7 @@ export function LoansHub() {
           </ul>
         )}
 
-        <p className="text-xs text-gray-500">{quote?.explanation}</p>
+        <p className="text-xs text-muted">{quote?.explanation}</p>
 
         <Button
           className="w-full"
@@ -187,24 +193,24 @@ export function LoansHub() {
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-        <h3 className="mb-3 font-medium text-white">Your loans</h3>
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-sm">
+        <h3 className="mb-3 font-semibold text-foreground">Your loans</h3>
         {loans.length === 0 ? (
-          <p className="text-sm text-gray-500">No loan requests yet.</p>
+          <p className="text-sm text-muted">No loan requests yet.</p>
         ) : (
           <ul className="space-y-3">
             {loans.map((loan) => (
               <li
                 key={loan.id}
-                className="rounded-xl border border-white/10 bg-black/20 p-3 text-sm"
+                className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.03] p-3 text-sm"
               >
-                <div className="flex justify-between text-white">
+                <div className="flex justify-between font-medium text-foreground">
                   <span>
                     {loan.term} · {loan.status}
                   </span>
                   <span>{formatCurrency(loan.principal)}</span>
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted">
                   Repay {formatCurrency(loan.totalDue)}
                   {loan.dueAt
                     ? ` · due ${new Date(loan.dueAt).toLocaleDateString()}`
@@ -238,7 +244,7 @@ export function LoansHub() {
       </div>
 
       {error && <p className="text-sm text-danger">{error}</p>}
-      {message && <p className="text-sm text-emerald-300">{message}</p>}
+      {message && <p className="text-sm text-primary">{message}</p>}
     </div>
   );
 }

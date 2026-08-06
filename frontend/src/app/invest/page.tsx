@@ -35,8 +35,8 @@ export default function InvestPage() {
     <div className="mx-auto max-w-lg space-y-4 px-4 py-4 sm:max-w-xl sm:px-6 sm:py-6 xl:max-w-7xl xl:px-8 xl:py-8">
       <div className="xl:flex xl:items-end xl:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white xl:text-3xl">Invest</h1>
-          <p className="mt-1 text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground xl:text-3xl">Invest</h1>
+          <p className="mt-1 text-sm text-muted">
             Smart Investment or on-chain vault — see minimums, daily yields, and
             deposit into the product you choose.
           </p>
@@ -49,10 +49,10 @@ export default function InvestPage() {
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-foreground">
                 Smart Investment
               </h2>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted">
                 Daily yield on your capital. New allocations earn after 24 hours.
               </p>
             </div>

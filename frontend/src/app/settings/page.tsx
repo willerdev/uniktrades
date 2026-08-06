@@ -8,8 +8,6 @@ import {
   User,
   MapPin,
   ShieldCheck,
-  Moon,
-  Sun,
   LogOut,
   Upload,
   Loader2,
@@ -27,7 +25,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useAuthStore } from "@/stores/auth";
 import { AuthLoadingScreen, useRequireAuth } from "@/hooks/use-require-auth";
-import { useThemeStore } from "@/stores/theme";
 import { useT } from "@/i18n";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { api, type UserSettings, type KycRecord, type MetaApiAccountRow } from "@/lib/api";
@@ -144,7 +141,6 @@ export default function SettingsPage() {
   const t = useT();
   const { ready } = useRequireAuth();
   const { logout, setAuth, token } = useAuthStore();
-  const { theme, setTheme } = useThemeStore();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -556,7 +552,7 @@ export default function SettingsPage() {
                   setProfileForm({ ...profileForm, displayName: e.target.value })
                 }
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 Reserved names (admin, platform, support, etc.) are not allowed.
               </p>
             </div>
@@ -714,7 +710,7 @@ export default function SettingsPage() {
                 id="displayCurrency"
                 value={preferredCurrency}
                 onChange={(e) => setPreferredCurrency(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+                className="w-full rounded-md border border-[var(--color-border)] bg-foreground/5 px-3 py-2 text-sm text-foreground"
               >
                 <option value="">USDT (default)</option>
                 <option value="USDT">USDT</option>
@@ -734,9 +730,9 @@ export default function SettingsPage() {
                 ))}
               </select>
               {settings?.displayCurrency && (
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted">
                   Currently showing{" "}
-                  <strong className="text-gray-300">
+                  <strong className="text-foreground/80">
                     {settings.displayCurrency.code}
                   </strong>
                   {settings.displayCurrency.source === "coinbase" &&
@@ -807,7 +803,7 @@ export default function SettingsPage() {
                   }
                   className="font-mono text-sm"
                 />
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted">
                   Tron network address — 34 characters starting with T.
                 </p>
               </div>
@@ -1022,11 +1018,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              {theme === "dark" ? (
-                <Moon className="h-5 w-5 text-primary" />
-              ) : (
-                <Sun className="h-5 w-5 text-primary" />
-              )}
+              <User className="h-5 w-5 text-primary" />
               <CardTitle>{t("settings.appearanceSession")}</CardTitle>
             </div>
             <CardDescription>
@@ -1045,29 +1037,6 @@ export default function SettingsPage() {
               </p>
               <p className="mb-2 text-xs text-muted">{t("settings.languageHint")}</p>
               <LanguageSwitcher />
-            </div>
-            <div>
-              <p className="mb-2 text-sm font-medium text-foreground">{t("settings.appearance")}</p>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant={theme === "dark" ? "default" : "secondary"}
-                  className="flex-1 gap-2"
-                  onClick={() => setTheme("dark")}
-                >
-                  <Moon className="h-4 w-4" />
-                  {t("settings.dark")}
-                </Button>
-                <Button
-                  type="button"
-                  variant={theme === "light" ? "default" : "secondary"}
-                  className="flex-1 gap-2"
-                  onClick={() => setTheme("light")}
-                >
-                  <Sun className="h-4 w-4" />
-                  {t("settings.light")}
-                </Button>
-              </div>
             </div>
             <Button
               variant="secondary"

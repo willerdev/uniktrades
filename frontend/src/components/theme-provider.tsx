@@ -1,20 +1,21 @@
 "use client";
 
 import { useEffect } from "react";
-import { useThemeStore } from "@/stores/theme";
 
+/** Light-only: strip any persisted `dark` class and lock document to light. */
 export function ThemeProvider() {
-  const theme = useThemeStore((s) => s.theme);
-
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const stored = useThemeStore.getState().theme;
-    document.documentElement.classList.add(stored);
+    root.classList.remove("dark");
+    root.classList.add("light");
+    try {
+      localStorage.setItem(
+        "uniktrades-theme",
+        JSON.stringify({ state: { theme: "light" }, version: 0 }),
+      );
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   return null;

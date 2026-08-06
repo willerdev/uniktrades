@@ -83,7 +83,7 @@ function PortfolioSummary({
   return (
     <motion.div
       {...fadeUp}
-      className="xl:col-span-12 xl:row-start-1 overflow-hidden rounded-2xl border border-white/10 bg-[var(--color-surface)]"
+      className="xl:col-span-12 xl:row-start-1 overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)]"
     >
       <div className="relative px-5 pb-5 pt-5 sm:px-6">
         <div
@@ -97,7 +97,7 @@ function PortfolioSummary({
             </p>
             <p
               className={cn(
-                "mt-2 font-bold tracking-tight text-white",
+                "mt-2 font-bold tracking-tight text-foreground",
                 localCurrency ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl",
               )}
             >
@@ -110,22 +110,22 @@ function PortfolioSummary({
                   : "Active investor"}
               </span>
               {vipActive && (
-                <span className="rounded-md bg-amber-400/20 px-1.5 py-0.5 text-xs font-semibold text-amber-100">
+                <span className="rounded-md bg-amber-400/20 px-1.5 py-0.5 text-xs font-semibold text-amber-900">
                   VIP
                 </span>
               )}
               {paused && (
-                <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-200">
+                <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-800">
                   Paused
                 </span>
               )}
               {yieldPaused && (
-                <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-200">
+                <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-800">
                   Yield paused
                 </span>
               )}
               {autoReinvest && (
-                <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-200">
+                <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-xs text-emerald-700">
                   Auto-reinvest
                 </span>
               )}
@@ -145,12 +145,12 @@ function PortfolioSummary({
         </div>
       </div>
 
-      <div className="grid border-t border-white/10 sm:grid-cols-3">
-        <div className="border-b border-white/10 px-5 py-4 sm:border-b-0 sm:border-r sm:px-6">
+      <div className="grid border-t border-[var(--color-border)] sm:grid-cols-3">
+        <div className="border-b border-[var(--color-border)] px-5 py-4 sm:border-b-0 sm:border-r sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
             Daily yield
           </p>
-          <p className="mt-1.5 text-2xl font-bold text-white">
+          <p className="mt-1.5 text-2xl font-bold text-foreground">
             {dailyYieldPercent}%
           </p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
@@ -169,11 +169,11 @@ function PortfolioSummary({
             )}
           </p>
         </div>
-        <div className="border-b border-white/10 px-5 py-4 sm:border-b-0 sm:border-r sm:px-6">
+        <div className="border-b border-[var(--color-border)] px-5 py-4 sm:border-b-0 sm:border-r sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
             Credited daily
           </p>
-          <p className="mt-1.5 text-2xl font-bold text-white">Wallet</p>
+          <p className="mt-1.5 text-2xl font-bold text-foreground">Wallet</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
             Yield lands in your platform wallet
           </p>
@@ -206,7 +206,7 @@ function tradeStatusClass(status: string) {
   const s = status.toLowerCase();
   if (s === "closed" || s === "open") return "bg-emerald-500/15 text-emerald-400";
   if (s === "failed" || s === "skipped") return "bg-red-500/15 text-red-400";
-  return "bg-white/10 text-gray-400";
+  return "bg-white/10 text-muted";
 }
 
 export function InvestHub() {
@@ -386,13 +386,13 @@ export function InvestHub() {
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-cyan-500/15 blur-3xl" />
           <div className="relative">
-            <p className="text-xs font-semibold uppercase tracking-widest text-indigo-300">
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
               Smart Investment
             </p>
-            <h2 className="mt-2 text-2xl font-bold text-white">
+            <h2 className="mt-2 text-2xl font-bold text-foreground">
               Start Smart Investment
             </h2>
-            <p className="mt-2 max-w-lg text-sm text-gray-400">
+            <p className="mt-2 max-w-lg text-sm text-muted">
               Deposit from ${investmentMin} USDT with no enrollment fee. Earn{" "}
               {status?.dailyYieldPercent ?? 5}% daily on invested capital —
               credited to your wallet{" "}
@@ -410,26 +410,26 @@ export function InvestHub() {
               ].map(({ icon: Icon, text }) => (
                 <li
                   key={text}
-                  className="flex items-center gap-2 rounded-xl border border-white/5 bg-black/20 px-3 py-2.5 text-sm text-gray-300"
+                  className="flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] px-3 py-2.5 text-sm text-foreground/80"
                 >
-                  <Icon className="h-4 w-4 shrink-0 text-cyan-400" />
+                  <Icon className="h-4 w-4 shrink-0 text-primary" />
                   {text}
                 </li>
               ))}
             </ul>
-            <div className="mt-5 rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-gray-300">
+            <div className="mt-5 rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] px-4 py-3 text-sm text-foreground/80">
               <p>
                 Minimum deposit{" "}
-                <strong className="text-white">
+                <strong className="text-foreground">
                   {formatCurrency(investmentMin)}
                 </strong>
                 {" · "}
                 maximum{" "}
-                <strong className="text-white">
+                <strong className="text-foreground">
                   {formatCurrency(investmentMax)}
                 </strong>
                 {" · "}
-                <strong className="text-emerald-300">
+                <strong className="text-emerald-700">
                   {status?.dailyYieldPercent ?? 5}% daily
                 </strong>
                 {status?.vipDailyYieldPercent
@@ -443,7 +443,7 @@ export function InvestHub() {
         <motion.div
           {...fadeUp}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
+          className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
         >
           {checkout?.payAddress ? (
             <div className="space-y-3">
@@ -473,9 +473,9 @@ export function InvestHub() {
                 </div>
               ) : (
                 <>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-sm text-foreground/80">
                     Send exactly{" "}
-                    <strong className="text-white">
+                    <strong className="text-foreground">
                       {Number(checkout.payAmount ?? depositDue).toFixed(6)} USDT
                     </strong>{" "}
                     on {network} to:
@@ -488,7 +488,7 @@ export function InvestHub() {
                     height={180}
                     className="mx-auto rounded-lg bg-white p-2"
                   />
-                  <code className="block break-all rounded-lg bg-black/40 p-3 text-xs text-primary">
+                  <code className="block break-all rounded-lg bg-foreground/[0.06] p-3 text-xs text-primary">
                     {checkout.payAddress}
                   </code>
                   <div className="flex flex-wrap gap-2">
@@ -524,7 +524,7 @@ export function InvestHub() {
                       Cancel
                     </Button>
                   </div>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted">
                     After payment confirms, the full{" "}
                     {formatCurrency(netInvested || parsedInvestment)} is invested
                     automatically (no enrollment fee). Keep this page open or
@@ -536,7 +536,7 @@ export function InvestHub() {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs text-gray-400">
+                <label className="mb-1 block text-xs text-muted">
                   Investment amount (USDT)
                 </label>
                 <Input
@@ -547,15 +547,15 @@ export function InvestHub() {
                   value={investmentAmount}
                   onChange={(e) => setInvestmentAmount(e.target.value)}
                 />
-                <p className="mt-1.5 text-xs text-gray-500">
+                <p className="mt-1.5 text-xs text-muted">
                   Deposit{" "}
-                  <strong className="text-white">
+                  <strong className="text-foreground">
                     {formatCurrency(depositDue || 0)}
                   </strong>
                   {" — "}
-                  <strong className="text-emerald-300">$0 enrollment fee</strong>
+                  <strong className="text-emerald-700">$0 enrollment fee</strong>
                   ,{" "}
-                  <strong className="text-white">
+                  <strong className="text-foreground">
                     {formatCurrency(netInvested || depositDue)}
                   </strong>{" "}
                   invested · earn {status?.dailyYieldPercent ?? 5}% daily
@@ -583,7 +583,7 @@ export function InvestHub() {
                 </div>
               )}
               {source === "wallet" && walletBalance < depositDue && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   <Link href="/wallet" className="text-primary hover:underline">
                     Deposit to wallet
                   </Link>{" "}
@@ -657,17 +657,17 @@ export function InvestHub() {
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <Badge className="bg-amber-400/20 text-amber-100">VIP</Badge>
-              <h3 className="text-sm font-semibold text-white">
+              <Badge className="bg-amber-400/20 text-amber-900">VIP</Badge>
+              <h3 className="text-sm font-semibold text-foreground">
                 {vip?.active ? "VIP active" : "Upgrade to VIP"}
               </h3>
             </div>
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-muted">
               {vip?.active
                 ? `Expires ${vip.expiresAt ? new Date(vip.expiresAt).toLocaleDateString() : "—"} · ${vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`
                 : `$${vip?.feeUsdt ?? 50}/month from wallet · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`}
             </p>
-            <ul className="mt-2 space-y-1 text-xs text-gray-400">
+            <ul className="mt-2 space-y-1 text-xs text-muted">
               <li>
                 •{" "}
                 {vip?.benefits?.dailyYieldPercent ??
@@ -690,7 +690,7 @@ export function InvestHub() {
           </Button>
         </div>
         {!vip?.active && walletBalance < (vip?.feeUsdt ?? 50) && (
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-muted">
             Need {formatCurrency(vip?.feeUsdt ?? 50)} in wallet to upgrade.
           </p>
         )}
@@ -699,17 +699,17 @@ export function InvestHub() {
       <motion.div
         {...fadeUp}
         transition={{ delay: 0.18 }}
-        className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 xl:col-span-5 xl:row-start-3"
+        className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 xl:col-span-5 xl:row-start-3"
       >
-        <h3 className="text-sm font-semibold text-white">Move funds</h3>
-        <p className="mt-1 text-xs text-gray-500">
+        <h3 className="text-sm font-semibold text-foreground">Move funds</h3>
+        <p className="mt-1 text-xs text-muted">
           Wallet {formatMoney(status.walletBalance, display)} · Investment{" "}
           {formatMoney(status.investmentBalance ?? 0, display)}. Daily yield only
           applies to capital that has been invested for at least 24 hours.
         </p>
         <div className="mt-3 flex flex-wrap items-end gap-2">
           <div className="min-w-[140px] flex-1">
-            <label className="mb-1 block text-xs text-gray-400">Amount (USDT)</label>
+            <label className="mb-1 block text-xs text-muted">Amount (USDT)</label>
             <Input
               type="number"
               min={0.01}
@@ -763,13 +763,13 @@ export function InvestHub() {
           </Button>
         </div>
         {error && <p className="mt-2 text-sm text-danger">{error}</p>}
-        <div className="mt-4 border-t border-white/10 pt-4">
+        <div className="mt-4 border-t border-[var(--color-border)] pt-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h4 className="text-sm font-medium text-white">
+              <h4 className="text-sm font-medium text-foreground">
                 Auto-reinvest (compounding)
               </h4>
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-muted">
                 {status.settings?.autoReinvestEarnings
                   ? `On — ${status.autoReinvestFeePercent ?? 10}% of each daily earning is charged as a fee; the remaining 90% compounds into your investment.`
                   : `Off — daily earnings go to your wallet. Enable to compound: ${status.autoReinvestFeePercent ?? 10}% fee on the full daily return, 90% added to investment.`}
@@ -851,12 +851,12 @@ export function InvestHub() {
         ].map((item) => (
           <div
             key={item.label}
-            className="rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3"
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3"
           >
-            <p className="text-xs text-gray-500">{item.label}</p>
+            <p className="text-xs text-muted">{item.label}</p>
             <p
               className={cn(
-                "mt-0.5 font-semibold text-white",
+                "mt-0.5 font-semibold text-foreground",
                 localCurrency ? "text-base" : "text-lg",
               )}
             >
@@ -869,14 +869,14 @@ export function InvestHub() {
       <motion.div
         {...fadeUp}
         transition={{ delay: 0.25 }}
-        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 xl:col-span-5 xl:row-start-5"
+        className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 xl:col-span-5 xl:row-start-5"
       >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-white">
+            <h3 className="text-base font-semibold text-foreground">
               Yield controls
             </h3>
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-muted">
               Pause or resume Smart Investment. Prefer the on-chain vault?{" "}
               <Link href="/blockchain" className="text-primary hover:underline">
                 Open blockchain contract
@@ -912,10 +912,10 @@ export function InvestHub() {
         <motion.div
           {...fadeUp}
           transition={{ delay: 0.3 }}
-          className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] xl:col-span-12 xl:row-start-6"
+          className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] xl:col-span-12 xl:row-start-6"
         >
-          <div className="border-b border-white/5 px-5 py-4">
-            <h3 className="text-base font-semibold text-white">Recent activity</h3>
+          <div className="border-b border-[var(--color-border)] px-5 py-4">
+            <h3 className="text-base font-semibold text-foreground">Recent activity</h3>
           </div>
           <div className="divide-y divide-white/5">
             {status.recentTrades.map((t) => (
@@ -924,10 +924,10 @@ export function InvestHub() {
                 className="flex items-center justify-between gap-3 px-5 py-3 text-sm"
               >
                 <div>
-                  <span className="font-medium text-white">
+                  <span className="font-medium text-foreground">
                     {t.symbol} {t.direction}
                   </span>
-                  <p className="text-xs text-gray-500">{t.signalId}</p>
+                  <p className="text-xs text-muted">{t.signalId}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {t.profit != null && (

@@ -75,8 +75,8 @@ export default function PayoutsPage() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 xl:max-w-6xl xl:px-8">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white">Payouts</h1>
-          <p className="mt-1 text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
+          <p className="mt-1 text-muted">
             {rewardTier?.weeklyPayoutsEnabled === false
               ? "Weekly tier payouts are paused — TP rewards and other payouts still apply."
               : "Weekly USDT rewards by performance tier — $10 Starter, $50 Pro, $100 Elite"}
@@ -125,14 +125,14 @@ export default function PayoutsPage() {
               {pendingRequest.map((payout) => (
                 <div
                   key={payout.id}
-                  className="rounded-lg border border-white/5 bg-white/[0.02] p-4"
+                  className="rounded-lg border border-white/5 bg-[var(--color-surface)] p-4"
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-white">
+                      <p className="font-semibold text-foreground">
                         {payoutTitle(payout)}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-muted">
                         Your share: {formatCurrency(Number(payout.traderShare))}
                       </p>
                     </div>
@@ -155,7 +155,7 @@ export default function PayoutsPage() {
         <Card className="mb-6">
           <CardContent className="flex items-start gap-3 pt-6">
             <Info className="h-5 w-5 shrink-0 text-primary mt-0.5" />
-            <p className="text-sm text-gray-300">
+            <p className="text-sm text-foreground/80">
               Trader payouts are funded by subscription revenue, premium memberships,
               signal marketplace fees, and sponsorships — not registration fees.
             </p>
@@ -178,7 +178,7 @@ export default function PayoutsPage() {
                 <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               </div>
             ) : payouts.length === 0 ? (
-              <p className="py-8 text-center text-gray-500">
+              <p className="py-8 text-center text-muted">
                 No payouts yet. Keep trading to earn weekly profits.
               </p>
             ) : (
@@ -186,23 +186,23 @@ export default function PayoutsPage() {
                 {payouts.map((payout) => (
                   <div
                     key={payout.id}
-                    className="rounded-lg border border-white/5 bg-white/[0.02] p-4"
+                    className="rounded-lg border border-white/5 bg-[var(--color-surface)] p-4"
                   >
                     <div className="flex items-center justify-between gap-4">
                       <div>
-                        <p className="font-semibold text-white">
+                        <p className="font-semibold text-foreground">
                           {payoutTitle(payout)}
                         </p>
-                        <p className="mt-1 text-xs text-gray-500">
+                        <p className="mt-1 text-xs text-muted">
                           Virtual profit: {formatCurrency(Number(payout.virtualProfit))}
                         </p>
                         {payout.payoutMethod && (
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-xs text-muted">
                             Method: {payout.payoutMethod === "MOBILE_MONEY" ? "Mobile money" : "TRC20"}
                           </p>
                         )}
                         {payout.rewardTier && (
-                          <p className="mt-1 text-xs text-gray-500">
+                          <p className="mt-1 text-xs text-muted">
                             Tier: {payout.rewardTier}
                           </p>
                         )}

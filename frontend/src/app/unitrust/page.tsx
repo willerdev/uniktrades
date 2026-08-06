@@ -11,8 +11,8 @@ export default function UnitrustPage() {
   return (
     <div className="mx-auto max-w-lg space-y-4 px-4 py-4 sm:max-w-xl sm:px-6 sm:py-6">
       <div>
-        <h1 className="text-2xl font-bold text-white">Unitrust</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground">Unitrust</h1>
+        <p className="mt-1 text-sm text-muted">
           5% daily on your corpus. Withdraw to wallet once per month.
         </p>
       </div>

@@ -300,7 +300,7 @@ export function AgentPortal() {
                   <p className="font-medium text-white">
                     {job.recipientName || "User"}
                   </p>
-                  <p className="text-lg font-semibold tracking-wide text-emerald-300">
+                  <p className="text-lg font-semibold tracking-wide text-emerald-700">
                     {job.momoPhone}
                   </p>
                   <p className="text-xs text-gray-400">{job.momoNetwork}</p>

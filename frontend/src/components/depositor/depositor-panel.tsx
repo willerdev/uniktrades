@@ -57,7 +57,7 @@ export function DepositorPanel() {
           <CardTitle className="text-base">Deposit & earn</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted">
             Deposit USDT and earn at the platform daily rate (
             {summary?.platformDailyYieldPercent ?? 0.5}% per day) over a 5-day
             plan. Pick your risk % to see max loss/gain per day at 1:2 RR.
@@ -76,7 +76,7 @@ export function DepositorPanel() {
         <CardContent className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs text-gray-400">Amount</label>
+              <label className="mb-1 block text-xs text-muted">Amount</label>
               <Input
                 type="number"
                 value={amount}
@@ -84,7 +84,7 @@ export function DepositorPanel() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-gray-400">Risk %</label>
+              <label className="mb-1 block text-xs text-muted">Risk %</label>
               <Input
                 type="number"
                 value={riskPercent}
@@ -94,7 +94,7 @@ export function DepositorPanel() {
           </div>
           {preview && (
             <div className="space-y-2 text-sm">
-              <p className="text-gray-400">
+              <p className="text-muted">
                 Per day at 1:2 RR — max loss{" "}
                 <strong className="text-danger">
                   {formatCurrency(preview.maxLossPerDay)}
@@ -104,13 +104,13 @@ export function DepositorPanel() {
                   {formatCurrency(preview.maxGainPerDay)}
                 </strong>
               </p>
-              <p className="text-gray-400">
+              <p className="text-muted">
                 Projected daily earning:{" "}
-                <strong className="text-white">
+                <strong className="text-foreground">
                   {formatCurrency(preview.projectedDailyEarning)}
                 </strong>{" "}
                 · 5-day total:{" "}
-                <strong className="text-white">
+                <strong className="text-foreground">
                   {formatCurrency(preview.projectedTotalEarning)}
                 </strong>
               </p>
@@ -118,9 +118,9 @@ export function DepositorPanel() {
                 {preview.days.map((d) => (
                   <div
                     key={d.day}
-                    className="rounded-lg border border-white/10 p-2 text-center text-xs"
+                    className="rounded-lg border border-[var(--color-border)] p-2 text-center text-xs"
                   >
-                    <p className="font-semibold text-white">Day {d.day}</p>
+                    <p className="font-semibold text-foreground">Day {d.day}</p>
                     <p className="text-success">
                       +{formatCurrency(d.projectedEarning ?? 0)}
                     </p>
@@ -137,7 +137,7 @@ export function DepositorPanel() {
           <CardHeader>
             <CardTitle className="text-base">Active plan</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-gray-400">
+          <CardContent className="text-sm text-muted">
             <p>
               {formatCurrency(summary.activePlan.amount)} at{" "}
               {summary.activePlan.riskPercent}% risk ·{" "}

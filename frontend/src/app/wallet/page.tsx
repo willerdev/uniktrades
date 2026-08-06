@@ -96,8 +96,8 @@ export default function WalletPage() {
     <div className="mx-auto max-w-lg space-y-4 px-4 py-4 sm:max-w-xl sm:px-6 sm:py-6 xl:max-w-7xl xl:px-8 xl:py-8">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Wallet</h1>
-          <p className="mt-1 text-sm text-gray-400">
+          <h1 className="text-2xl font-bold text-foreground">Wallet</h1>
+          <p className="mt-1 text-sm text-muted">
             Balance and earnings — USDT ledger with optional local display
           </p>
         </div>
@@ -183,14 +183,14 @@ export default function WalletPage() {
             ].map((item) => (
               <div
                 key={item.label}
-                className="rounded-xl border border-white/5 bg-white/[0.02] px-3 py-3"
+                className="rounded-xl border border-white/5 bg-[var(--color-surface)] px-3 py-3"
               >
-                <p className="text-[10px] uppercase tracking-wide text-gray-500">
+                <p className="text-[10px] uppercase tracking-wide text-muted">
                   {item.label}
                 </p>
                 <p
                   className={cn(
-                    "font-bold text-white",
+                    "font-bold text-foreground",
                     localCurrency ? "text-xs sm:text-sm" : "text-sm",
                   )}
                 >
@@ -204,7 +204,7 @@ export default function WalletPage() {
         <Card className="xl:col-span-5 xl:row-start-3">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base">Assets</CardTitle>
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted">
               {summary?.displayCurrency?.code ?? "USDT"}
             </span>
           </CardHeader>
@@ -216,8 +216,8 @@ export default function WalletPage() {
                     ₮
                   </div>
                   <div>
-                    <p className="font-medium text-white">USDT</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="font-medium text-foreground">USDT</p>
+                    <p className="text-xs text-muted">
                       Shown as {summary.displayCurrency?.code ?? "USDT"}
                     </p>
                   </div>
@@ -225,7 +225,7 @@ export default function WalletPage() {
                 <div className="text-right">
                   <p
                     className={cn(
-                      "font-bold text-white",
+                      "font-bold text-foreground",
                       localCurrency ? "text-sm" : "text-base",
                     )}
                   >
@@ -234,13 +234,13 @@ export default function WalletPage() {
                       summary.displayCurrency,
                     )}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted">
                     {formatCurrency(summary.availableBalance)} USDT
                   </p>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted">
                 Balance unavailable — tap Retry above.
               </p>
             )}
@@ -253,7 +253,7 @@ export default function WalletPage() {
           </CardHeader>
           <CardContent className="space-y-2 xl:grid xl:grid-cols-2 xl:gap-3 xl:space-y-0">
             {txs.length === 0 ? (
-              <p className="text-sm text-gray-500 xl:col-span-2">
+              <p className="text-sm text-muted xl:col-span-2">
                 {summary ? "No transactions yet." : "Transactions unavailable."}
               </p>
             ) : (
@@ -263,8 +263,8 @@ export default function WalletPage() {
                   className="flex items-center justify-between gap-3 rounded-lg border border-white/5 px-3 py-2.5"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-white">{tx.description}</p>
-                    <p className="text-[10px] text-gray-500">
+                    <p className="truncate text-sm text-foreground">{tx.description}</p>
+                    <p className="text-[10px] text-muted">
                       {new Date(tx.createdAt).toLocaleString()}
                     </p>
                   </div>

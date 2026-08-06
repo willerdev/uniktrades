@@ -79,44 +79,44 @@ export function UnitrustHub() {
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-        <p className="text-xs uppercase tracking-[0.16em] text-emerald-300/80">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-emerald-700/80">
           Unitrust
         </p>
-        <h2 className="mt-1 text-xl font-semibold text-white">
+        <h2 className="mt-1 text-xl font-semibold text-foreground">
           {formatCurrency(status?.unitrustBalance ?? 0)} corpus
         </h2>
-        <p className="mt-2 text-sm text-gray-400">
+        <p className="mt-2 text-sm text-muted">
           {status?.dailyYieldPercent ?? 5}% daily yield credited to your wallet
           at 16:00 Africa/Kampala. New deposits earn after 24 hours. Withdrawals
           once per calendar month.
         </p>
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-xl bg-black/20 p-3">
-            <div className="text-xs text-gray-500">Projected daily</div>
-            <div className="font-medium text-white">
+          <div className="rounded-xl bg-foreground/[0.04] p-3">
+            <div className="text-xs text-muted">Projected daily</div>
+            <div className="font-medium text-foreground">
               {formatCurrency(status?.projectedDailyEarning ?? 0)}
             </div>
           </div>
-          <div className="rounded-xl bg-black/20 p-3">
-            <div className="text-xs text-gray-500">Wallet available</div>
-            <div className="font-medium text-white">
+          <div className="rounded-xl bg-foreground/[0.04] p-3">
+            <div className="text-xs text-muted">Wallet available</div>
+            <div className="font-medium text-foreground">
               {formatCurrency(status?.availableBalance ?? 0)}
             </div>
           </div>
         </div>
         {status?.yieldPaused && (
-          <p className="mt-3 text-sm text-amber-300">
+          <p className="mt-3 text-sm text-amber-700">
             Unitrust yield is paused by the platform.
           </p>
         )}
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
-        <h3 className="font-medium text-white">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+        <h3 className="font-medium text-foreground">
           {status?.active ? "Add to Unitrust" : "Join Unitrust"}
         </h3>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted">
           Min {formatCurrency(min)} · no enrollment fee · max{" "}
           {formatCurrency(status?.maxDepositUsdt ?? 50000)}
         </p>
@@ -141,9 +141,9 @@ export function UnitrustHub() {
       </div>
 
       {status?.active && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 space-y-3">
-          <h3 className="font-medium text-white">Monthly withdrawal</h3>
-          <p className="text-xs text-gray-500">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3">
+          <h3 className="font-medium text-foreground">Monthly withdrawal</h3>
+          <p className="text-xs text-muted">
             {status.canWithdrawThisMonth
               ? "You can withdraw once this month (Kampala calendar)."
               : `Already withdrew this month. Next window: ${
@@ -180,16 +180,16 @@ export function UnitrustHub() {
       )}
 
       {status?.recentCredits && status.recentCredits.length > 0 && (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-          <h3 className="mb-3 font-medium text-white">Recent daily credits</h3>
+        <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+          <h3 className="mb-3 font-medium text-foreground">Recent daily credits</h3>
           <ul className="space-y-2 text-sm">
             {status.recentCredits.map((c) => (
               <li
                 key={c.creditDate}
-                className="flex justify-between text-gray-300"
+                className="flex justify-between text-foreground/80"
               >
                 <span>{c.creditDate}</span>
-                <span className="text-emerald-300">
+                <span className="text-emerald-700">
                   +{formatCurrency(c.amount)}
                 </span>
               </li>
@@ -199,9 +199,9 @@ export function UnitrustHub() {
       )}
 
       {error && <p className="text-sm text-danger">{error}</p>}
-      {message && <p className="text-sm text-emerald-300">{message}</p>}
+      {message && <p className="text-sm text-emerald-700">{message}</p>}
 
-      <p className="text-center text-sm text-gray-500">
+      <p className="text-center text-sm text-muted">
         Also use{" "}
         <Link href="/invest" className="text-primary hover:underline">
           Smart-Invest

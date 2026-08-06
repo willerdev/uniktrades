@@ -106,10 +106,10 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
         transition={{ duration: 0.35 }}
         className="space-y-2"
       >
-        <h1 className="text-2xl font-bold text-white sm:text-3xl">
+        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
           {displayName ? `Welcome, ${displayName}` : "Your investment hub"}
         </h1>
-        <p className="max-w-2xl text-sm text-gray-400 sm:text-base">
+        <p className="max-w-2xl text-sm text-muted sm:text-base">
           Choose Smart Investment or an on-chain vault contract — each shows its
           minimum and daily yield before you deposit.
         </p>
@@ -163,24 +163,24 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + i * 0.06 }}
             >
-              <Card className="flex h-full flex-col border-white/10 bg-white/[0.03]">
+              <Card className="flex h-full flex-col border-[var(--color-border)] bg-[var(--color-surface)]">
                 <CardHeader className="pb-3">
                   <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <CardTitle className="text-lg text-white">{product.title}</CardTitle>
-                  <p className="text-sm text-gray-400">{product.tagline}</p>
+                  <CardTitle className="text-lg text-foreground">{product.title}</CardTitle>
+                  <p className="text-sm text-muted">{product.tagline}</p>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col gap-4 pt-0">
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-300/80">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-emerald-700/80">
                       How it works
                     </p>
                     <ul className="space-y-1.5">
                       {product.how.map((line) => (
                         <li
                           key={line}
-                          className="text-sm leading-relaxed text-gray-300"
+                          className="text-sm leading-relaxed text-foreground/80"
                         >
                           <span className="mr-1.5 text-primary/80">·</span>
                           {line}
@@ -189,16 +189,16 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
                     </ul>
                   </div>
                   <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-sky-300/80">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">
                       Get started
                     </p>
                     <ol className="space-y-1.5">
                       {product.start.map((line, idx) => (
                         <li
                           key={line}
-                          className="flex gap-2 text-sm leading-relaxed text-gray-300"
+                          className="flex gap-2 text-sm leading-relaxed text-foreground/80"
                         >
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-white">
+                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-foreground">
                             {idx + 1}
                           </span>
                           {line}

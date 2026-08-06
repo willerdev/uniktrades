@@ -3,7 +3,7 @@ import { ColorType } from "lightweight-charts";
 import { MT5_BUY, MT5_SELL } from "@/components/mt5/mt5-ui";
 import type { SymbolPriceFormat } from "@/components/charts/chart-price-format";
 
-export type ChartThemeMode = "dark" | "light";
+export type ChartThemeMode = "light" | "dark";
 
 const MT5_DARK = {
   background: "#050505",
@@ -21,8 +21,9 @@ const MT5_LIGHT = {
   grid: "#e5e7eb",
 };
 
-function palette(mode: ChartThemeMode) {
-  return mode === "light" ? MT5_LIGHT : MT5_DARK;
+function palette(_mode: ChartThemeMode) {
+  // App is light-only
+  return MT5_LIGHT;
 }
 
 /** Lightweight Charts layout + grid options aligned with `.mt5-shell`. */
