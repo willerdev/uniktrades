@@ -41,7 +41,7 @@ export default function WalletPage() {
         api.wallet.transactions(),
       ]);
       setSummary(s);
-      setTxs(t.items);
+      setTxs(Array.isArray(t?.items) ? t.items : []);
     } catch (err) {
       setSummary(null);
       setTxs([]);

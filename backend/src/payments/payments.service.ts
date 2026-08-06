@@ -1556,7 +1556,10 @@ export class PaymentsService {
         liveStatus = charge?.status as string | undefined;
         if (synced.confirmed) {
           return {
-            payment,
+            paymentId: synced.payment.id,
+            status: synced.payment.status,
+            amount: Number(synced.payment.amount),
+            network: synced.payment.network,
             liveStatus: liveStatus ?? 'succeeded',
             progress: 'complete',
             confirmed: true,
@@ -1610,15 +1613,30 @@ export class PaymentsService {
 
     const stored = payment.gatewayResponse as Record<string, unknown> | null;
     payAddress =
-      payAddress || (stored?.pay_address as string | undefined);
-    payAmount = payAmount ?? (stored?.pay_amount as number | undefined);
+      payAddress ||
+      (typeof stored?.pay_address === 'string'
+        ? stored.pay_address
+        : undefined) ||
+      payment.payAddress ||
+      undefined;
+    const resolvedPayAmount = Number(
+      payAmount ?? stored?.pay_amount ?? payment.payAmount ?? payment.amount,
+    );
 
     return {
-      payment,
+      paymentId: payment.id,
+      status: payment.status,
+      amount: Number(payment.amount),
+      network: payment.network,
       liveStatus,
-      actuallyPaid,
-      payAmount,
-      payAddress,
+      actuallyPaid:
+        actuallyPaid != null && Number.isFinite(Number(actuallyPaid))
+          ? Number(actuallyPaid)
+          : undefined,
+      payAmount: Number.isFinite(resolvedPayAmount)
+        ? resolvedPayAmount
+        : undefined,
+      payAddress: payAddress || undefined,
       progress: this.mapPaymentProgress(liveStatus ?? payment.status),
       confirmed: payment.status === 'CONFIRMED',
     };

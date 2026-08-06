@@ -28,7 +28,13 @@ const NETWORKS = [
 
 type Step = "amount" | "network" | "pay" | "done";
 type DepositMethod = "crypto" | "momo";
-type Progress = "waiting" | "confirming" | "partial" | "complete" | "failed";
+type Progress =
+  | "waiting"
+  | "confirming"
+  | "partial"
+  | "complete"
+  | "failed"
+  | "expired";
 
 const PROGRESS_LABEL: Record<Progress, string> = {
   waiting: "Waiting for transfer",
@@ -36,7 +42,37 @@ const PROGRESS_LABEL: Record<Progress, string> = {
   partial: "Partial payment received",
   complete: "Deposit confirmed",
   failed: "Payment failed",
+  expired: "Payment expired",
 };
+
+function coerceUsdt(value: unknown, fallback = 0): number {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const n = Number(value);
+    if (Number.isFinite(n)) return n;
+  }
+  if (value != null && typeof value === "object" && "toString" in value) {
+    const n = Number(String((value as { toString(): string }).toString()));
+    if (Number.isFinite(n)) return n;
+  }
+  return fallback;
+}
+
+function formatUsdtAmount(value: unknown, fallback: unknown = 0): string {
+  return coerceUsdt(value, coerceUsdt(fallback, 0)).toFixed(6);
+}
+
+function normalizeProgress(value: unknown): Progress {
+  if (typeof value !== "string") return "waiting";
+  const key = value.toLowerCase() as Progress;
+  return key in PROGRESS_LABEL ? key : "waiting";
+}
+
+function errorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error && err.message.trim()) return err.message;
+  if (typeof err === "string" && err.trim()) return err;
+  return fallback;
+}
 
 export function WalletDepositModal({
   open,
@@ -91,12 +127,11 @@ export function WalletDepositModal({
       .depositMinimum(network)
       .then((m) => {
         if (cancelled) return;
-        setDepositMin(m.minUsdt);
+        const min = coerceUsdt(m?.minUsdt, 10);
+        setDepositMin(min > 0 ? min : 10);
         setAmount((prev) => {
           const n = Number(prev);
-          return !Number.isFinite(n) || n < m.minUsdt
-            ? String(m.minUsdt)
-            : prev;
+          return !Number.isFinite(n) || n < min ? String(min) : prev;
         });
       })
       .catch(() => {
@@ -109,7 +144,7 @@ export function WalletDepositModal({
 
   useEffect(() => {
     if (!open || depositMethod !== "momo" || !momoEnabled || !flwConfig) return;
-    const min = flwConfig.minDepositUsd;
+    const min = coerceUsdt(flwConfig.minDepositUsd, 3);
     setDepositMin(min);
     setAmount((prev) => {
       const n = Number(prev);
@@ -121,10 +156,13 @@ export function WalletDepositModal({
     if (!paymentId) return;
     try {
       const status = await api.payments.getStatus(paymentId);
-      if (status.payAddress) setPayAddress(status.payAddress);
-      if (status.payAmount != null) setPayAmount(status.payAmount);
-      const p = (status.progress as Progress) || "waiting";
-      setProgress(p);
+      if (typeof status.payAddress === "string" && status.payAddress) {
+        setPayAddress(status.payAddress);
+      }
+      if (status.payAmount != null) {
+        setPayAmount(coerceUsdt(status.payAmount, Number(amount) || 0));
+      }
+      setProgress(normalizeProgress(status.progress));
       if (status.confirmed) {
         setStep("done");
         onComplete?.();
@@ -132,7 +170,7 @@ export function WalletDepositModal({
     } catch {
       /* polling */
     }
-  }, [paymentId, onComplete]);
+  }, [paymentId, onComplete, amount]);
 
   useEffect(() => {
     if (!paymentId || step === "done") return;
@@ -176,25 +214,33 @@ export function WalletDepositModal({
             },
       );
 
-      if (!res.paymentId) {
+      const nextPaymentId =
+        typeof res?.paymentId === "string" && res.paymentId
+          ? res.paymentId
+          : null;
+      if (!nextPaymentId) {
         throw new Error("Could not start deposit — try again");
       }
 
-      if (depositMethod === "crypto" && !res.payAddress) {
+      const nextAddress =
+        typeof res.payAddress === "string" ? res.payAddress.trim() : "";
+      if (depositMethod === "crypto" && !nextAddress) {
         throw new Error(
-          res.message ||
+          (typeof res.message === "string" && res.message) ||
             "No deposit address returned — crypto payments may be unavailable. Try again or contact support.",
         );
       }
 
-      setPaymentId(res.paymentId);
-      setPayAddress(res.payAddress ?? "");
-      setPayAmount(res.payAmount ?? res.amount ?? numAmount);
-      setMomoInstruction(res.instruction ?? "");
+      setPaymentId(nextPaymentId);
+      setPayAddress(nextAddress);
+      setPayAmount(coerceUsdt(res.payAmount ?? res.amount, numAmount));
+      setMomoInstruction(
+        typeof res.instruction === "string" ? res.instruction : "",
+      );
       setStep("pay");
       setProgress("waiting");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Could not start deposit");
+      setError(errorMessage(e, "Could not start deposit"));
     } finally {
       setLoading(false);
     }
@@ -217,6 +263,8 @@ export function WalletDepositModal({
     depositMethod === "momo"
       ? ["Amount", "Pay", "Done"]
       : ["Amount", "Network", "Pay", "Done"];
+
+  const progressLabel = PROGRESS_LABEL[progress] ?? PROGRESS_LABEL.waiting;
 
   return (
     <div
@@ -308,8 +356,8 @@ export function WalletDepositModal({
                     ≈{" "}
                     {formatLocalAmount(
                       Number(amount) || 0,
-                      flwConfig.usdRate,
-                      flwConfig.currency,
+                      coerceUsdt(flwConfig.usdRate, 3800),
+                      flwConfig.currency || "UGX",
                     )}{" "}
                     charged on your phone
                   </p>
@@ -406,7 +454,7 @@ export function WalletDepositModal({
               ) : (
                 <>
                   <div className="flex items-center justify-between gap-2">
-                    <Badge variant="gold">{PROGRESS_LABEL[progress]}</Badge>
+                    <Badge variant="gold">{progressLabel}</Badge>
                     <Button
                       type="button"
                       size="sm"
@@ -429,10 +477,14 @@ export function WalletDepositModal({
                             "Check your phone for the Mobile Money prompt and enter your PIN to approve."}
                         </p>
                         <p className="mt-3 text-xs text-muted">
-                          {formatCurrency(Number(amount))} USDT
+                          {formatCurrency(Number(amount) || 0)} USDT
                           {momoEnabled &&
                             flwConfig &&
-                            ` (≈ ${formatLocalAmount(Number(amount), flwConfig.usdRate, flwConfig.currency)})`}
+                            ` (≈ ${formatLocalAmount(
+                              Number(amount) || 0,
+                              coerceUsdt(flwConfig.usdRate, 3800),
+                              flwConfig.currency || "UGX",
+                            )})`}
                         </p>
                       </>
                     ) : (
@@ -441,7 +493,7 @@ export function WalletDepositModal({
                           Send exactly
                         </p>
                         <p className="text-2xl font-bold text-foreground">
-                          {Number(payAmount ?? amount).toFixed(6)} USDT
+                          {formatUsdtAmount(payAmount, amount)} USDT
                         </p>
                         <p className="text-xs text-muted">Network: {network}</p>
                         {payAddress ? (
@@ -481,6 +533,8 @@ export function WalletDepositModal({
                       setError("");
                       setPaymentId(null);
                       setPayAddress("");
+                      setPayAmount(null);
+                      setProgress("waiting");
                       setStep(depositMethod === "momo" ? "amount" : "network");
                     }}
                   >

@@ -31,7 +31,10 @@ export function WalletDepositPanel({
     try {
       const status = await api.payments.getStatus(paymentId);
       if (status.payAddress) setPayAddress(status.payAddress);
-      if (status.payAmount != null) setPayAmount(status.payAmount);
+      if (status.payAmount != null) {
+        const n = Number(status.payAmount);
+        setPayAmount(Number.isFinite(n) ? n : null);
+      }
       if (status.confirmed) {
         setConfirmed(true);
         onComplete?.();
@@ -57,9 +60,16 @@ export function WalletDepositPanel({
         amount: Number(amount),
         riskPercent: Number(riskPercent),
       });
+      if (!res.paymentId || !res.payAddress) {
+        throw new Error(
+          res.message ||
+            "No deposit address returned — crypto payments may be unavailable.",
+        );
+      }
       setPaymentId(res.paymentId);
-      setPayAddress(res.payAddress ?? "");
-      setPayAmount(res.payAmount ?? res.amount);
+      setPayAddress(res.payAddress);
+      const n = Number(res.payAmount ?? res.amount);
+      setPayAmount(Number.isFinite(n) ? n : Number(amount));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not start deposit");
     } finally {
@@ -81,7 +91,10 @@ export function WalletDepositPanel({
         <p className="text-sm text-foreground/80">
           Send{" "}
           <strong className="text-foreground">
-            {payAmount != null ? payAmount : amount} USDT
+            {payAmount != null
+              ? Number(payAmount).toFixed(6)
+              : Number(amount).toFixed(2)}{" "}
+            USDT
           </strong>{" "}
           on {network} to:
         </p>

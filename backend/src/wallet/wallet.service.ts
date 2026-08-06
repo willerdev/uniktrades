@@ -798,6 +798,9 @@ export class WalletService {
     });
 
     if (!this.nowPayments.isConfigured) {
+      await this.prisma.payment
+        .delete({ where: { id: payment.id } })
+        .catch(() => undefined);
       throw new ServiceUnavailableException(
         'Crypto deposits are not configured — contact support',
       );
@@ -812,6 +815,21 @@ export class WalletService {
         ipnCallbackUrl: this.ipnUrl(),
       });
 
+      const payAddress =
+        typeof npPayment.pay_address === 'string'
+          ? npPayment.pay_address.trim()
+          : '';
+      const payAmount = Number(npPayment.pay_amount);
+
+      if (!payAddress) {
+        await this.prisma.payment
+          .delete({ where: { id: payment.id } })
+          .catch(() => undefined);
+        throw new ServiceUnavailableException(
+          'Payment provider did not return a deposit address — try again shortly',
+        );
+      }
+
       await this.prisma.payment.update({
         where: { id: payment.id },
         data: {
@@ -820,8 +838,8 @@ export class WalletService {
             ...(npPayment as object),
             ...(riskPercent != null ? { riskPercent } : {}),
           } as object,
-          payAddress: npPayment.pay_address,
-          payAmount: npPayment.pay_amount,
+          payAddress,
+          payAmount: Number.isFinite(payAmount) ? payAmount : amount,
         },
       });
 
@@ -837,8 +855,8 @@ export class WalletService {
         network,
         purpose: 'wallet_deposit',
         payCurrency: npPayment.pay_currency,
-        payAmount: npPayment.pay_amount,
-        payAddress: npPayment.pay_address,
+        payAmount: Number.isFinite(payAmount) ? payAmount : amount,
+        payAddress,
         gatewayPaymentId: npPayment.payment_id,
         liveStatus: npPayment.payment_status,
         gateway: 'Crypto',
@@ -848,6 +866,9 @@ export class WalletService {
       await this.prisma.payment
         .delete({ where: { id: payment.id } })
         .catch(() => undefined);
+      if (err instanceof ServiceUnavailableException) {
+        throw err;
+      }
       if (err instanceof NowPaymentsApiError) {
         if (/less than minimal/i.test(err.message || '')) {
           throw new BadRequestException(this.depositBelowMinMessage(network));

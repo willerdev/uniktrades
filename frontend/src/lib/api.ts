@@ -867,7 +867,11 @@ class ApiClient {
       }),
     getStatus: (paymentId: string) =>
       this.request<{
-        payment: { id: string; status: string; amount: number };
+        paymentId?: string;
+        status?: string;
+        amount?: number;
+        network?: string;
+        payment?: { id: string; status: string; amount: number };
         liveStatus?: string;
         actuallyPaid?: number;
         payAmount?: number;
