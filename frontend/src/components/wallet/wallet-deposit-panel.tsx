@@ -77,7 +77,7 @@ export function WalletDepositPanel({
 
   if (paymentId && payAddress) {
     return (
-      <div className="space-y-3 rounded-xl border border-[var(--color-border)] bg-white/[0.02] p-4">
+      <div className="space-y-3 rounded-xl border border-[var(--color-border)] bg-foreground/[0.02] p-4">
         <p className="text-sm text-foreground/80">
           Send{" "}
           <strong className="text-foreground">
@@ -85,7 +85,7 @@ export function WalletDepositPanel({
           </strong>{" "}
           on {network} to:
         </p>
-        <code className="block break-all rounded-lg bg-black/40 p-3 text-xs text-primary">
+        <code className="block break-all rounded-lg bg-foreground/[0.06] p-3 text-xs text-primary">
           {payAddress}
         </code>
         <p className="text-xs text-muted">

@@ -53,11 +53,11 @@ export function Mt5PositionsPanel() {
 
   if (!visible) {
     return (
-      <Card className="lg:col-span-2 border-white/5">
+      <Card className="lg:col-span-2 border-[var(--color-border)]">
         <CardContent className="flex flex-col items-start justify-between gap-3 py-4 sm:flex-row sm:items-center">
           <div>
-            <p className="text-sm font-medium text-gray-300">Live MT5 positions</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm font-medium text-foreground/80">Live MT5 positions</p>
+            <p className="text-xs text-muted">
               Hidden — show this panel to view Signal Hub executions and close trades
             </p>
           </div>
@@ -239,7 +239,7 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
             <Activity className="h-5 w-5 text-primary" />
             Live MT5 Positions
           </CardTitle>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted">
             Open trades executed from your signals via Signal Hub
           </p>
         </div>
@@ -249,7 +249,7 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
               variant="ghost"
               size="sm"
               onClick={onHide}
-              className="gap-1 text-gray-400"
+              className="gap-1 text-muted"
               title="Hide MT5 panel"
             >
               <EyeOff className="h-3.5 w-3.5" />
@@ -280,28 +280,28 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
       </CardHeader>
       <CardContent>
         {loading && positions.length === 0 ? (
-          <div className="flex items-center justify-center py-12 text-gray-500">
+          <div className="flex items-center justify-center py-12 text-muted">
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Loading positions…
           </div>
         ) : error && positions.length === 0 ? (
-          <div className="rounded-lg border border-white/5 bg-white/[0.02] py-8 text-center">
-            <p className="text-sm text-gray-400">{error}</p>
+          <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] py-8 text-center">
+            <p className="text-sm text-muted">{error}</p>
             <Button variant="secondary" size="sm" className="mt-4" onClick={load}>
               Try again
             </Button>
           </div>
         ) : positions.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-white/10 py-10 text-center">
-            <p className="text-gray-500">No open positions on MT5</p>
-            <p className="mt-1 text-xs text-gray-600">
+          <div className="rounded-lg border border-dashed border-[var(--color-border)] py-10 text-center">
+            <p className="text-muted">No open positions on MT5</p>
+            <p className="mt-1 text-xs text-muted">
               Positions appear here after a submitted setup is executed
             </p>
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2 text-sm">
-              <span className="text-gray-400">
+            <div className="flex items-center justify-between rounded-lg bg-foreground/[0.03] px-3 py-2 text-sm">
+              <span className="text-muted">
                 {positions.length} open position{positions.length !== 1 ? "s" : ""}
               </span>
               <span
@@ -323,48 +323,48 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
               return (
                 <div
                   key={ticket || `${pos.symbol}-${pos.price_open}`}
-                  className="flex flex-col gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-4"
+                  className="flex flex-col gap-3 rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] p-4"
                 >
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-lg font-bold text-white">
+                      <span className="text-lg font-bold text-foreground">
                         {pos.symbol ?? "—"}
                       </span>
                       <Badge variant={side === "BUY" ? "success" : "danger"}>
                         {side}
                       </Badge>
                       {ticket > 0 && (
-                        <span className="text-xs text-gray-500">#{ticket}</span>
+                        <span className="text-xs text-muted">#{ticket}</span>
                       )}
                     </div>
-                    <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400 sm:grid-cols-4">
+                    <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted sm:grid-cols-4">
                       <span>
                         Vol:{" "}
-                        <span className="text-gray-300">
+                        <span className="text-foreground/80">
                           {pos.volume ?? "—"}
                         </span>
                       </span>
                       <span>
                         Entry:{" "}
-                        <span className="text-gray-300">
+                        <span className="text-foreground/80">
                           {pos.price_open ?? "—"}
                         </span>
                       </span>
                       <span>
                         SL:{" "}
-                        <span className="text-gray-300">{pos.sl ?? "—"}</span>
+                        <span className="text-foreground/80">{pos.sl ?? "—"}</span>
                       </span>
                       <span>
                         TP:{" "}
-                        <span className="text-gray-300">{pos.tp ?? "—"}</span>
+                        <span className="text-foreground/80">{pos.tp ?? "—"}</span>
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 sm:shrink-0">
                     <div className="text-right">
-                      <p className="text-xs text-gray-500">Profit</p>
+                      <p className="text-xs text-muted">Profit</p>
                       <p
                         className={cn(
                           "flex items-center justify-end gap-1 text-lg font-bold",
@@ -424,8 +424,8 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
                   </div>
 
                   {editTicket === ticket && (
-                    <div className="rounded-lg border border-white/10 bg-black/20 p-3 space-y-3">
-                      <p className="text-xs font-medium text-gray-400">
+                    <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] p-3 space-y-3">
+                      <p className="text-xs font-medium text-muted">
                         Modify stop loss / take profit
                       </p>
                       <div className="grid gap-2 sm:grid-cols-2">
@@ -470,8 +470,8 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
                         </Button>
                       </div>
 
-                      <div className="border-t border-white/5 pt-3">
-                        <p className="text-xs font-medium text-gray-400">
+                      <div className="border-t border-[var(--color-border)] pt-3">
+                        <p className="text-xs font-medium text-muted">
                           Partial close
                         </p>
                         <div className="mt-2 flex flex-wrap items-end gap-2">
@@ -498,7 +498,7 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
                             )}
                           </Button>
                         </div>
-                        <p className="mt-1 text-xs text-gray-600">
+                        <p className="mt-1 text-xs text-muted">
                           You will receive an email when partial closes are recorded.
                         </p>
                       </div>
@@ -511,8 +511,8 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
         )}
 
         {logs.length > 0 && (
-          <div className="mt-6 border-t border-white/5 pt-4">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+          <div className="mt-6 border-t border-[var(--color-border)] pt-4">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
               Recent execution activity
             </p>
             <div className="space-y-2">
@@ -522,10 +522,10 @@ function OpenPositionsCard({ onHide }: OpenPositionsCardProps) {
                   className="flex items-start justify-between gap-3 text-xs"
                 >
                   <div className="min-w-0">
-                    <span className="font-medium text-gray-300">{log.event}</span>
-                    <span className="text-gray-500"> — {log.message}</span>
+                    <span className="font-medium text-foreground/80">{log.event}</span>
+                    <span className="text-muted"> — {log.message}</span>
                   </div>
-                  <span className="shrink-0 text-gray-600">
+                  <span className="shrink-0 text-muted">
                     {new Date(log.created_at).toLocaleString()}
                   </span>
                 </div>

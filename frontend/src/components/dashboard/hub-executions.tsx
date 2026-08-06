@@ -58,14 +58,14 @@ export function HubExecutionsCard() {
   }, [load]);
 
   return (
-    <Card className="lg:col-span-2 border-white/5">
+    <Card className="lg:col-span-2 border-[var(--color-border)]">
       <CardHeader className="flex flex-col gap-4 space-y-0 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5 text-primary" />
             Signal Hub History
           </CardTitle>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted">
             Recent MT5 execution queue entries for your account
           </p>
         </div>
@@ -83,14 +83,14 @@ export function HubExecutionsCard() {
       <CardContent>
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="space-y-1">
-            <Label htmlFor="hub-status" className="text-xs text-gray-500">
+            <Label htmlFor="hub-status" className="text-xs text-muted">
               Status
             </Label>
             <select
               id="hub-status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="flex h-9 w-full min-w-[140px] rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-white"
+              className="flex h-9 w-full min-w-[140px] rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] px-3 text-sm text-foreground"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value || "all"} value={opt.value}>
@@ -100,7 +100,7 @@ export function HubExecutionsCard() {
             </select>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="hub-since" className="text-xs text-gray-500">
+            <Label htmlFor="hub-since" className="text-xs text-muted">
               Since
             </Label>
             <Input
@@ -114,16 +114,16 @@ export function HubExecutionsCard() {
         </div>
 
         {loading && items.length === 0 ? (
-          <div className="flex items-center justify-center py-10 text-gray-500">
+          <div className="flex items-center justify-center py-10 text-muted">
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Loading history…
           </div>
         ) : error && items.length === 0 ? (
-          <div className="rounded-lg border border-white/5 py-8 text-center text-sm text-gray-400">
+          <div className="rounded-lg border border-[var(--color-border)] py-8 text-center text-sm text-muted">
             {error}
           </div>
         ) : items.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-white/10 py-10 text-center text-sm text-gray-500">
+          <div className="rounded-lg border border-dashed border-[var(--color-border)] py-10 text-center text-sm text-muted">
             No execution records match your filters
           </div>
         ) : (
@@ -131,7 +131,7 @@ export function HubExecutionsCard() {
             {items.map((item) => (
               <div
                 key={item.id}
-                className="rounded-lg border border-white/5 bg-white/[0.02] p-3"
+                className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] p-3"
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant={statusVariant(item.status)}>{item.status}</Badge>
@@ -139,17 +139,17 @@ export function HubExecutionsCard() {
                     <Badge variant="secondary">duplicate</Badge>
                   )}
                   {item.external_id && (
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-muted">
                       Setup {item.external_id.slice(0, 12)}…
                     </span>
                   )}
                 </div>
                 {item.progress?.message && (
-                  <p className="mt-2 text-sm text-gray-400">
+                  <p className="mt-2 text-sm text-muted">
                     {item.progress.message}
                   </p>
                 )}
-                <p className="mt-1 text-xs text-gray-600">
+                <p className="mt-1 text-xs text-muted">
                   {item.created_at
                     ? new Date(item.created_at).toLocaleString()
                     : "—"}

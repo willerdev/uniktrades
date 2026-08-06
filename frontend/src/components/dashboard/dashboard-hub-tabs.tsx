@@ -28,7 +28,7 @@ export function DashboardHubTabs({
   return (
     <div
       className={cn(
-        "flex gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02] p-1",
+        "flex gap-1 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-foreground/[0.02] p-1",
         className,
       )}
     >
@@ -44,7 +44,7 @@ export function DashboardHubTabs({
               "shrink-0 rounded-lg px-4 py-2 text-sm font-medium transition-colors",
               isActive
                 ? "bg-primary text-white"
-                : "text-gray-400 hover:text-white",
+                : "text-muted hover:text-foreground",
             )}
           >
             {tab.label}

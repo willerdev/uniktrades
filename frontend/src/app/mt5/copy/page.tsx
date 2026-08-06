@@ -37,7 +37,7 @@ function statusBadge(status: string) {
   if (s === "open") return "bg-emerald-500/15 text-emerald-400";
   if (s === "closed") return "bg-sky-500/15 text-sky-400";
   if (s === "failed") return "bg-red-500/15 text-red-400";
-  return "bg-white/10 text-gray-400";
+  return "bg-foreground/[0.05] text-muted";
 }
 
 export default function Mt5CopyPage() {
@@ -229,12 +229,12 @@ export default function Mt5CopyPage() {
       >
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-2xl font-bold text-foreground">
               {isCopyOwner ? "Your MT5 Copy Account" : "MT5 Copy Pool"}
             </h1>
             <Mt5AccountModeBadge mode="real" detail="MT5 Copy" />
           </div>
-          <p className="mt-1 max-w-2xl text-sm text-gray-400">
+          <p className="mt-1 max-w-2xl text-sm text-muted">
             {isCopyOwner
               ? `Live copy account — balance, positions, and journal at ${data?.riskPercent ?? RISK_PERCENT}% risk per trade.`
               : `Second live account — mirrors traders in the copy pool (or top 3 weekly by default) at ${data?.riskPercent ?? RISK_PERCENT}% risk per trade on account equity.`}
@@ -267,10 +267,10 @@ export default function Mt5CopyPage() {
             <Wallet className="h-8 w-8 text-primary" />
             <div>
               <div className="flex items-center gap-2">
-                <p className="text-xs text-gray-500">Balance</p>
+                <p className="text-xs text-muted">Balance</p>
                 <Mt5AccountModeBadge mode="real" detail="MT5 Copy" className="scale-90" />
               </div>
-              <p className="text-lg font-semibold text-white">
+              <p className="text-lg font-semibold text-foreground">
                 {formatCurrency(balance)} {currency}
               </p>
             </div>
@@ -280,8 +280,8 @@ export default function Mt5CopyPage() {
           <CardContent className="flex items-center gap-3 py-4">
             <Activity className="h-8 w-8 text-sky-400" />
             <div>
-              <p className="text-xs text-gray-500">Equity</p>
-              <p className="text-lg font-semibold text-white">
+              <p className="text-xs text-muted">Equity</p>
+              <p className="text-lg font-semibold text-foreground">
                 {formatCurrency(equity)} {currency}
               </p>
             </div>
@@ -295,7 +295,7 @@ export default function Mt5CopyPage() {
               <TrendingDown className="h-8 w-8 text-red-400" />
             )}
             <div>
-              <p className="text-xs text-gray-500">Floating P/L</p>
+              <p className="text-xs text-muted">Floating P/L</p>
               <p
                 className={cn(
                   "text-lg font-semibold",
@@ -311,7 +311,7 @@ export default function Mt5CopyPage() {
           <CardContent className="flex items-center gap-3 py-4">
             <BookOpen className="h-8 w-8 text-violet-400" />
             <div>
-              <p className="text-xs text-gray-500">Realized (journal)</p>
+              <p className="text-xs text-muted">Realized (journal)</p>
               <p
                 className={cn(
                   "text-lg font-semibold",
@@ -339,13 +339,13 @@ export default function Mt5CopyPage() {
         </CardHeader>
         <CardContent>
           {data?.leaders.length === 0 ? (
-            <p className="text-sm text-gray-500">No leaderboard data yet.</p>
+            <p className="text-sm text-muted">No leaderboard data yet.</p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-3">
               {data?.leaders.map((leader) => (
                 <div
                   key={leader.userId}
-                  className="rounded-lg border border-white/5 bg-white/[0.02] p-3"
+                  className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] p-3"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium text-amber-400/90">
@@ -355,8 +355,8 @@ export default function Mt5CopyPage() {
                       {leader.tier}
                     </Badge>
                   </div>
-                  <p className="mt-1 font-medium text-white">{leader.displayName}</p>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 font-medium text-foreground">{leader.displayName}</p>
+                  <p className="mt-1 text-xs text-muted">
                     Score {leader.score} · {leader.winRate.toFixed(0)}% win
                   </p>
                 </div>
@@ -393,7 +393,7 @@ export default function Mt5CopyPage() {
             </CardHeader>
             <CardContent>
               {(data?.terminal?.positions.length ?? 0) === 0 ? (
-                <p className="text-sm text-gray-500">No open copy positions.</p>
+                <p className="text-sm text-muted">No open copy positions.</p>
               ) : (
                 <ul className="space-y-3">
                   {data?.terminal?.positions.map((pos) => {
@@ -401,16 +401,16 @@ export default function Mt5CopyPage() {
                     return (
                       <li
                         key={pos.id}
-                        className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0"
+                        className="flex items-center justify-between border-b border-[var(--color-border)] pb-3 last:border-0"
                       >
                         <div>
-                          <p className="font-medium text-white">
+                          <p className="font-medium text-foreground">
                             {pos.symbol}{" "}
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-muted">
                               {pos.type} · {pos.volume} lots
                             </span>
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-muted">
                             @ {pos.openPrice} → {pos.currentPrice}
                           </p>
                         </div>
@@ -435,20 +435,20 @@ export default function Mt5CopyPage() {
             </CardHeader>
             <CardContent>
               {(data?.journal.length ?? 0) === 0 ? (
-                <p className="text-sm text-gray-500">No copy trades yet.</p>
+                <p className="text-sm text-muted">No copy trades yet.</p>
               ) : (
                 <ul className="space-y-3">
                   {data?.journal.slice(0, 6).map((entry) => (
                     <li
                       key={entry.id}
-                      className="flex items-start justify-between gap-2 border-b border-white/5 pb-3 last:border-0"
+                      className="flex items-start justify-between gap-2 border-b border-[var(--color-border)] pb-3 last:border-0"
                     >
                       <div>
-                        <p className="text-sm text-white">
+                        <p className="text-sm text-foreground">
                           #{entry.sourceRank} {entry.sourceName} · {entry.symbol}{" "}
                           {entry.direction}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted">
                           {entry.volume != null ? `${entry.volume} lots` : "—"}
                           {entry.executedAt
                             ? ` · ${new Date(entry.executedAt).toLocaleString()}`
@@ -470,7 +470,7 @@ export default function Mt5CopyPage() {
           <CardContent className="overflow-x-auto pt-6">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-gray-500">
+                <tr className="border-b border-[var(--color-border)] text-left text-muted">
                   <th className="pb-2 pr-4">Symbol</th>
                   <th className="pb-2 pr-4">Side</th>
                   <th className="pb-2 pr-4">Lots</th>
@@ -483,12 +483,12 @@ export default function Mt5CopyPage() {
                 {(data?.terminal?.positions ?? []).map((pos) => {
                   const pnl = Number(pos.profit ?? 0);
                   return (
-                    <tr key={pos.id} className="border-b border-white/5">
-                      <td className="py-3 pr-4 text-white">{pos.symbol}</td>
+                    <tr key={pos.id} className="border-b border-[var(--color-border)]">
+                      <td className="py-3 pr-4 text-foreground">{pos.symbol}</td>
                       <td className="py-3 pr-4">{pos.type}</td>
                       <td className="py-3 pr-4">{pos.volume}</td>
                       <td className="py-3 pr-4">{pos.openPrice}</td>
-                      <td className="py-3 pr-4 text-gray-400">
+                      <td className="py-3 pr-4 text-muted">
                         {pos.stopLoss ?? "—"} / {pos.takeProfit ?? "—"}
                       </td>
                       <td
@@ -505,7 +505,7 @@ export default function Mt5CopyPage() {
               </tbody>
             </table>
             {(data?.terminal?.positions.length ?? 0) === 0 && (
-              <p className="py-8 text-center text-sm text-gray-500">No open positions.</p>
+              <p className="py-8 text-center text-sm text-muted">No open positions.</p>
             )}
           </CardContent>
         </Card>
@@ -516,7 +516,7 @@ export default function Mt5CopyPage() {
           <CardContent className="overflow-x-auto pt-6">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10 text-left text-gray-500">
+                <tr className="border-b border-[var(--color-border)] text-left text-muted">
                   <th className="pb-2 pr-4">Trader</th>
                   <th className="pb-2 pr-4">Setup</th>
                   <th className="pb-2 pr-4">Lots</th>
@@ -529,12 +529,12 @@ export default function Mt5CopyPage() {
               </thead>
               <tbody>
                 {(data?.journal ?? []).map((entry) => (
-                  <tr key={entry.id} className="border-b border-white/5">
+                  <tr key={entry.id} className="border-b border-[var(--color-border)]">
                     <td className="py-3 pr-4">
                       <span className="text-amber-400/90">#{entry.sourceRank}</span>{" "}
                       {entry.sourceName}
                     </td>
-                    <td className="py-3 pr-4 text-white">
+                    <td className="py-3 pr-4 text-foreground">
                       {entry.symbol} {entry.direction}
                     </td>
                     <td className="py-3 pr-4">{entry.volume ?? "—"}</td>
@@ -543,7 +543,7 @@ export default function Mt5CopyPage() {
                       <Badge className={statusBadge(entry.status)}>{entry.status}</Badge>
                     </td>
                     <td
-                      className="py-3 pr-4 text-gray-400"
+                      className="py-3 pr-4 text-muted"
                       title={entry.notes ?? undefined}
                     >
                       {entry.notes?.trim() ||
@@ -555,7 +555,7 @@ export default function Mt5CopyPage() {
                       className={cn(
                         "py-3 pr-4 font-medium",
                         entry.profit == null
-                          ? "text-gray-500"
+                          ? "text-muted"
                           : entry.profit >= 0
                             ? "text-emerald-400"
                             : "text-red-400",
@@ -563,7 +563,7 @@ export default function Mt5CopyPage() {
                     >
                       {entry.profit != null ? fmtPnl(entry.profit, currency) : "—"}
                     </td>
-                    <td className="py-3 text-gray-500">
+                    <td className="py-3 text-muted">
                       {entry.executedAt
                         ? new Date(entry.executedAt).toLocaleString()
                         : new Date(entry.createdAt).toLocaleString()}
@@ -573,7 +573,7 @@ export default function Mt5CopyPage() {
               </tbody>
             </table>
             {(data?.journal.length ?? 0) === 0 && (
-              <p className="py-8 text-center text-sm text-gray-500">
+              <p className="py-8 text-center text-sm text-muted">
                 Copy trades will appear here when signals are mirrored.
               </p>
             )}
@@ -591,10 +591,10 @@ export default function Mt5CopyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3">
+              <div className="flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-white">Mirror new trades</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-foreground">Mirror new trades</p>
+                  <p className="text-xs text-muted">
                     {copyEnabled ? "Copy trading is active" : "Copy trading is paused"}
                   </p>
                 </div>
@@ -609,7 +609,7 @@ export default function Mt5CopyPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-xs text-gray-400">Risk per trade (%)</label>
+                <label className="mb-1 block text-xs text-muted">Risk per trade (%)</label>
                 <div className="flex gap-2">
                   <Input
                     type="number"
@@ -629,10 +629,10 @@ export default function Mt5CopyPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3">
+              <div className="flex items-center justify-between rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-white">Use 1:2 RR take profit</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-sm font-medium text-foreground">Use 1:2 RR take profit</p>
+                  <p className="text-xs text-muted">
                     Override signal TP with calculated 1:2 RR target
                   </p>
                 </div>
@@ -646,8 +646,8 @@ export default function Mt5CopyPage() {
                 </Button>
               </div>
 
-              <div className="rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3 text-sm">
-                <p className="font-medium text-white">Pool health</p>
+              <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] px-4 py-3 text-sm">
+                <p className="font-medium text-foreground">Pool health</p>
                 <p
                   className={cn(
                     "mt-1 text-xs",
@@ -681,7 +681,7 @@ export default function Mt5CopyPage() {
               </div>
 
               {(data?.poolTraders?.length ?? 0) === 0 ? (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   No manual pool traders — weekly top 3 is used automatically.
                 </p>
               ) : (
@@ -689,11 +689,11 @@ export default function Mt5CopyPage() {
                   {data?.poolTraders?.map((trader) => (
                     <li
                       key={trader.userId}
-                      className="flex items-center justify-between rounded-lg border border-white/10 px-3 py-2"
+                      className="flex items-center justify-between rounded-lg border border-[var(--color-border)] px-3 py-2"
                     >
                       <div>
-                        <p className="text-sm text-white">{trader.displayName}</p>
-                        <p className="font-mono text-xs text-gray-500">{trader.userId}</p>
+                        <p className="text-sm text-foreground">{trader.displayName}</p>
+                        <p className="font-mono text-xs text-muted">{trader.userId}</p>
                       </div>
                       <Button
                         size="sm"
@@ -710,8 +710,8 @@ export default function Mt5CopyPage() {
 
               {(data?.weeklyLeaderboard?.length ?? 0) > 0 && (
                 <div>
-                  <p className="mb-2 text-xs text-gray-500">Weekly leaderboard (add by ID)</p>
-                  <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-gray-400">
+                  <p className="mb-2 text-xs text-muted">Weekly leaderboard (add by ID)</p>
+                  <ul className="max-h-40 space-y-1 overflow-y-auto text-xs text-muted">
                     {data?.weeklyLeaderboard?.slice(0, 10).map((leader) => (
                       <li key={leader.userId} className="flex justify-between gap-2">
                         <span>

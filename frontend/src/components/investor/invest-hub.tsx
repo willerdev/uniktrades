@@ -185,7 +185,7 @@ function PortfolioSummary({
           <p
             className={cn(
               "mt-1.5 font-bold tracking-tight",
-              profitPositive ? "text-emerald-400" : "text-red-400",
+              profitPositive ? "text-emerald-700" : "text-red-600",
               localCurrency ? "text-xl sm:text-2xl" : "text-2xl",
             )}
           >
@@ -206,7 +206,7 @@ function tradeStatusClass(status: string) {
   const s = status.toLowerCase();
   if (s === "closed" || s === "open") return "bg-emerald-500/15 text-emerald-400";
   if (s === "failed" || s === "skipped") return "bg-red-500/15 text-red-400";
-  return "bg-white/10 text-muted";
+  return "bg-foreground/5 text-muted";
 }
 
 export function InvestHub() {
@@ -381,18 +381,18 @@ export function InvestHub() {
         </div>
         <motion.div
           {...fadeUp}
-          className="relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/80 via-[#0f1419] to-cyan-950/40 p-6"
+          className="relative overflow-hidden rounded-2xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950 via-[#0f1419] to-cyan-950 p-6 text-white"
         >
           <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-500/20 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-cyan-500/15 blur-3xl" />
           <div className="relative">
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary">
+            <p className="text-xs font-semibold uppercase tracking-widest text-cyan-300">
               Smart Investment
             </p>
-            <h2 className="mt-2 text-2xl font-bold text-foreground">
+            <h2 className="mt-2 text-2xl font-bold text-white">
               Start Smart Investment
             </h2>
-            <p className="mt-2 max-w-lg text-sm text-muted">
+            <p className="mt-2 max-w-lg text-sm text-white/75">
               Deposit from ${investmentMin} USDT with no enrollment fee. Earn{" "}
               {status?.dailyYieldPercent ?? 5}% daily on invested capital —
               credited to your wallet{" "}
@@ -410,26 +410,26 @@ export function InvestHub() {
               ].map(({ icon: Icon, text }) => (
                 <li
                   key={text}
-                  className="flex items-center gap-2 rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] px-3 py-2.5 text-sm text-foreground/80"
+                  className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm text-white/90"
                 >
-                  <Icon className="h-4 w-4 shrink-0 text-primary" />
+                  <Icon className="h-4 w-4 shrink-0 text-cyan-300" />
                   {text}
                 </li>
               ))}
             </ul>
-            <div className="mt-5 rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] px-4 py-3 text-sm text-foreground/80">
+            <div className="mt-5 rounded-xl border border-white/15 bg-black/25 px-4 py-3 text-sm text-white/80">
               <p>
                 Minimum deposit{" "}
-                <strong className="text-foreground">
+                <strong className="text-white">
                   {formatCurrency(investmentMin)}
                 </strong>
                 {" · "}
                 maximum{" "}
-                <strong className="text-foreground">
+                <strong className="text-white">
                   {formatCurrency(investmentMax)}
                 </strong>
                 {" · "}
-                <strong className="text-emerald-700">
+                <strong className="text-emerald-300">
                   {status?.dailyYieldPercent ?? 5}% daily
                 </strong>
                 {status?.vipDailyYieldPercent
@@ -473,24 +473,30 @@ export function InvestHub() {
                 </div>
               ) : (
                 <>
-                  <p className="text-sm text-foreground/80">
-                    Send exactly{" "}
-                    <strong className="text-foreground">
-                      {Number(checkout.payAmount ?? depositDue).toFixed(6)} USDT
-                    </strong>{" "}
-                    on {network} to:
-                  </p>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(checkout.payAddress)}`}
-                    alt="Payment QR code"
-                    width={180}
-                    height={180}
-                    className="mx-auto rounded-lg bg-white p-2"
-                  />
-                  <code className="block break-all rounded-lg bg-foreground/[0.06] p-3 text-xs text-primary">
-                    {checkout.payAddress}
-                  </code>
+                  <div className="rounded-xl border border-[var(--color-border)] bg-background p-4">
+                    <p className="text-sm text-foreground">
+                      Send exactly{" "}
+                      <strong className="font-semibold text-foreground">
+                        {Number(checkout.payAmount ?? depositDue).toFixed(6)} USDT
+                      </strong>{" "}
+                      on{" "}
+                      <strong className="font-semibold text-foreground">
+                        {network}
+                      </strong>{" "}
+                      to:
+                    </p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(checkout.payAddress)}`}
+                      alt="Payment QR code"
+                      width={180}
+                      height={180}
+                      className="mx-auto mt-3 rounded-lg border border-[var(--color-border)] bg-white p-2"
+                    />
+                    <code className="mt-3 block break-all rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] p-3 font-mono text-xs text-foreground">
+                      {checkout.payAddress}
+                    </code>
+                  </div>
                   <div className="flex flex-wrap gap-2">
                     <Button
                       type="button"

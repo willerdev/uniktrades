@@ -277,7 +277,7 @@ function LoginForm() {
                 </div>
               </form>
             )}
-            <p className="mt-6 text-center text-sm text-gray-400">
+            <p className="mt-6 text-center text-sm text-muted">
               {t("login.newHere")}{" "}
               <Link href="/register" className="text-primary hover:underline">
                 {t("login.inviteOnly")}

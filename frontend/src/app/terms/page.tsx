@@ -80,14 +80,14 @@ export default function TermsPage() {
           <p className="mt-3">
             UnikTrades is a talent-discovery and capital-allocation platform.
             Wallet balances, investor allocations, and depositor plans are
-            designed for <strong className="text-gray-200">stable, ongoing
+            designed for <strong className="text-foreground">stable, ongoing
             participation</strong> — not day-to-day cash movement. Random or
             frequent withdrawals disrupt yield planning, liquidity management,
             and fair treatment of other participants.
           </p>
           <p className="mt-3">
             By using the platform you agree to withdraw on a{" "}
-            <strong className="text-gray-200">preferred cadence</strong>{" "}
+            <strong className="text-foreground">preferred cadence</strong>{" "}
             (weekly or monthly, as configured) whenever practicable, and to
             accept documented fees and penalties when you choose to withdraw
             outside that window.
@@ -104,17 +104,17 @@ export default function TermsPage() {
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li>
-              <strong className="text-gray-200">Weekly mode:</strong> Sundays
+              <strong className="text-foreground">Weekly mode:</strong> Sundays
               (UTC calendar day).
             </li>
             <li>
-              <strong className="text-gray-200">Monthly mode:</strong> the 1st of
+              <strong className="text-foreground">Monthly mode:</strong> the 1st of
               each calendar month (UTC).
             </li>
           </ul>
           <p className="mt-3">
             During a preferred window, standard processing fees apply (if any),
-            and <strong className="text-gray-200">no off-schedule penalty</strong>{" "}
+            and <strong className="text-foreground">no off-schedule penalty</strong>{" "}
             is charged. The live Wallet screen shows whether today is inside the
             preferred window and when the next window opens.
           </p>
@@ -130,18 +130,18 @@ export default function TermsPage() {
           </h2>
           <p className="mt-3">
             Withdrawals outside the preferred window{" "}
-            <strong className="text-gray-200">remain available</strong> — the
+            <strong className="text-foreground">remain available</strong> — the
             platform does not block anytime access to your available wallet
             balance (subject to KYC, compliance, and sufficient funds). Choosing
             an off-schedule withdrawal constitutes an early / discretionary exit
             and incurs an{" "}
-            <strong className="text-gray-200">off-schedule penalty</strong> in
+            <strong className="text-foreground">off-schedule penalty</strong> in
             addition to any processing fee.
           </p>
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li>
               Default penalty:{" "}
-              <strong className="text-gray-200">8% of the gross withdrawal
+              <strong className="text-foreground">8% of the gross withdrawal
               amount</strong> (configurable by the platform; shown before you
               confirm).
             </li>
@@ -152,7 +152,7 @@ export default function TermsPage() {
             <li>
               VIP / promotional waivers may reduce or remove the{" "}
               <em>processing</em> fee; they do{" "}
-              <strong className="text-gray-200">not</strong> automatically waive
+              <strong className="text-foreground">not</strong> automatically waive
               the off-schedule penalty unless explicitly stated.
             </li>
             <li>
@@ -170,7 +170,7 @@ export default function TermsPage() {
           <ul className="mt-3 list-disc space-y-2 pl-5">
             <li>
               A platform processing fee (default{" "}
-              <strong className="text-gray-200">$3 USDT</strong> for non-VIP
+              <strong className="text-foreground">$3 USDT</strong> for non-VIP
               users; $0 for eligible VIP) may apply on every wallet withdrawal.
             </li>
             <li>
@@ -255,7 +255,7 @@ export default function TermsPage() {
             Continued use after the effective date constitutes acceptance.
           </p>
           <p className="mt-3">
-            Questions: use <strong className="text-gray-200">Messages → Speak
+            Questions: use <strong className="text-foreground">Messages → Speak
             to admin</strong> on the platform.
           </p>
         </section>
@@ -268,14 +268,14 @@ export default function TermsPage() {
             The Chain / vault product is a separate enrollment. You must accept
             contract terms, complete document + liveness KYC, and wait for
             approval before depositing. Minimum deposit is{" "}
-            <strong className="text-gray-200">$2,000 USDT</strong>. Accounts from
+            <strong className="text-foreground">$2,000 USDT</strong>. Accounts from
             $2,000–$5,000 have an indicative{" "}
-            <strong className="text-gray-200">10%</strong> starting yield band;
+            <strong className="text-foreground">10%</strong> starting yield band;
             above $5,000 an indicative{" "}
-            <strong className="text-gray-200">15%</strong> band. Actual percentage
+            <strong className="text-foreground">15%</strong> band. Actual percentage
             may change depending on deposit size, available funds, market
             conditions, and past user behavior. Every withdrawal deducts a{" "}
-            <strong className="text-gray-200">5%</strong> fee. The live dashboard
+            <strong className="text-foreground">5%</strong> fee. The live dashboard
             stays empty until approval; the contract launches only after an
             approved deposit.
           </p>

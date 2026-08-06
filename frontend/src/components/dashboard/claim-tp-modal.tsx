@@ -158,7 +158,7 @@ export function ClaimTpModal({
   return (
     <div className="modal-overlay fixed inset-0 z-[110] flex items-center justify-center p-4">
       <Card
-        className="modal-panel max-h-[90vh] w-full max-w-lg overflow-y-auto border border-white/10 shadow-2xl"
+        className="modal-panel max-h-[90vh] w-full max-w-lg overflow-y-auto border border-[var(--color-border)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <CardHeader className="flex flex-row items-start justify-between gap-3">
@@ -183,7 +183,7 @@ export function ClaimTpModal({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="rounded-lg p-1 text-muted hover:bg-white/5 hover:text-foreground disabled:opacity-50"
+            className="rounded-lg p-1 text-muted hover:bg-foreground/[0.04] hover:text-foreground disabled:opacity-50"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -268,7 +268,7 @@ function UploadSlot({
       <Label htmlFor={id}>{label}</Label>
       <label
         htmlFor={id}
-        className="flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-white/15 bg-white/[0.02] p-3 text-center text-xs text-muted hover:border-primary/40 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50"
+        className="flex min-h-[120px] cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-[var(--color-border)] bg-foreground/[0.02] p-3 text-center text-xs text-muted hover:border-primary/40 data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50"
         data-disabled={disabled ? "true" : "false"}
       >
         {preview ? (

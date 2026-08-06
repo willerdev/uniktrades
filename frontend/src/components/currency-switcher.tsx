@@ -45,7 +45,7 @@ export function CurrencySwitcher({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-0.5",
+        "inline-flex items-center gap-1 rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] p-0.5",
         className,
       )}
     >
@@ -55,7 +55,7 @@ export function CurrencySwitcher({
         variant={showingUsdt ? "default" : "ghost"}
         className={cn(
           "h-7 px-2.5 text-xs",
-          !showingUsdt && "text-gray-400 hover:text-white",
+          !showingUsdt && "text-muted hover:text-foreground",
         )}
         disabled={saving}
         onClick={() => void setMode("USDT")}
@@ -68,7 +68,7 @@ export function CurrencySwitcher({
         variant={showingLocal ? "default" : "ghost"}
         className={cn(
           "h-7 px-2.5 text-xs",
-          !showingLocal && "text-gray-400 hover:text-white",
+          !showingLocal && "text-muted hover:text-foreground",
         )}
         disabled={saving || !localCode}
         title={

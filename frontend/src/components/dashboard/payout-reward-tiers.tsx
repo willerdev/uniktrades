@@ -48,12 +48,12 @@ export function PayoutRewardTiersCard({ reward, compact }: Props) {
             {reward.windowSize} setups
           </span>
           {reward.recentResults.length > 0 && (
-            <span className="font-mono text-xs tracking-wider text-gray-500">
+            <span className="font-mono text-xs tracking-wider text-muted">
               {reward.recentResults.join(" ")}
             </span>
           )}
           {reward.nextTierId && reward.winsToNextTier > 0 && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted">
               {reward.winsToNextTier} more win{reward.winsToNextTier === 1 ? "" : "s"} for{" "}
               {reward.nextTierId === "PRO" ? "$50 Pro" : "$100 Elite"}
             </span>
@@ -70,7 +70,7 @@ export function PayoutRewardTiersCard({ reward, compact }: Props) {
                   "rounded-xl border p-4 transition-colors",
                   active
                     ? "border-rank-gold/50 bg-rank-gold/10 ring-1 ring-rank-gold/30"
-                    : "border-white/10 bg-white/[0.02]",
+                    : "border-[var(--color-border)] bg-foreground/[0.02]",
                 )}
               >
                 <div className="flex items-center justify-between gap-2">
@@ -83,17 +83,17 @@ export function PayoutRewardTiersCard({ reward, compact }: Props) {
                 </div>
                 <p className="mt-2 text-2xl font-bold text-success">
                   ${tier.amountUsdt}
-                  <span className="ml-1 text-sm font-normal text-gray-400">USDT</span>
+                  <span className="ml-1 text-sm font-normal text-muted">USDT</span>
                 </p>
-                <p className="mt-2 text-xs leading-relaxed text-gray-400">{tier.requirement}</p>
+                <p className="mt-2 text-xs leading-relaxed text-muted">{tier.requirement}</p>
               </div>
             );
           })}
         </div>
 
         {!compact && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4">
-            <p className="text-xs text-gray-500">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[var(--color-border)] pt-4">
+            <p className="text-xs text-muted">
               {reward.weeklyPayoutsEnabled === false
                 ? "Tier amounts are shown for reference only until the platform re-enables weekly payouts."
                 : "Paid weekly when you have profitable activity. Complete KYC and add payout details to withdraw."}

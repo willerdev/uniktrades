@@ -62,7 +62,7 @@ function stepIcon(state: StepState) {
   if (state === "done") return <CheckCircle2 className="h-4 w-4 text-success" />;
   if (state === "current") return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
   if (state === "error") return <Circle className="h-4 w-4 text-danger" />;
-  return <Circle className="h-4 w-4 text-gray-600" />;
+  return <Circle className="h-4 w-4 text-muted" />;
 }
 
 function hubStageLabel(hub: HubSignalStatus | null) {
@@ -200,7 +200,7 @@ function PriceProgressBar({
 
   return (
     <div className="space-y-2">
-      <div className="relative h-3 overflow-hidden rounded-full bg-white/10">
+      <div className="relative h-3 overflow-hidden rounded-full bg-foreground/[0.06]">
         <div
           className="absolute top-0 h-full rounded-full bg-primary/30"
           style={{
@@ -223,7 +223,7 @@ function PriceProgressBar({
           />
         )}
       </div>
-      <div className="flex justify-between text-[10px] text-gray-500">
+      <div className="flex justify-between text-[10px] text-muted">
         <span>SL {sl}</span>
         <span>
           {oneToOnePrice != null && oneToOnePrice !== tp
@@ -233,7 +233,7 @@ function PriceProgressBar({
         <span>TP {tp}</span>
       </div>
       {currentPrice != null && (
-        <p className="text-center text-xs text-gray-400">
+        <p className="text-center text-xs text-muted">
           Mid entry {entryMid.toFixed(5)} · Live {currentPrice}
         </p>
       )}
@@ -535,7 +535,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
     <>
       <div className="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4">
         <Card
-          className="modal-panel max-h-[92vh] w-full max-w-2xl overflow-y-auto border border-white/10 shadow-2xl"
+          className="modal-panel max-h-[92vh] w-full max-w-2xl overflow-y-auto border border-[var(--color-border)] shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
@@ -563,7 +563,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1 text-muted hover:bg-white/5 hover:text-foreground"
+              className="rounded-lg p-1 text-muted hover:bg-foreground/[0.04] hover:text-foreground"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -572,7 +572,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
 
           <CardContent className="space-y-5">
             {loading ? (
-              <div className="flex justify-center py-12 text-gray-500">
+              <div className="flex justify-center py-12 text-muted">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
             ) : (
@@ -584,18 +584,18 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
                 )}
 
                 {res?.executionLabel && (
-                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-                    <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-4 py-3">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted">
                       Trade progress
                     </p>
-                    <p className="mt-1 text-sm text-white">{res.executionLabel}</p>
+                    <p className="mt-1 text-sm text-foreground">{res.executionLabel}</p>
                     {res.partialClosed && isOpen && (
                       <p className="mt-1 text-xs text-amber-300/90">
                         Partial close recorded — remainder may still be open.
                       </p>
                     )}
                     {res.tradeProgressOutcome && (
-                      <p className="mt-1 text-xs text-gray-400">
+                      <p className="mt-1 text-xs text-muted">
                         Result: {tradeProgressLabel(res.tradeProgressOutcome)}
                         {res.exitPrice != null ? ` · exit ${res.exitPrice}` : ""}
                         {res.pnl != null ? ` · P/L ${res.pnl}` : ""}
@@ -675,22 +675,22 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
 
                 {setup.screenshotUrl && (
                   <div>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
                       Chart setup
                     </p>
-                    <div className="overflow-hidden rounded-lg border border-white/10">
+                    <div className="overflow-hidden rounded-lg border border-[var(--color-border)]">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={setup.screenshotUrl}
                         alt="Setup"
-                        className="max-h-48 w-full object-contain bg-black/40"
+                        className="max-h-48 w-full object-contain bg-foreground/[0.06]"
                       />
                     </div>
                   </div>
                 )}
 
                 <div>
-                  <p className="mb-3 text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted">
                     Trade progress
                   </p>
                   <ol className="space-y-3">
@@ -703,13 +703,13 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
                               "text-sm font-medium",
                               step.state === "done" && "text-success",
                               step.state === "current" && "text-primary",
-                              step.state === "pending" && "text-gray-400",
+                              step.state === "pending" && "text-muted",
                               step.state === "error" && "text-danger",
                             )}
                           >
                             {step.label}
                           </p>
-                          <p className="text-xs text-gray-500">{step.detail}</p>
+                          <p className="text-xs text-muted">{step.detail}</p>
                         </div>
                       </li>
                     ))}
@@ -718,7 +718,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
 
                 {(res?.currentPrice != null || isOpen) && (
                   <div>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
                       Price vs levels
                     </p>
                     <PriceProgressBar
@@ -730,7 +730,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
                 )}
 
                 {res?.oneToOnePrice != null && isOpen && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted">
                     1:1 RR target: {res.oneToOnePrice}
                     {res.riskRewardRatio != null && (
                       <> · Submitted RR 1:{res.riskRewardRatio}</>
@@ -740,13 +740,13 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
 
                 {logs.length > 0 && (
                   <div>
-                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-500">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
                       Hub activity
                     </p>
-                    <div className="max-h-32 space-y-1.5 overflow-y-auto rounded-lg border border-white/5 bg-white/[0.02] p-3">
+                    <div className="max-h-32 space-y-1.5 overflow-y-auto rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] p-3">
                       {logs.map((log) => (
-                        <div key={log.id} className="text-xs text-gray-400">
-                          <span className="font-medium text-gray-300">{log.event}</span>
+                        <div key={log.id} className="text-xs text-muted">
+                          <span className="font-medium text-foreground/80">{log.event}</span>
                           {" — "}
                           {log.message}
                         </div>
@@ -767,7 +767,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
                 )}
 
                 {isOpen && (
-                  <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
+                  <div className="flex flex-wrap gap-2 border-t border-[var(--color-border)] pt-4">
                     {res?.canPlaceTrade && !tradeRunning && (
                       <Button
                         size="sm"
@@ -905,7 +905,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-gray-400"
+                      className="text-muted"
                       disabled={Boolean(actionLoading)}
                       onClick={() => setShowArchiveConfirm(true)}
                     >
@@ -915,7 +915,7 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
                 )}
 
                 {!isOpen && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted">
                     This setup is {setup.status.toLowerCase().replace("_", " ")} — actions
                     are read-only.
                   </p>
@@ -981,9 +981,9 @@ export function SetupDetailModal({ setup, onClose, onUpdated }: Props) {
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-white/5 bg-white/[0.02] px-3 py-2">
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className="font-medium text-white">{value}</p>
+    <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] px-3 py-2">
+      <p className="text-xs text-muted">{label}</p>
+      <p className="font-medium text-foreground">{value}</p>
     </div>
   );
 }
@@ -1026,7 +1026,7 @@ function AdjustStopsPanel({
         <Pencil className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
         <div>
           <p className="text-sm font-medium text-sky-200">Adjust stop levels</p>
-          <p className="mt-0.5 text-xs text-gray-400">
+          <p className="mt-0.5 text-xs text-muted">
             Sync your platform SL/TP with the broker when they differ. Updates your
             broker and Signal Hub for this setup.
           </p>
@@ -1043,7 +1043,7 @@ function AdjustStopsPanel({
 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="edit-sl" className="text-xs text-gray-400">
+          <Label htmlFor="edit-sl" className="text-xs text-muted">
             Stop loss ({direction === "BUY" ? "below entry" : "above entry"})
           </Label>
           <Input
@@ -1052,11 +1052,11 @@ function AdjustStopsPanel({
             step="any"
             value={editStopLoss}
             onChange={(e) => onStopLossChange(e.target.value)}
-            className="border-white/10 bg-white/[0.03]"
+            className="border-[var(--color-border)] bg-foreground/[0.03]"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="edit-tp" className="text-xs text-gray-400">
+          <Label htmlFor="edit-tp" className="text-xs text-muted">
             Take profit
           </Label>
           <Input
@@ -1065,7 +1065,7 @@ function AdjustStopsPanel({
             step="any"
             value={editTakeProfit}
             onChange={(e) => onTakeProfitChange(e.target.value)}
-            className="border-white/10 bg-white/[0.03]"
+            className="border-[var(--color-border)] bg-foreground/[0.03]"
           />
         </div>
       </div>
@@ -1104,11 +1104,11 @@ function LiveTradePanel({
     return (
       <div className="rounded-lg border border-amber-500/25 bg-amber-500/5 px-4 py-3">
         <LiveTradePanelHeader refreshing={refreshing} onRefresh={onRefresh} />
-        <p className="mt-2 text-sm text-gray-300">
+        <p className="mt-2 text-sm text-foreground/80">
           Pending fill — P/L available once the position opens.
         </p>
         {(live.stopLoss != null || live.takeProfit != null) && (
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="mt-2 text-xs text-muted">
             {live.stopLoss != null && <>Broker SL {live.stopLoss}</>}
             {live.stopLoss != null && live.takeProfit != null && " · "}
             {live.takeProfit != null && <>Broker TP {live.takeProfit}</>}
@@ -1121,9 +1121,9 @@ function LiveTradePanel({
 
   if (!live || live.status === "none") {
     return (
-      <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-4 py-3">
         <LiveTradePanelHeader refreshing={refreshing} onRefresh={onRefresh} />
-        <p className="mt-2 text-sm text-gray-400">
+        <p className="mt-2 text-sm text-muted">
           No open position with your comment tag — tap refresh after placing a trade.
         </p>
         {error && <p className="mt-2 text-xs text-danger">{error}</p>}
@@ -1145,7 +1145,7 @@ function LiveTradePanel({
   const inLoss = pnl != null && pnl < 0;
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+    <div className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-4 py-3">
       <LiveTradePanelHeader refreshing={refreshing} onRefresh={onRefresh} />
       <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -1155,8 +1155,8 @@ function LiveTradePanel({
               refreshing && "opacity-60",
               inProfit && "text-success",
               inLoss && "text-danger",
-              pnl != null && pnl === 0 && "text-gray-300",
-              pnl == null && "text-gray-400",
+              pnl != null && pnl === 0 && "text-foreground/80",
+              pnl == null && "text-muted",
             )}
           >
             {pnl != null
@@ -1164,7 +1164,7 @@ function LiveTradePanel({
               : "—"}
           </p>
         </div>
-        <div className="text-right text-xs text-gray-500">
+        <div className="text-right text-xs text-muted">
           {live.volume != null && <p>{live.volume} lots</p>}
           {live.openPrice != null && <p>Entry {live.openPrice}</p>}
           {live.currentPrice != null && <p>Mark {live.currentPrice}</p>}
@@ -1179,18 +1179,18 @@ function LiveTradePanel({
               "rounded-full px-2 py-0.5",
               live.tp1Reached
                 ? "bg-success/15 text-success"
-                : "bg-white/5 text-gray-400",
+                : "bg-foreground/[0.04] text-muted",
             )}
           >
             TP1 (1:1) {live.tp1Price}
             {live.tp1Reached ? " · reached" : ""}
           </span>
         )}
-        <span className="rounded-full bg-white/5 px-2 py-0.5 text-gray-400">
+        <span className="rounded-full bg-foreground/[0.04] px-2 py-0.5 text-muted">
           Win on close only if TP1 was reached
         </span>
         {live.comment && (
-          <span className="rounded-full bg-white/5 px-2 py-0.5 text-gray-400">
+          <span className="rounded-full bg-foreground/[0.04] px-2 py-0.5 text-muted">
             Comment: {live.comment}
           </span>
         )}
@@ -1209,14 +1209,14 @@ function LiveTradePanelHeader({
 }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <p className="text-xs font-medium uppercase tracking-wider text-gray-500">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted">
         Live P/L
       </p>
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="h-7 gap-1 px-2 text-xs text-gray-400"
+        className="h-7 gap-1 px-2 text-xs text-muted"
         disabled={refreshing}
         onClick={onRefresh}
       >

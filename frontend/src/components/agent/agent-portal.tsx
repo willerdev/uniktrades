@@ -176,24 +176,24 @@ export function AgentPortal() {
         </div>
 
         {error && (
-          <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+          <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-danger">
             {error}
           </p>
         )}
         {message && (
-          <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
+          <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800">
             {message}
           </p>
         )}
 
         {tab === "code" ? (
-          <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-gray-400">
+          <div className="space-y-3 rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] p-4">
+            <p className="text-sm text-muted">
               Enter the code you received after approval to see MoMo withdrawal
               requests and process payouts.
             </p>
             <input
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-lg tracking-[0.2em] text-white uppercase outline-none focus:border-sky-400"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.05] px-3 py-2 text-lg tracking-[0.2em] text-foreground uppercase outline-none focus:border-sky-400"
               placeholder="AGENT CODE"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -209,32 +209,32 @@ export function AgentPortal() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
-            <p className="text-sm text-gray-400">
+          <div className="space-y-3 rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] p-4">
+            <p className="text-sm text-muted">
               Apply to process MoMo withdrawals for users. After approval you
               receive an agent code by email.
             </p>
             <input
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-white outline-none focus:border-sky-400"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.05] px-3 py-2 text-foreground outline-none focus:border-sky-400"
               placeholder="Full name"
               value={applyName}
               onChange={(e) => setApplyName(e.target.value)}
             />
             <input
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-white outline-none focus:border-sky-400"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.05] px-3 py-2 text-foreground outline-none focus:border-sky-400"
               placeholder="MoMo phone"
               value={applyPhone}
               onChange={(e) => setApplyPhone(e.target.value)}
             />
             <input
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-white outline-none focus:border-sky-400"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.05] px-3 py-2 text-foreground outline-none focus:border-sky-400"
               placeholder="Email"
               type="email"
               value={applyEmail}
               onChange={(e) => setApplyEmail(e.target.value)}
             />
             <textarea
-              className="w-full rounded-lg border border-white/15 bg-black/30 px-3 py-2 text-white outline-none focus:border-sky-400"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.05] px-3 py-2 text-foreground outline-none focus:border-sky-400"
               placeholder="Why you want to become an agent (optional)"
               rows={3}
               value={applyNote}
@@ -262,8 +262,8 @@ export function AgentPortal() {
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm text-gray-400">Signed in as</p>
-          <p className="font-medium text-white">{agent?.displayName}</p>
+          <p className="text-sm text-muted">Signed in as</p>
+          <p className="font-medium text-foreground">{agent?.displayName}</p>
         </div>
         <Button type="button" variant="ghost" size="sm" onClick={signOut}>
           Lock portal
@@ -271,45 +271,45 @@ export function AgentPortal() {
       </div>
 
       {error && (
-        <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <p className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-danger">
           {error}
         </p>
       )}
       {message && (
-        <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-100">
+        <p className="rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800">
           {message}
         </p>
       )}
 
-      <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm text-sky-50">
+      <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 px-3 py-2 text-sm text-sky-900">
         Claim a request → send the UGX amount to the phone via MoMo → upload the
         transfer screenshot to confirm.
       </div>
 
       {jobs.length === 0 ? (
-        <p className="text-sm text-gray-400">No open MoMo withdrawals right now.</p>
+        <p className="text-sm text-muted">No open MoMo withdrawals right now.</p>
       ) : (
         <ul className="space-y-3">
           {jobs.map((job) => (
             <li
               key={job.id}
-              className="rounded-xl border border-white/10 bg-white/5 p-4 space-y-2"
+              className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] p-4 space-y-2"
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div>
-                  <p className="font-medium text-white">
+                  <p className="font-medium text-foreground">
                     {job.recipientName || "User"}
                   </p>
                   <p className="text-lg font-semibold tracking-wide text-emerald-700">
                     {job.momoPhone}
                   </p>
-                  <p className="text-xs text-gray-400">{job.momoNetwork}</p>
+                  <p className="text-xs text-muted">{job.momoNetwork}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-lg font-semibold text-white">
+                  <p className="text-lg font-semibold text-foreground">
                     UGX {Math.round(job.amountUgx).toLocaleString("en-UG")}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-muted">
                     ${job.amountUsdt.toFixed(2)} USDT · {job.status}
                     {job.mine ? " · yours" : ""}
                   </p>
@@ -328,7 +328,7 @@ export function AgentPortal() {
               )}
 
               {(job.mine || job.agentId) && (
-                <div className="space-y-2 border-t border-white/10 pt-3">
+                <div className="space-y-2 border-t border-[var(--color-border)] pt-3">
                   {confirmId === job.id ? (
                     <>
                       <input

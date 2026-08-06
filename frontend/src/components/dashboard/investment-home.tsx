@@ -198,7 +198,7 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
                           key={line}
                           className="flex gap-2 text-sm leading-relaxed text-foreground/80"
                         >
-                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/10 text-[11px] font-semibold text-foreground">
+                          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-foreground/[0.06] text-[11px] font-semibold text-foreground">
                             {idx + 1}
                           </span>
                           {line}

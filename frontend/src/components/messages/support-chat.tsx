@@ -216,14 +216,14 @@ export function SupportChat() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       {/* Header */}
-      <header className="shrink-0 border-b border-white/10 bg-background/80 px-4 py-3 backdrop-blur-md sm:px-5">
+      <header className="shrink-0 border-b border-[var(--color-border)] bg-background/80 px-4 py-3 backdrop-blur-md sm:px-5">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="flex items-center gap-2 truncate text-lg font-semibold text-white sm:text-xl">
+            <h1 className="flex items-center gap-2 truncate text-lg font-semibold text-foreground sm:text-xl">
               <MessageCircle className="h-5 w-5 shrink-0 text-primary" />
               Support
             </h1>
-            <p className="mt-0.5 truncate text-xs text-gray-400 sm:text-sm">
+            <p className="mt-0.5 truncate text-xs text-muted sm:text-sm">
               {showAgent
                 ? "Agent replies instantly · escalate anytime"
                 : "Human admin queue · tap Chat with Agent to resume AI"}
@@ -277,13 +277,13 @@ export function SupportChat() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center px-4 text-center text-gray-500">
+          <div className="flex h-full flex-col items-center justify-center px-4 text-center text-muted">
             <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10">
               <Bot className="h-7 w-7 text-primary" />
             </div>
-            <p className="font-medium text-gray-300">Hi — I&apos;m Agent</p>
+            <p className="font-medium text-foreground/80">Hi — I&apos;m Agent</p>
             <p className="mt-2 max-w-xs text-sm">
-              Ask about setups, KYC, payouts, or how UnikTrades works. Tap <strong className="text-gray-300">Speak to admin</strong>{" "}
+              Ask about setups, KYC, payouts, or how UnikTrades works. Tap <strong className="text-foreground/80">Speak to admin</strong>{" "}
               for a human anytime.
             </p>
           </div>
@@ -308,12 +308,12 @@ export function SupportChat() {
                         {isAgent ? (
                           <Bot className="h-3 w-3 text-primary" />
                         ) : (
-                          <UserRound className="h-3 w-3 text-gray-400" />
+                          <UserRound className="h-3 w-3 text-muted" />
                         )}
                         <span
                           className={cn(
                             "text-[11px] font-medium",
-                            isAgent ? "text-primary" : "text-gray-400",
+                            isAgent ? "text-primary" : "text-muted",
                           )}
                         >
                           {msg.senderName}
@@ -326,15 +326,15 @@ export function SupportChat() {
                         isMine
                           ? "rounded-br-md bg-primary text-white"
                           : isAgent
-                            ? "rounded-bl-md border border-primary/20 bg-primary/10 text-gray-100"
-                            : "rounded-bl-md bg-white/10 text-gray-100",
+                            ? "rounded-bl-md border border-primary/20 bg-primary/10 text-foreground"
+                            : "rounded-bl-md border border-[var(--color-border)] bg-foreground/[0.04] text-foreground",
                       )}
                     >
                       <p className="whitespace-pre-wrap break-words">{msg.body}</p>
                       <p
                         className={cn(
                           "mt-1.5 text-[10px]",
-                          isMine ? "text-white/60" : "text-gray-500",
+                          isMine ? "text-white/70" : "text-muted",
                         )}
                       >
                         {fmtTime(msg.createdAt)}
@@ -363,7 +363,7 @@ export function SupportChat() {
       </div>
 
       {/* Compose */}
-      <div className="shrink-0 border-t border-white/10 bg-background/90 px-3 py-3 backdrop-blur-md sm:px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div className="shrink-0 border-t border-[var(--color-border)] bg-background/90 px-3 py-3 backdrop-blur-md sm:px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
         {error && (
           <p className="mb-2 text-center text-xs text-danger sm:text-sm">{error}</p>
         )}
@@ -383,7 +383,7 @@ export function SupportChat() {
             placeholder="Message Agent…"
             maxLength={4000}
             rows={1}
-            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-gray-500 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
+            className="max-h-32 min-h-[44px] flex-1 resize-none rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30"
             style={{ fieldSizing: "content" } as React.CSSProperties}
           />
           <Button

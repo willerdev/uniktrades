@@ -7,7 +7,7 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "animate-pulse rounded-xl bg-white/5 dark:bg-white/5 light:bg-slate-200/80",
+        "animate-pulse rounded-xl bg-foreground/[0.04] dark:bg-foreground/[0.04] light:bg-slate-200/80",
         className,
       )}
     />
@@ -100,7 +100,7 @@ export function TxStatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         "inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
-        map[status] ?? "bg-white/5 text-muted border-white/10",
+        map[status] ?? "bg-foreground/[0.04] text-muted border-[var(--color-border)]",
       )}
     >
       {status}

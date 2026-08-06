@@ -96,7 +96,7 @@ export function LaunchSubscribeBanner() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@email.com"
               disabled={status === "done" || status === "loading"}
-              className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-black/25 pl-9 pr-3 text-sm outline-none focus:border-primary disabled:opacity-70"
+              className="h-10 w-full rounded-xl border border-[var(--color-border)] bg-foreground/[0.05] pl-9 pr-3 text-sm outline-none focus:border-primary disabled:opacity-70"
               aria-label="Email for launch notification"
             />
           </div>

@@ -50,7 +50,7 @@ export function WalletWithdrawForm({
   return (
     <div className="space-y-3">
       <div>
-        <label className="mb-1 block text-xs text-gray-400">
+        <label className="mb-1 block text-xs text-muted">
           Amount (max {formatCurrency(availableBalance)})
         </label>
         <Input
@@ -64,7 +64,7 @@ export function WalletWithdrawForm({
         <WalletWithdrawFeeNotice amount={amount} feeUsdt={fee} className="mt-2" />
       </div>
       <div>
-        <label className="mb-1 block text-xs text-gray-400">
+        <label className="mb-1 block text-xs text-muted">
           TRC20 address (optional if saved in settings)
         </label>
         <Input

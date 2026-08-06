@@ -379,7 +379,7 @@ function SidebarShell({
         {filtered.map((group) => (
           <div key={group.id} className="mb-3">
             {group.labelKey && showLabels && (
-              <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-foreground/50">
+              <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                 {t(group.labelKey)}
               </p>
             )}
@@ -398,8 +398,8 @@ function SidebarShell({
                       "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                       !showLabels && "justify-center px-0",
                       active
-                        ? "bg-primary/20 text-primary"
-                        : "text-foreground/75 hover:bg-foreground/10 hover:text-foreground",
+                        ? "bg-primary/15 text-primary"
+                        : "text-foreground hover:bg-foreground/5",
                     )}
                   >
                     <Icon

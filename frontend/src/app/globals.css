@@ -3,7 +3,7 @@
 @theme inline {
   --color-background: #FFFFFF;
   --color-foreground: #0A0A0A;
-  --color-muted: #5C6B73;
+  --color-muted: #475569;
   --color-border: rgba(22, 67, 91, 0.14);
   --color-surface: rgba(255, 255, 255, 0.96);
   --color-primary: #16435B;
@@ -97,7 +97,7 @@ html.dark .mt5-shell {
   --nav-dock-bg: #ffffff;
   --nav-dock-border: rgba(22, 67, 91, 0.12);
   --nav-dock-shadow: 0 8px 28px rgba(22, 67, 91, 0.12);
-  --nav-dock-inactive: #64748b;
+  --nav-dock-inactive: #475569;
 }
 
 html.dark .mobile-nav-dock {

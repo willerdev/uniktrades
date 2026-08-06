@@ -38,14 +38,14 @@ export function ArchivedSetupsCard() {
   }
 
   return (
-    <Card className="lg:col-span-2 border-white/5">
+    <Card className="lg:col-span-2 border-[var(--color-border)]">
       <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <Archive className="h-5 w-5 text-gray-400" />
+            <Archive className="h-5 w-5 text-muted" />
             Archived Setups
           </CardTitle>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted">
             Setups you archived or invalidated — hidden from open setups, not scored
           </p>
         </div>
@@ -62,7 +62,7 @@ export function ArchivedSetupsCard() {
       </CardHeader>
       <CardContent>
         {loading && items.length === 0 ? (
-          <div className="flex items-center justify-center py-8 text-gray-500">
+          <div className="flex items-center justify-center py-8 text-muted">
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
             Loading archives…
           </div>
@@ -76,11 +76,11 @@ export function ArchivedSetupsCard() {
             {items.map((setup) => (
               <div
                 key={setup.id}
-                className="flex flex-col gap-2 rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-2 rounded-lg border border-[var(--color-border)] bg-foreground/[0.02] p-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-white">{setup.symbol}</span>
+                    <span className="font-semibold text-foreground">{setup.symbol}</span>
                     <Badge
                       variant={setup.direction === "BUY" ? "success" : "danger"}
                     >
@@ -88,11 +88,11 @@ export function ArchivedSetupsCard() {
                     </Badge>
                     <Badge variant="secondary">{setup.status}</Badge>
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-muted">
                     Entry {setup.entryMin} – {setup.entryMax} · TP {setup.takeProfit}{" "}
                     · SL {setup.stopLoss}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-muted">
                     Submitted {new Date(setup.submittedAt).toLocaleString()}
                     {setup.resolvedAt && (
                       <>

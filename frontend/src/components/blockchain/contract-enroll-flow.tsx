@@ -67,7 +67,7 @@ function PhasePills({ phase }: { phase: number }) {
               ? "border-primary/40 bg-primary/15 text-sky-200"
               : phase > item.n
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                : "border-white/10 text-gray-500",
+                : "border-[var(--color-border)] text-muted",
           )}
         >
           {phase > item.n ? (
@@ -101,11 +101,11 @@ function DocGuide({ type }: { type: DocType }) {
         ];
   return (
     <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-100">
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-900">
         <ScanLine className="h-4 w-4" />
         How to scan a valid {type === "PASSPORT" ? "passport" : "ID"}
       </div>
-      <ul className="space-y-1.5 text-xs leading-relaxed text-amber-100/80">
+      <ul className="space-y-1.5 text-xs leading-relaxed text-amber-900/80">
         {tips.map((t) => (
           <li key={t} className="flex gap-2">
             <span className="text-amber-400">•</span>
@@ -149,7 +149,7 @@ function UploadSlot({
     <div className="space-y-2">
       <Label>{label}</Label>
       {url ? (
-        <div className="relative overflow-hidden rounded-xl border border-white/10">
+        <div className="relative overflow-hidden rounded-xl border border-[var(--color-border)]">
           <AuthenticatedImage
             src={url}
             alt={label}
@@ -164,7 +164,7 @@ function UploadSlot({
           </button>
         </div>
       ) : (
-        <label className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-white/15 bg-white/[0.02] text-sm text-muted hover:border-primary/40">
+        <label className="flex h-40 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--color-border)] bg-foreground/[0.02] text-sm text-muted hover:border-primary/40">
           {busy ? (
             <Loader2 className="h-5 w-5 animate-spin" />
           ) : (
@@ -218,10 +218,10 @@ function PhaseTerms({
       className="space-y-6"
     >
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
           On-chain vault contract
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-gray-400">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
           Enroll once, complete identity + liveness, then deposit after approval.
           The contract only launches when your KYC is approved and you fund the
           vault — until then your dashboard stays empty.
@@ -245,37 +245,37 @@ function PhaseTerms({
         ].map((card) => (
           <div
             key={card.title}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+            className="rounded-2xl border border-[var(--color-border)] bg-foreground/[0.03] p-4"
           >
-            <p className="text-sm font-semibold text-white">{card.title}</p>
-            <p className="mt-2 text-xs leading-relaxed text-gray-400">
+            <p className="text-sm font-semibold text-foreground">{card.title}</p>
+            <p className="mt-2 text-xs leading-relaxed text-muted">
               {card.body}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-black/30 p-5 text-sm leading-relaxed text-gray-300">
-        <p className="mb-3 flex items-center gap-2 font-semibold text-white">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-foreground/[0.05] p-5 text-sm leading-relaxed text-foreground/80">
+        <p className="mb-3 flex items-center gap-2 font-semibold text-foreground">
           <FileText className="h-4 w-4 text-primary" />
           Brief contract terms
         </p>
-        <ul className="list-disc space-y-2 pl-5 text-gray-400">
+        <ul className="list-disc space-y-2 pl-5 text-muted">
           <li>
             Minimum deposit{" "}
-            <strong className="text-gray-200">
+            <strong className="text-foreground">
               ${t.minDepositUsd.toLocaleString()} USDT
             </strong>
             .
           </li>
           <li>
             Indicative yield bands:{" "}
-            <strong className="text-gray-200">
+            <strong className="text-foreground">
               {t.midTierYieldPercent}%
             </strong>{" "}
             for ${t.minDepositUsd.toLocaleString()}–$
             {t.midTierMaxUsd.toLocaleString()};{" "}
-            <strong className="text-gray-200">
+            <strong className="text-foreground">
               {t.highTierYieldPercent}%
             </strong>{" "}
             above ${t.midTierMaxUsd.toLocaleString()}.
@@ -288,7 +288,7 @@ function PhaseTerms({
             {t.withdrawFeePercent > 0 ? (
               <>
                 Every withdrawal deducts{" "}
-                <strong className="text-gray-200">
+                <strong className="text-foreground">
                   {t.withdrawFeePercent}%
                 </strong>{" "}
                 of the withdrawn amount.
@@ -311,12 +311,12 @@ function PhaseTerms({
         </ul>
       </div>
 
-      <label className="flex items-start gap-3 text-sm text-gray-300">
+      <label className="flex items-start gap-3 text-sm text-foreground/80">
         <input
           type="checkbox"
           checked={agreed}
           onChange={(e) => setAgreed(e.target.checked)}
-          className="mt-1 rounded border-white/20"
+          className="mt-1 rounded border-[var(--color-border)]"
         />
         <span>
           I have read and agree to the on-chain vault contract terms, yield
@@ -425,8 +425,8 @@ function PhaseKyc({
       className="space-y-6"
     >
       <div>
-        <h1 className="text-2xl font-bold text-white">Identity verification</h1>
-        <p className="mt-2 text-sm text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground">Identity verification</h1>
+        <p className="mt-2 text-sm text-muted">
           Phase 2 — choose your country, upload a valid document, then complete
           head-turn liveness.
         </p>
@@ -453,7 +453,7 @@ function PhaseKyc({
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
-                  className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-md border border-[var(--color-border)] bg-foreground/[0.04] px-3 py-2 text-sm text-foreground"
                 >
                   <option value="">Select country</option>
                   {COUNTRIES.map((c) => (
@@ -553,7 +553,7 @@ function PhaseKyc({
             exit={{ opacity: 0, x: -8 }}
             className="space-y-4"
           >
-            <p className="text-center text-sm text-gray-400">
+            <p className="text-center text-sm text-muted">
               Follow the prompts — rotate your head slowly. The ring fills as
               each pose completes, then turns green.
             </p>
@@ -612,11 +612,11 @@ export function ContractNullDashboard({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-transparent p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-gradient-to-br from-white/[0.04] to-transparent p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           Contract dashboard
         </p>
-        <h1 className="mt-2 text-2xl font-bold text-white">
+        <h1 className="mt-2 text-2xl font-bold text-foreground">
           {enrollment.status === "KYC_PENDING"
             ? "Under review"
             : enrollment.status === "APPROVED"
@@ -625,7 +625,7 @@ export function ContractNullDashboard({
                 ? "Verification rejected"
                 : "Awaiting activation"}
         </h1>
-        <p className="mt-2 max-w-xl text-sm text-gray-400">
+        <p className="mt-2 max-w-xl text-sm text-muted">
           {enrollment.status === "KYC_PENDING"
             ? "Your documents and liveness are with the team. Balances, yield, and activity stay empty until approval."
             : enrollment.status === "APPROVED"
@@ -643,10 +643,10 @@ export function ContractNullDashboard({
         ].map((card) => (
           <div
             key={card.label}
-            className="rounded-xl border border-dashed border-white/10 bg-black/20 px-4 py-5"
+            className="rounded-xl border border-dashed border-[var(--color-border)] bg-foreground/[0.04] px-4 py-5"
           >
-            <p className="text-xs text-gray-500">{card.label}</p>
-            <p className="mt-2 text-2xl font-semibold tabular-nums text-gray-600">
+            <p className="text-xs text-muted">{card.label}</p>
+            <p className="mt-2 text-2xl font-semibold tabular-nums text-muted">
               {card.value}
             </p>
           </div>
@@ -655,8 +655,8 @@ export function ContractNullDashboard({
 
       {enrollment.status === "APPROVED" && (
         <div className="rounded-2xl border border-primary/25 bg-primary/5 p-5 space-y-4">
-          <p className="text-sm font-semibold text-white">Launch deposit</p>
-          <p className="text-xs text-gray-400">
+          <p className="text-sm font-semibold text-foreground">Launch deposit</p>
+          <p className="text-xs text-muted">
             ${t.minDepositUsd.toLocaleString()}–$
             {t.midTierMaxUsd.toLocaleString()} → indicative {t.midTierYieldPercent}% ·
             above ${t.midTierMaxUsd.toLocaleString()} → indicative{" "}

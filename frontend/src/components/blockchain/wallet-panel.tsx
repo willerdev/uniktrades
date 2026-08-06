@@ -65,13 +65,13 @@ export function WalletPanel({
       </div>
 
       {withdrawFeePercent > 0 ? (
-        <p className="mb-4 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-gray-400">
+        <p className="mb-4 rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-3 py-2 text-xs text-muted">
           Contract withdrawals deduct a{" "}
-          <strong className="text-gray-200">{withdrawFeePercent}%</strong> fee from
+          <strong className="text-foreground">{withdrawFeePercent}%</strong> fee from
           the withdrawn amount.
         </p>
       ) : (
-        <p className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-gray-400">
+        <p className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-muted">
           Contract withdrawals have <strong className="text-emerald-200">no platform fee</strong>.
         </p>
       )}
@@ -156,7 +156,7 @@ export function WalletPanel({
           step="0.01"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          className="h-9 w-28 rounded-lg border border-[var(--color-border)] bg-black/20 px-3 text-sm outline-none focus:border-primary"
+          className="h-9 w-28 rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] px-3 text-sm outline-none focus:border-primary"
           aria-label="Amount"
         />
         {!wallet.connected ? (
@@ -219,7 +219,7 @@ export function WalletPanel({
       {!contractReady && (
         <p className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
           Contract address not loaded. On Render set{" "}
-          <code className="text-amber-100">NEXT_PUBLIC_CONTRACT_ADDRESS</code> on{" "}
+          <code className="text-amber-900">NEXT_PUBLIC_CONTRACT_ADDRESS</code> on{" "}
           <strong>traders-web</strong> and redeploy the frontend (Next inlines
           this at build time). Network: Polygon Amoy (80002).
         </p>
@@ -242,7 +242,7 @@ function Field({
   mono?: boolean;
 }) {
   return (
-    <div className="rounded-xl bg-white/[0.03] p-3">
+    <div className="rounded-xl bg-foreground/[0.03] p-3">
       <dt className="text-[11px] uppercase tracking-wider text-muted">{label}</dt>
       <dd className={`mt-1 text-sm font-semibold ${mono ? "font-mono text-sky-300" : ""}`}>
         {value}

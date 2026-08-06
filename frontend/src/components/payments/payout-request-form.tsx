@@ -57,11 +57,11 @@ export function PayoutRequestForm({
   if (hasSavedDetails) {
     return (
       <div className="space-y-3">
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-muted">
           Payout will be sent to your saved{" "}
           {method === "MOBILE_MONEY" ? "mobile money" : "TRC20"} details:
         </p>
-        <p className="truncate font-mono text-xs text-gray-300">{savedDestination}</p>
+        <p className="truncate font-mono text-xs text-foreground/80">{savedDestination}</p>
         <div className="flex flex-wrap gap-2">
           <Button
             type="button"
@@ -92,7 +92,7 @@ export function PayoutRequestForm({
         </Link>{" "}
         for faster requests, or enter a one-time destination below.
       </p>
-      <Label className="text-xs text-gray-400">
+      <Label className="text-xs text-muted">
         USDT TRC20 address or mobile money (Provider: number)
       </Label>
       <div className="flex flex-col gap-2 sm:flex-row">

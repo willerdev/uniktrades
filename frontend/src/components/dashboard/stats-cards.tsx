@@ -33,10 +33,10 @@ function Metric({
 }) {
   return (
     <div className={cn("min-w-0", className)}>
-      <p className="text-[10px] font-medium uppercase tracking-wide text-gray-500">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-muted">
         {label}
       </p>
-      <p className="mt-0.5 truncate text-lg font-bold leading-tight text-white sm:text-xl">
+      <p className="mt-0.5 truncate text-lg font-bold leading-tight text-foreground sm:text-xl">
         {value}
       </p>
       {sub && (
@@ -44,7 +44,7 @@ function Metric({
           className={cn(
             "mt-0.5 flex items-center gap-0.5 text-[10px] font-medium",
             positive === undefined
-              ? "text-gray-500"
+              ? "text-muted"
               : positive
                 ? "text-success"
                 : "text-danger",
@@ -78,10 +78,10 @@ export function DashboardStats({
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-xl border border-white/10 p-3.5 sm:p-4"
+      className="glass-card rounded-xl border border-[var(--color-border)] p-3.5 sm:p-4"
     >
-      <div className="mb-3 flex items-center justify-between gap-2 border-b border-white/10 pb-3">
-        <p className="text-xs text-gray-400">Performance snapshot</p>
+      <div className="mb-3 flex items-center justify-between gap-2 border-b border-[var(--color-border)] pb-3">
+        <p className="text-xs text-muted">Performance snapshot</p>
         <Link href="/invest">
           <Button size="sm" className="h-8 gap-1.5 px-3 text-xs">
             <TrendingUp className="h-3.5 w-3.5" />
@@ -102,14 +102,14 @@ export function DashboardStats({
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <div className="rounded-lg bg-white/[0.03] px-2.5 py-2">
-          <p className="text-[10px] uppercase tracking-wide text-gray-500">Rank</p>
-          <p className="text-sm font-bold text-white">
+        <div className="rounded-lg bg-foreground/[0.03] px-2.5 py-2">
+          <p className="text-[10px] uppercase tracking-wide text-muted">Rank</p>
+          <p className="text-sm font-bold text-foreground">
             {rank ? `#${rank}` : "Unranked"}
           </p>
         </div>
-        <div className="rounded-lg bg-white/[0.03] px-2.5 py-2">
-          <p className="text-[10px] uppercase tracking-wide text-gray-500">Tier</p>
+        <div className="rounded-lg bg-foreground/[0.03] px-2.5 py-2">
+          <p className="text-[10px] uppercase tracking-wide text-muted">Tier</p>
           <span
             className={cn(
               "mt-0.5 inline-block rounded-full border px-2 py-0.5 text-[10px] font-bold",
@@ -119,22 +119,22 @@ export function DashboardStats({
             {tier}
           </span>
         </div>
-        <div className="rounded-lg bg-white/[0.03] px-2.5 py-2">
-          <p className="text-[10px] uppercase tracking-wide text-gray-500">Score</p>
-          <p className="text-sm font-bold text-white">{score} pts</p>
+        <div className="rounded-lg bg-foreground/[0.03] px-2.5 py-2">
+          <p className="text-[10px] uppercase tracking-wide text-muted">Score</p>
+          <p className="text-sm font-bold text-foreground">{score} pts</p>
         </div>
-        <div className="rounded-lg bg-white/[0.03] px-2.5 py-2">
-          <p className="text-[10px] uppercase tracking-wide text-gray-500">Max DD</p>
+        <div className="rounded-lg bg-foreground/[0.03] px-2.5 py-2">
+          <p className="text-[10px] uppercase tracking-wide text-muted">Max DD</p>
           <p className="text-sm font-bold text-danger">{formatPercent(drawdown)}</p>
         </div>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs">
         <span className="text-success">
-          <span className="text-gray-500">Win streak</span> {consecutiveWins}
+          <span className="text-muted">Win streak</span> {consecutiveWins}
         </span>
         <span className="text-danger">
-          <span className="text-gray-500">Loss streak</span> {consecutiveLosses}
+          <span className="text-muted">Loss streak</span> {consecutiveLosses}
         </span>
       </div>
     </motion.div>

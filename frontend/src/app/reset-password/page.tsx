@@ -69,7 +69,7 @@ function ResetPasswordForm() {
           <Link href="/forgot-password">
             <Button className="w-full">Request new link</Button>
           </Link>
-          <p className="text-center text-sm text-gray-400">
+          <p className="text-center text-sm text-muted">
             <Link href="/login" className="text-primary hover:underline">
               {t("forgot.backToSignIn")}
             </Link>
@@ -117,7 +117,7 @@ function ResetPasswordForm() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? t("reset.updating") : t("reset.update")}
           </Button>
-          <p className="text-center text-sm text-gray-400">
+          <p className="text-center text-sm text-muted">
             <Link href="/login" className="text-primary hover:underline">
               {t("forgot.backToSignIn")}
             </Link>

@@ -150,14 +150,14 @@ export function EvaluationCheckoutPanel({
       onClick={onClose}
     >
       <Card
-        className="modal-panel w-full max-w-lg border border-white/10 shadow-2xl"
+        className="modal-panel w-full max-w-lg border border-[var(--color-border)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <CardContent className="space-y-4 pt-6">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold">Start evaluation</h3>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted">
                 {formatEvaluationSize(evaluationSize)} program ·{" "}
                 {formatCurrency(feeUsdt)} fee
               </p>
@@ -171,7 +171,7 @@ export function EvaluationCheckoutPanel({
             <div className="flex flex-col items-center gap-3 py-6 text-center">
               <CheckCircle2 className="h-12 w-12 text-success" />
               <p className="font-medium">Evaluation activated</p>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted">
                 Open MT5 to trade within your program limits.
               </p>
               <Button onClick={onComplete ?? onClose}>Go to dashboard</Button>
@@ -205,11 +205,11 @@ export function EvaluationCheckoutPanel({
                         "rounded-xl border p-3 text-left text-sm transition-colors",
                         network === item.id
                           ? "border-primary bg-primary/10"
-                          : "border-white/10 hover:border-white/20",
+                          : "border-[var(--color-border)] hover:border-[var(--color-border)]",
                       )}
                     >
                       <p className="font-medium">{item.label}</p>
-                      <p className="text-xs text-gray-500">{item.hint}</p>
+                      <p className="text-xs text-muted">{item.hint}</p>
                     </button>
                   ))}
                 </div>
@@ -228,16 +228,16 @@ export function EvaluationCheckoutPanel({
             </>
           ) : (
             <div className="space-y-4">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-                <p className="text-sm text-gray-400">{PROGRESS_LABEL[progress]}</p>
+              <div className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] p-4 text-center">
+                <p className="text-sm text-muted">{PROGRESS_LABEL[progress]}</p>
                 {source === "momo" ? (
-                  <p className="mt-3 text-sm text-gray-300">
+                  <p className="mt-3 text-sm text-foreground/80">
                     {momoInstruction ||
                       "Approve the Mobile Money prompt on your phone to complete enrollment."}
                   </p>
                 ) : (
                   <>
-                    <p className="mt-2 text-2xl font-bold">
+                    <p className="mt-2 text-2xl font-bold text-foreground">
                       {payAmount != null ? payAmount.toFixed(2) : feeUsdt.toFixed(2)} USDT
                     </p>
                     {payAddress ? (
@@ -245,7 +245,7 @@ export function EvaluationCheckoutPanel({
                         <div className="mx-auto mt-4 flex h-36 w-36 items-center justify-center rounded-xl bg-white">
                           <QrCode className="h-16 w-16 text-slate-400" />
                         </div>
-                        <p className="mt-3 break-all font-mono text-xs text-gray-300">
+                        <p className="mt-3 break-all font-mono text-xs text-foreground/80">
                           {payAddress}
                         </p>
                         <Button

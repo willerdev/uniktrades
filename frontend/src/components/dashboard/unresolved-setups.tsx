@@ -111,7 +111,7 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
               <Target className="h-5 w-5 text-amber-400" />
               Unresolved Setups
             </CardTitle>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted">
               Click a setup for progress, claim TP/SL, or invalidate. TP claims
               on{" "}
               <Link href="/tp-claims" className="text-primary hover:underline">
@@ -125,7 +125,7 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="gap-1 text-gray-400"
+                className="gap-1 text-muted"
                 disabled={loading || archivingAll}
                 onClick={() => setShowArchiveAllConfirm(true)}
               >
@@ -151,7 +151,7 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
         </CardHeader>
         <CardContent>
           {loading && items.length === 0 ? (
-            <div className="flex items-center justify-center py-10 text-gray-500">
+            <div className="flex items-center justify-center py-10 text-muted">
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
               Checking open setups…
             </div>
@@ -170,7 +170,7 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
               )}
 
               {claimable.length === 0 && openOnly.length > 0 && (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted">
                   {openOnly.length} setup{openOnly.length !== 1 ? "s" : ""} still
                   open — click to view trade progress.
                 </p>
@@ -184,14 +184,14 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
                     type="button"
                     onClick={() => setSelected(toSummary(setup))}
                     className={cn(
-                      "flex w-full flex-col gap-2 rounded-lg border border-white/5",
-                      "bg-white/[0.02] p-4 text-left transition-colors sm:flex-row sm:items-center sm:justify-between",
+                      "flex w-full flex-col gap-2 rounded-lg border border-[var(--color-border)]",
+                      "bg-foreground/[0.02] p-4 text-left transition-colors sm:flex-row sm:items-center sm:justify-between",
                       "hover:border-amber-500/30 hover:bg-amber-500/5",
                     )}
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-lg font-bold text-white">
+                        <span className="text-lg font-bold text-foreground">
                           {setup.symbol}
                         </span>
                         <Badge
@@ -225,11 +225,11 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
                           </Badge>
                         )}
                       </div>
-                      <p className="mt-2 text-xs text-gray-500">
+                      <p className="mt-2 text-xs text-muted">
                         Entry {setup.entryMin} – {setup.entryMax} · TP{" "}
                         {setup.takeProfit} · SL {setup.stopLoss}
                       </p>
-                      <p className="mt-1 text-xs text-gray-600">
+                      <p className="mt-1 text-xs text-muted">
                         Submitted {new Date(setup.submittedAt).toLocaleString()}
                         {res.currentPrice != null && (
                           <> · Market {res.currentPrice}</>
@@ -237,7 +237,7 @@ export function UnresolvedSetupsCard({ onClaimed }: Props) {
                         {res.hubStatus && <> · Hub {res.hubStatus}</>}
                       </p>
                     </div>
-                    <ChevronRight className="hidden h-5 w-5 shrink-0 text-gray-600 sm:block" />
+                    <ChevronRight className="hidden h-5 w-5 shrink-0 text-muted sm:block" />
                   </button>
                 );
               })}

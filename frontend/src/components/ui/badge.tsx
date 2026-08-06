@@ -11,7 +11,8 @@ const badgeVariants = cva(
         success: "border-success/30 bg-success/10 text-success",
         danger: "border-danger/30 bg-danger/10 text-danger",
         gold: "border-rank-gold/30 bg-rank-gold/10 text-rank-gold",
-        secondary: "border-white/10 bg-white/5 text-gray-300",
+        secondary:
+          "border-[var(--color-border)] bg-foreground/[0.04] text-foreground",
       },
     },
     defaultVariants: {

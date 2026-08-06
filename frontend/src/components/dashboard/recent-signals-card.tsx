@@ -59,7 +59,7 @@ export function RecentSignalsCard({ signals, onRefresh }: Props) {
         <CardContent>
           {signals.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-gray-500">No recent setups on this account</p>
+              <p className="text-muted">No recent setups on this account</p>
               <Link href="/invest" className="mt-4 inline-block">
                 <Button variant="secondary" size="sm" className="gap-2">
                   Go to Smart-Invest
@@ -75,21 +75,21 @@ export function RecentSignalsCard({ signals, onRefresh }: Props) {
                   type="button"
                   onClick={() => setSelected(toSummary(signal))}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-lg border border-white/5",
-                    "bg-white/[0.02] p-3 text-left transition-colors",
+                    "flex w-full items-center justify-between rounded-lg border border-[var(--color-border)]",
+                    "bg-foreground/[0.02] p-3 text-left transition-colors",
                     "hover:border-primary/30 hover:bg-primary/5",
                   )}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-white">{signal.symbol}</span>
+                      <span className="font-semibold text-foreground">{signal.symbol}</span>
                       <Badge
                         variant={signal.direction === "BUY" ? "success" : "danger"}
                       >
                         {signal.direction}
                       </Badge>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-muted">
                       Entry: {Number(signal.entryMin)} – {Number(signal.entryMax)}
                       {" · "}
                       {new Date(signal.submittedAt).toLocaleString()}
@@ -99,11 +99,11 @@ export function RecentSignalsCard({ signals, onRefresh }: Props) {
                     <Badge variant={statusBadgeVariant(signal.status)}>
                       {statusLabel(signal.status)}
                     </Badge>
-                    <ChevronRight className="h-4 w-4 text-gray-600" />
+                    <ChevronRight className="h-4 w-4 text-muted" />
                   </div>
                 </button>
               ))}
-              <p className="pt-1 text-center text-xs text-gray-600">
+              <p className="pt-1 text-center text-xs text-muted">
                 Click a setup to view progress, claim TP, or invalidate
               </p>
             </div>

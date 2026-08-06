@@ -74,7 +74,7 @@ export function InvestorList({
               setPage(1);
             }}
             placeholder="Search wallet or country"
-            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-black/20 pl-9 pr-3 text-sm outline-none focus:border-primary"
+            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] pl-9 pr-3 text-sm outline-none focus:border-primary"
           />
         </div>
       </div>
@@ -82,7 +82,7 @@ export function InvestorList({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-left text-sm">
           <thead className="text-[11px] uppercase tracking-wider text-muted">
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-[var(--color-border)]">
               {(
                 [
                   ["wallet", "Wallet"],
@@ -109,7 +109,7 @@ export function InvestorList({
           </thead>
           <tbody>
             {pageRows.map((r) => (
-              <tr key={r.wallet} className="border-b border-white/5 last:border-0">
+              <tr key={r.wallet} className="border-b border-[var(--color-border)] last:border-0">
                 <td className="py-2.5 pr-3 font-mono text-xs text-primary">
                   {shortAddr(r.wallet, 6)}
                 </td>

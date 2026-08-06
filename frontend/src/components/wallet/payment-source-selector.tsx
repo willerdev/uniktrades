@@ -132,7 +132,7 @@ export function PaymentSourceSelector({
           )}
         >
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/[0.04]">
               <ArrowDownToLine className="h-4 w-4 text-foreground" />
             </div>
             <div>

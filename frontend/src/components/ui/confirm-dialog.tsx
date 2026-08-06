@@ -40,19 +40,19 @@ export function ConfirmDialog({
       onClick={onCancel}
     >
       <Card
-        className="modal-panel w-full max-w-md border border-white/10 shadow-2xl"
+        className="modal-panel w-full max-w-md border border-[var(--color-border)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
             <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${accent} bg-white/[0.03]`}
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${accent} bg-foreground/[0.03]`}
             >
               <AlertTriangle className="h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-base font-semibold text-white">{title}</h3>
-              <div className="mt-1 text-sm text-gray-400">{message}</div>
+              <h3 className="text-base font-semibold text-foreground">{title}</h3>
+              <div className="mt-1 text-sm text-muted">{message}</div>
             </div>
           </div>
 

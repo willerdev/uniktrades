@@ -96,7 +96,7 @@ export function TransactionHistory({
               setPage(1);
             }}
             placeholder="Search wallet or hash"
-            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-black/20 pl-9 pr-3 text-sm outline-none focus:border-primary"
+            className="h-9 w-full rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] pl-9 pr-3 text-sm outline-none focus:border-primary"
           />
         </div>
         <select
@@ -105,7 +105,7 @@ export function TransactionHistory({
             setType(e.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-lg border border-[var(--color-border)] bg-black/20 px-3 text-sm"
+          className="h-9 rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] px-3 text-sm"
         >
           <option value="">All types</option>
           <option value="deposit">Deposit</option>
@@ -120,7 +120,7 @@ export function TransactionHistory({
             setStatus(e.target.value);
             setPage(1);
           }}
-          className="h-9 rounded-lg border border-[var(--color-border)] bg-black/20 px-3 text-sm"
+          className="h-9 rounded-lg border border-[var(--color-border)] bg-foreground/[0.04] px-3 text-sm"
         >
           <option value="">All statuses</option>
           <option value="success">Success</option>
@@ -132,7 +132,7 @@ export function TransactionHistory({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-left text-sm">
           <thead className="text-[11px] uppercase tracking-wider text-muted">
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-[var(--color-border)]">
               <th className="pb-2 pr-3 font-medium">Wallet</th>
               <th className="pb-2 pr-3 font-medium">Type</th>
               <th className="pb-2 pr-3 font-medium">Amount</th>
@@ -145,7 +145,7 @@ export function TransactionHistory({
           </thead>
           <tbody>
             {pageRows.map((r) => (
-              <tr key={r.id} className="border-b border-white/5 last:border-0">
+              <tr key={r.id} className="border-b border-[var(--color-border)] last:border-0">
                 <td className="py-2.5 pr-3 font-mono text-xs">{shortAddr(r.wallet)}</td>
                 <td className="py-2.5 pr-3 capitalize">{r.type.replace(/_/g, " ")}</td>
                 <td className="py-2.5 pr-3">{r.amount}</td>

@@ -108,7 +108,7 @@ function AccountTransferForm() {
             appear on this account and the old account is banned.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 text-center text-sm text-gray-300">
+        <CardContent className="space-y-4 text-center text-sm text-foreground/80">
           {finalizeAfter ? (
             <p>
               Expected completion:{" "}
@@ -132,15 +132,15 @@ function AccountTransferForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-gray-300">
+        <div className="rounded-xl border border-[var(--color-border)] bg-foreground/[0.04] p-4 text-sm text-foreground/80">
           <p>
-            <span className="text-gray-500">From (will be banned):</span>{" "}
+            <span className="text-muted">From (will be banned):</span>{" "}
             <strong>
               {summary.fromDisplayName} ({summary.fromEmailMasked})
             </strong>
           </p>
           <p className="mt-2">
-            <span className="text-gray-500">To (this account):</span>{" "}
+            <span className="text-muted">To (this account):</span>{" "}
             <strong>
               {summary.toDisplayName} ({summary.toEmailMasked})
             </strong>
@@ -152,18 +152,18 @@ function AccountTransferForm() {
           </ul>
         </div>
 
-        <div className="space-y-2 text-sm text-gray-400">
-          <p className="font-semibold text-gray-200">Agreement</p>
+        <div className="space-y-2 text-sm text-muted">
+          <p className="font-semibold text-foreground">Agreement</p>
           <p>
             By approving, you confirm both accounts belong to you, balances and
             transaction history will move to the keep account after a{" "}
-            <strong className="text-gray-200">24-hour review</strong>, and the
-            source account will then be <strong className="text-gray-200">banned</strong>.
+            <strong className="text-foreground">24-hour review</strong>, and the
+            source account will then be <strong className="text-foreground">banned</strong>.
             Funds are not spendable on the keep account until review completes.
           </p>
         </div>
 
-        <label className="flex items-start gap-3 text-sm text-gray-300">
+        <label className="flex items-start gap-3 text-sm text-foreground/80">
           <input
             type="checkbox"
             className="mt-1"
@@ -193,7 +193,7 @@ function AccountTransferForm() {
           {agreeing ? "Approving…" : "I agree and transfer"}
         </Button>
 
-        <p className="text-center text-sm text-gray-400">
+        <p className="text-center text-sm text-muted">
           <Link href="/login" className="text-primary hover:underline">
             Back to sign in
           </Link>
