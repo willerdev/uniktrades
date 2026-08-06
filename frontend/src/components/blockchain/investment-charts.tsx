@@ -21,13 +21,13 @@ export function InvestmentCharts({
   }
 
   const charts = [
-    { title: "Daily Deposits", data: stats.dailyDeposits, color: "#38BDF8" },
-    { title: "Daily Withdrawals", data: stats.dailyWithdrawals, color: "#F472B6" },
-    { title: "TVL Growth", data: stats.tvlGrowth, color: "#34D399" },
-    { title: "User Growth", data: stats.userGrowth, color: "#A78BFA" },
-    { title: "Rewards Paid", data: stats.rewardsPaid, color: "#FBBF24" },
-    { title: "Profit Distribution", data: stats.profitDistribution, color: "#60A5FA" },
-    { title: "Network Activity", data: stats.networkActivity, color: "#2DD4BF" },
+    { title: "Daily Deposits", data: stats.dailyDeposits ?? [], color: "#38BDF8" },
+    { title: "Daily Withdrawals", data: stats.dailyWithdrawals ?? [], color: "#F472B6" },
+    { title: "TVL Growth", data: stats.tvlGrowth ?? [], color: "#34D399" },
+    { title: "User Growth", data: stats.userGrowth ?? [], color: "#A78BFA" },
+    { title: "Rewards Paid", data: stats.rewardsPaid ?? [], color: "#FBBF24" },
+    { title: "Profit Distribution", data: stats.profitDistribution ?? [], color: "#60A5FA" },
+    { title: "Network Activity", data: stats.networkActivity ?? [], color: "#2DD4BF" },
   ];
 
   return (
@@ -35,15 +35,22 @@ export function InvestmentCharts({
       <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {charts.map((c) => (
           <GlassCard key={c.title} title={c.title}>
-            <Sparkline data={c.data.map((d) => d.value)} color={c.color} />
+            <Sparkline
+              data={(c.data ?? []).map((d) => d.value)}
+              color={c.color}
+            />
           </GlassCard>
         ))}
       </div>
       <GlassCard title="Monthly Comparison">
         <div className="flex h-40 items-end gap-3">
-          {stats.monthlyComparison.map((m) => {
+          {(stats.monthlyComparison ?? []).map((m) => {
             const max = Math.max(
-              ...stats.monthlyComparison.flatMap((x) => [x.deposits, x.withdrawals]),
+              1,
+              ...(stats.monthlyComparison ?? []).flatMap((x) => [
+                x.deposits,
+                x.withdrawals,
+              ]),
             );
             return (
               <div key={m.month} className="flex flex-1 flex-col items-center gap-1">

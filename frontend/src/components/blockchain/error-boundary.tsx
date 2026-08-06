@@ -21,7 +21,7 @@ export class BlockchainErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       return (
         <div className="glass-card rounded-2xl border border-rose-500/30 p-8 text-center">
-          <h2 className="text-lg font-semibold text-rose-300">
+          <h2 className="text-lg font-semibold text-danger">
             {this.props.fallbackTitle ?? "Something went wrong"}
           </h2>
           <p className="mt-2 text-sm text-muted">{this.state.error.message}</p>

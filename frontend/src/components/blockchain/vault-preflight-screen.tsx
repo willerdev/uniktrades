@@ -43,10 +43,10 @@ export function VaultPreflightScreen({
       className="mx-auto max-w-xl space-y-6 py-6"
     >
       <div className="space-y-2 text-center sm:text-left">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-300">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
           Vault readiness
         </p>
-        <h1 className="text-2xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           Checking on-chain connection
         </h1>
         <p className="text-sm text-muted">
@@ -59,7 +59,7 @@ export function VaultPreflightScreen({
                 href={explorerAddress(address)}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-sky-300/90 underline-offset-2 hover:underline"
+                className="font-mono text-primary underline-offset-2 hover:underline"
               >
                 {address.slice(0, 8)}…{address.slice(-6)}
               </a>
@@ -69,7 +69,7 @@ export function VaultPreflightScreen({
         </p>
       </div>
 
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]/60 p-4 sm:p-5">
+      <div className="rounded-2xl border border-[var(--color-border)] bg-foreground/[0.03] p-4 sm:p-5">
         <ul className="space-y-3">
           {checks.map((check, i) => (
             <motion.li
@@ -86,9 +86,9 @@ export function VaultPreflightScreen({
                 <p
                   className={
                     check.status === "fail"
-                      ? "text-sm font-medium text-rose-200"
+                      ? "text-sm font-medium text-danger"
                       : check.status === "pass"
-                        ? "text-sm font-medium text-emerald-100"
+                        ? "text-sm font-medium text-emerald-700"
                         : "text-sm font-medium text-foreground"
                   }
                 >

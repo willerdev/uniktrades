@@ -32,8 +32,8 @@ export function InvestorList({
       if (!q) return true;
       const needle = q.toLowerCase();
       return (
-        r.wallet.toLowerCase().includes(needle) ||
-        r.country.toLowerCase().includes(needle)
+        (r.wallet || "").toLowerCase().includes(needle) ||
+        (r.country || "").toLowerCase().includes(needle)
       );
     });
     list = [...list].sort((a, b) => {

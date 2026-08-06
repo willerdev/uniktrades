@@ -90,8 +90,9 @@ function seriesFromEvents(
   for (let i = days - 1; i >= 0; i--) map.set(daysAgo(i), 0);
   for (const e of events) {
     if (e.type !== type) continue;
-    const day = e.timestamp.slice(0, 10);
-    if (map.has(day)) map.set(day, (map.get(day) || 0) + e.amount);
+    const day = (e.timestamp || "").slice(0, 10);
+    if (!day || !map.has(day)) continue;
+    map.set(day, (map.get(day) || 0) + (Number(e.amount) || 0));
   }
   return [...map.entries()].map(([date, value]) => ({
     date,
@@ -272,7 +273,7 @@ export class HybridBlockchainService implements IBlockchainService {
       id: a.id,
       type: a.type,
       title: a.type.replace(/_/g, " "),
-      message: `${a.amount} ${NATIVE_SYMBOL} · ${a.wallet.slice(0, 10)}…`,
+      message: `${a.amount} ${NATIVE_SYMBOL} · ${(a.wallet || "").slice(0, 10)}…`,
       createdAt: a.timestamp,
       read: false,
       severity: "info" as const,

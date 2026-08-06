@@ -64,9 +64,9 @@ function PhasePills({ phase }: { phase: number }) {
           className={cn(
             "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium",
             phase === item.n
-              ? "border-primary/40 bg-primary/15 text-sky-200"
+              ? "border-primary/40 bg-primary/15 text-primary"
               : phase > item.n
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
                 : "border-[var(--color-border)] text-muted",
           )}
         >
@@ -100,15 +100,15 @@ function DocGuide({ type }: { type: DocType }) {
           "Avoid glare, shadows, and cropped edges",
         ];
   return (
-    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-900">
-        <ScanLine className="h-4 w-4" />
+    <div className="rounded-xl border border-amber-700/25 bg-amber-50 p-4">
+      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-950">
+        <ScanLine className="h-4 w-4 shrink-0 text-amber-800" />
         How to scan a valid {type === "PASSPORT" ? "passport" : "ID"}
       </div>
-      <ul className="space-y-1.5 text-xs leading-relaxed text-amber-900/80">
+      <ul className="space-y-1.5 text-xs leading-relaxed text-amber-950">
         {tips.map((t) => (
           <li key={t} className="flex gap-2">
-            <span className="text-amber-400">•</span>
+            <span className="text-amber-800">•</span>
             <span>{t}</span>
           </li>
         ))}
@@ -197,6 +197,13 @@ function PhaseTerms({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const t = enrollment.terms;
+  if (!t) {
+    return (
+      <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+        Contract terms failed to load. Refresh the page and try again.
+      </p>
+    );
+  }
 
   async function submit() {
     if (!agreed) return;
@@ -351,7 +358,9 @@ function PhaseKyc({
   onSubmitted: (e: ChainContractEnrollment) => void;
 }) {
   const [step, setStep] = useState<"docs" | "liveness">("docs");
-  const [country, setCountry] = useState(enrollment.country ?? "");
+  const [country, setCountry] = useState(
+    enrollment.country?.trim() || "Rwanda",
+  );
   const [customCountry, setCustomCountry] = useState("");
   const [documentType, setDocumentType] = useState<DocType>(
     enrollment.documentType ?? "NATIONAL_ID",
@@ -368,14 +377,24 @@ function PhaseKyc({
   const resolvedCountry =
     country === "Other" ? customCountry.trim() : country.trim();
 
-  const docsReady = useMemo(() => {
-    if (!resolvedCountry || !documentNumber.trim() || !frontUrl) return false;
-    if (needsBack && !backUrl) return false;
-    return true;
+  const missingDocs = useMemo(() => {
+    const missing: string[] = [];
+    if (!resolvedCountry) missing.push("country");
+    if (!documentNumber.trim()) missing.push("document number");
+    if (!frontUrl) missing.push("ID front image");
+    if (needsBack && !backUrl) missing.push("ID back image");
+    return missing;
   }, [resolvedCountry, documentNumber, frontUrl, backUrl, needsBack]);
 
+  const docsReady = missingDocs.length === 0;
+
   async function goToLiveness() {
-    if (!docsReady) return;
+    if (!docsReady) {
+      setError(
+        `Complete these before continuing: ${missingDocs.join(", ")}.`,
+      );
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -530,10 +549,15 @@ function PhaseKyc({
             </div>
 
             {error && <p className="text-sm text-danger">{error}</p>}
+            {!docsReady && !error && (
+              <p className="text-xs text-muted">
+                Still needed: {missingDocs.join(", ")}.
+              </p>
+            )}
 
             <Button
               size="lg"
-              disabled={!docsReady || loading}
+              disabled={loading}
               onClick={() => void goToLiveness()}
               className="gap-2"
             >
@@ -589,6 +613,13 @@ export function ContractNullDashboard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const t = enrollment.terms;
+  if (!t) {
+    return (
+      <p className="rounded-lg border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger">
+        Contract terms failed to load. Refresh the page and try again.
+      </p>
+    );
+  }
   const amount = Number(deposit);
   const previewYield =
     Number.isFinite(amount) && amount >= t.minDepositUsd
