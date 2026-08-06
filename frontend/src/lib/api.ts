@@ -1819,6 +1819,7 @@ export interface WalletDepositCheckout {
   liveStatus?: string;
   gateway?: string;
   instruction?: string;
+  message?: string;
   momoNetwork?: string;
   momoPhone?: string;
   redirectUrl?: string;

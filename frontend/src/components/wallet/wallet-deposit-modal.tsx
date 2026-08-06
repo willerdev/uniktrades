@@ -26,7 +26,7 @@ const NETWORKS = [
   { id: "ERC20", label: "ERC20", hint: "Higher gas" },
 ] as const;
 
-type Step = "amount" | "network" | "pay" | "confirming" | "done";
+type Step = "amount" | "network" | "pay" | "done";
 type DepositMethod = "crypto" | "momo";
 type Progress = "waiting" | "confirming" | "partial" | "complete" | "failed";
 
@@ -38,23 +38,17 @@ const PROGRESS_LABEL: Record<Progress, string> = {
   failed: "Payment failed",
 };
 
-const DEPOSIT_POLL_COOLDOWN_SEC = 120;
-
 export function WalletDepositModal({
   open,
   onClose,
-  minPlanDeposit,
   onComplete,
 }: {
   open: boolean;
   onClose: () => void;
-  minPlanDeposit: number;
   onComplete?: () => void;
 }) {
   const [step, setStep] = useState<Step>("amount");
-  const [amount, setAmount] = useState("2");
-  const [startPlan, setStartPlan] = useState(false);
-  const [riskPercent, setRiskPercent] = useState("2");
+  const [amount, setAmount] = useState("10");
   const [network, setNetwork] = useState("TRC20");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -69,17 +63,10 @@ export function WalletDepositModal({
   const [momoPhone, setMomoPhone] = useState("");
   const [momoNetwork, setMomoNetwork] = useState("MTN");
   const [momoInstruction, setMomoInstruction] = useState("");
-  const [payStartedAt, setPayStartedAt] = useState<number | null>(null);
-  const [cooldownLeft, setCooldownLeft] = useState(DEPOSIT_POLL_COOLDOWN_SEC);
-
-  const belowMinMessage = (net: string) =>
-    `Amount is below the minimum for ${net}. Try a higher amount or switch network.`;
 
   const reset = useCallback(() => {
     setStep("amount");
     setAmount("10");
-    setStartPlan(false);
-    setRiskPercent("2");
     setNetwork("TRC20");
     setLoading(false);
     setError("");
@@ -87,8 +74,6 @@ export function WalletDepositModal({
     setPayAddress("");
     setPayAmount(null);
     setProgress("waiting");
-    setPayStartedAt(null);
-    setCooldownLeft(DEPOSIT_POLL_COOLDOWN_SEC);
     setDepositMethod("crypto");
     setMomoPhone("");
     setMomoNetwork("MTN");
@@ -102,14 +87,21 @@ export function WalletDepositModal({
   useEffect(() => {
     if (!open || depositMethod !== "crypto") return;
     let cancelled = false;
-    void api.wallet.depositMinimum(network).then((m) => {
-      if (cancelled) return;
-      setDepositMin(m.minUsdt);
-      setAmount((prev) => {
-        const n = Number(prev);
-        return !Number.isFinite(n) || n < m.minUsdt ? String(m.minUsdt) : prev;
+    void api.wallet
+      .depositMinimum(network)
+      .then((m) => {
+        if (cancelled) return;
+        setDepositMin(m.minUsdt);
+        setAmount((prev) => {
+          const n = Number(prev);
+          return !Number.isFinite(n) || n < m.minUsdt
+            ? String(m.minUsdt)
+            : prev;
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setDepositMin(10);
       });
-    });
     return () => {
       cancelled = true;
     };
@@ -143,25 +135,11 @@ export function WalletDepositModal({
   }, [paymentId, onComplete]);
 
   useEffect(() => {
-    if (!paymentId || step === "done" || payStartedAt == null) return;
-    const tick = () => {
-      const elapsed = Math.floor((Date.now() - payStartedAt) / 1000);
-      setCooldownLeft(Math.max(0, DEPOSIT_POLL_COOLDOWN_SEC - elapsed));
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [paymentId, step, payStartedAt]);
-
-  useEffect(() => {
     if (!paymentId || step === "done") return;
     const t = setInterval(() => void pollStatus(), 8000);
     void pollStatus();
     return () => clearInterval(t);
   }, [paymentId, step, pollStatus]);
-
-  const canManualRefresh = cooldownLeft <= 0;
-  const cooldownLabel = `${String(Math.floor(cooldownLeft / 60)).padStart(1, "0")}:${String(cooldownLeft % 60).padStart(2, "0")}`;
 
   async function createPayment() {
     setError("");
@@ -169,37 +147,52 @@ export function WalletDepositModal({
     try {
       const numAmount = Number(amount);
       if (!Number.isFinite(numAmount) || numAmount < depositMin) {
-        throw new Error(belowMinMessage(network));
-      }
-      if (startPlan && numAmount < minPlanDeposit) {
         throw new Error(
-          `Earning plan requires at least ${formatCurrency(minPlanDeposit)} USDT`,
+          `Minimum deposit is ${formatCurrency(depositMin)} USDT${
+            depositMethod === "crypto" ? ` on ${network}` : ""
+          }`,
         );
       }
+      if (depositMethod === "crypto" && !network) {
+        throw new Error("Choose a network");
+      }
+      if (depositMethod === "momo" && momoPhone.trim().length < 8) {
+        throw new Error("Enter a valid MoMo phone number");
+      }
+
       const res = await api.wallet.deposit(
         depositMethod === "momo"
           ? {
               method: "momo",
               amount: numAmount,
-              momoPhone,
+              momoPhone: momoPhone.trim(),
               momoNetwork,
               momoCountryCode: flwConfig?.countryCode,
-              ...(startPlan ? { riskPercent: Number(riskPercent) } : {}),
             }
           : {
+              method: "crypto",
               network,
               amount: numAmount,
-              ...(startPlan ? { riskPercent: Number(riskPercent) } : {}),
             },
       );
+
+      if (!res.paymentId) {
+        throw new Error("Could not start deposit — try again");
+      }
+
+      if (depositMethod === "crypto" && !res.payAddress) {
+        throw new Error(
+          res.message ||
+            "No deposit address returned — crypto payments may be unavailable. Try again or contact support.",
+        );
+      }
+
       setPaymentId(res.paymentId);
       setPayAddress(res.payAddress ?? "");
-      setPayAmount(res.payAmount ?? res.amount);
+      setPayAmount(res.payAmount ?? res.amount ?? numAmount);
       setMomoInstruction(res.instruction ?? "");
       setStep("pay");
       setProgress("waiting");
-      setPayStartedAt(Date.now());
-      setCooldownLeft(DEPOSIT_POLL_COOLDOWN_SEC);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not start deposit");
     } finally {
@@ -209,24 +202,21 @@ export function WalletDepositModal({
 
   async function copyAddress() {
     if (!payAddress) return;
-    await navigator.clipboard.writeText(payAddress);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(payAddress);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError("Could not copy — select the address manually");
+    }
   }
 
   if (!open) return null;
 
-  const steps: { id: Step; label: string }[] = [
-    { id: "amount", label: "Amount" },
-    { id: "network", label: "Network" },
-    { id: "pay", label: "Pay" },
-    { id: "confirming", label: "Confirm" },
-    { id: "done", label: "Done" },
-  ];
-
-  const stepIndex = steps.findIndex((s) =>
-    step === "confirming" ? s.id === "pay" : s.id === step,
-  );
+  const stepLabels =
+    depositMethod === "momo"
+      ? ["Amount", "Pay", "Done"]
+      : ["Amount", "Network", "Pay", "Done"];
 
   return (
     <div
@@ -234,55 +224,37 @@ export function WalletDepositModal({
       onClick={onClose}
     >
       <div
-        className="modal-panel w-full max-w-lg rounded-t-2xl border border-white/10 shadow-2xl sm:rounded-2xl"
+        className="modal-panel w-full max-w-lg rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-          <h2 className="text-lg font-semibold text-white">
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+          <h2 className="text-lg font-semibold text-foreground">
             {depositMethod === "momo" ? "Deposit via MoMo" : "Deposit USDT"}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-1.5 text-muted hover:bg-foreground/5 hover:text-foreground"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="px-5 pt-4">
-          <div className="flex items-center gap-1">
-            {steps.slice(0, 4).map((s, i) => (
-              <div key={s.id} className="flex flex-1 items-center gap-1">
-                <div
-                  className={cn(
-                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold",
-                    i <= stepIndex
-                      ? "bg-primary text-white"
-                      : "bg-white/10 text-gray-500",
-                  )}
-                >
-                  {i < stepIndex || step === "done" ? "✓" : i + 1}
-                </div>
-                {i < 3 && (
-                  <div
-                    className={cn(
-                      "h-0.5 flex-1 rounded",
-                      i < stepIndex ? "bg-primary" : "bg-white/10",
-                    )}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-          <p className="mt-2 text-xs text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted">
             {step === "done"
               ? "Deposit complete"
               : step === "pay"
-                ? "Send crypto to the address below"
+                ? depositMethod === "momo"
+                  ? "Approve on your phone"
+                  : "Send crypto to the address below"
                 : step === "network"
                   ? "Choose your network"
-                  : "Enter any amount to add to your wallet"}
+                  : "Enter amount to add to your wallet"}
+          </p>
+          <p className="mt-1 text-[11px] text-muted">
+            {stepLabels.join(" → ")}
           </p>
         </div>
 
@@ -297,8 +269,8 @@ export function WalletDepositModal({
                     className={cn(
                       "rounded-xl border px-3 py-2 text-sm font-medium",
                       depositMethod === "crypto"
-                        ? "border-primary bg-primary/10 text-white"
-                        : "border-white/10 text-gray-400",
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-[var(--color-border)] text-muted",
                     )}
                   >
                     USDT crypto
@@ -307,10 +279,10 @@ export function WalletDepositModal({
                     type="button"
                     onClick={() => setDepositMethod("momo")}
                     className={cn(
-                      "rounded-xl border px-3 py-2 text-sm font-medium inline-flex items-center justify-center gap-1.5",
+                      "inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium",
                       depositMethod === "momo"
-                        ? "border-emerald-500 bg-emerald-500/10 text-white"
-                        : "border-white/10 text-gray-400",
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-[var(--color-border)] text-muted",
                     )}
                   >
                     <Smartphone className="h-4 w-4" />
@@ -319,7 +291,7 @@ export function WalletDepositModal({
                 </div>
               )}
               <div>
-                <label className="mb-1 block text-xs text-gray-400">
+                <label className="mb-1 block text-xs font-medium text-muted">
                   Amount (USDT) — minimum {formatCurrency(depositMin)}
                   {depositMethod === "crypto" ? ` on ${network}` : ""}
                 </label>
@@ -329,11 +301,17 @@ export function WalletDepositModal({
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="text-lg font-semibold"
+                  className="text-lg font-semibold text-foreground"
                 />
                 {depositMethod === "momo" && momoEnabled && flwConfig && (
-                  <p className="mt-1 text-xs text-emerald-400/90">
-                    ≈ {formatLocalAmount(Number(amount) || 0, flwConfig.usdRate, flwConfig.currency)} charged on your phone
+                  <p className="mt-1 text-xs text-primary">
+                    ≈{" "}
+                    {formatLocalAmount(
+                      Number(amount) || 0,
+                      flwConfig.usdRate,
+                      flwConfig.currency,
+                    )}{" "}
+                    charged on your phone
                   </p>
                 )}
               </div>
@@ -346,37 +324,9 @@ export function WalletDepositModal({
                   config={flwConfig}
                 />
               )}
-              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 p-3">
-                <input
-                  type="checkbox"
-                  checked={startPlan}
-                  onChange={(e) => setStartPlan(e.target.checked)}
-                  className="rounded border-white/20"
-                />
-                <div>
-                  <p className="text-sm text-white">Start 5-day earning plan</p>
-                  <p className="text-xs text-gray-500">
-                    Min {formatCurrency(minPlanDeposit)} · 1:2 RR · daily yield
-                  </p>
-                </div>
-              </label>
-              {startPlan && (
-                <div>
-                  <label className="mb-1 block text-xs text-gray-400">
-                    Risk % (1:2 RR)
-                  </label>
-                  <Input
-                    type="number"
-                    min={0.5}
-                    max={10}
-                    step={0.5}
-                    value={riskPercent}
-                    onChange={(e) => setRiskPercent(e.target.value)}
-                  />
-                </div>
-              )}
               {error && <p className="text-sm text-danger">{error}</p>}
               <Button
+                type="button"
                 className="w-full"
                 onClick={() =>
                   depositMethod === "momo"
@@ -408,20 +358,28 @@ export function WalletDepositModal({
                       "rounded-xl border px-4 py-3 text-left transition-colors",
                       network === n.id
                         ? "border-primary bg-primary/10"
-                        : "border-white/10 hover:border-primary/40",
+                        : "border-[var(--color-border)] hover:border-primary/40",
                     )}
                   >
-                    <span className="font-medium text-white">{n.label}</span>
-                    <span className="ml-2 text-xs text-gray-500">{n.hint}</span>
+                    <span className="font-medium text-foreground">{n.label}</span>
+                    <span className="ml-2 text-xs text-muted">{n.hint}</span>
                   </button>
                 ))}
               </div>
               {error && <p className="text-sm text-danger">{error}</p>}
               <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setStep("amount")}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => {
+                    setError("");
+                    setStep("amount");
+                  }}
+                >
                   Back
                 </Button>
                 <Button
+                  type="button"
                   className="flex-1"
                   onClick={() => void createPayment()}
                   disabled={loading}
@@ -438,48 +396,27 @@ export function WalletDepositModal({
               {step === "done" ? (
                 <div className="flex flex-col items-center gap-3 py-4 text-center">
                   <CheckCircle2 className="h-12 w-12 text-success" />
-                  <p className="text-sm font-medium text-white">
+                  <p className="text-sm font-medium text-foreground">
                     Deposit confirmed — balance updated
                   </p>
-                  <Button onClick={onClose}>Done</Button>
+                  <Button type="button" onClick={onClose}>
+                    Done
+                  </Button>
                 </div>
               ) : (
                 <>
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="gold">{PROGRESS_LABEL[progress]}</Badge>
-                    {canManualRefresh ? (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => void pollStatus()}
-                        className="gap-1 text-muted"
-                      >
-                        <RefreshCw className="h-3.5 w-3.5" />
-                        Refresh
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-muted">
-                        Refresh in {cooldownLabel}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mb-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-center">
-                    <p className="text-[10px] uppercase tracking-wide text-muted">
-                      Confirmation check
-                    </p>
-                    <p className="text-2xl font-bold tabular-nums text-white">
-                      {canManualRefresh ? "Ready" : cooldownLabel}
-                    </p>
-                    {!canManualRefresh && (
-                      <div className="mx-auto mt-2 h-1.5 max-w-xs overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className="h-full bg-primary transition-all duration-1000"
-                          style={{
-                            width: `${((DEPOSIT_POLL_COOLDOWN_SEC - cooldownLeft) / DEPOSIT_POLL_COOLDOWN_SEC) * 100}%`,
-                          }}
-                        />
-                      </div>
-                    )}
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => void pollStatus()}
+                      className="gap-1 text-muted"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5" />
+                      Refresh
+                    </Button>
                   </div>
                   <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
                     {depositMethod === "momo" ? (
@@ -487,18 +424,15 @@ export function WalletDepositModal({
                         <p className="text-xs uppercase tracking-wide text-muted">
                           Approve on your phone
                         </p>
-                        <p className="mt-2 text-sm text-white">
+                        <p className="mt-2 text-sm text-foreground">
                           {momoInstruction ||
                             "Check your phone for the Mobile Money prompt and enter your PIN to approve."}
                         </p>
                         <p className="mt-3 text-xs text-muted">
                           {formatCurrency(Number(amount))} USDT
-                          {momoEnabled && flwConfig &&
+                          {momoEnabled &&
+                            flwConfig &&
                             ` (≈ ${formatLocalAmount(Number(amount), flwConfig.usdRate, flwConfig.currency)})`}
-                        </p>
-                        <p className="text-xs text-muted">
-                          {momoNetwork} · +{flwConfig?.countryCode ?? "256"}
-                          {momoPhone}
                         </p>
                       </>
                     ) : (
@@ -506,29 +440,52 @@ export function WalletDepositModal({
                         <p className="text-xs uppercase tracking-wide text-muted">
                           Send exactly
                         </p>
-                        <p className="text-2xl font-bold text-white">
-                          {payAmount ?? amount} USDT
+                        <p className="text-2xl font-bold text-foreground">
+                          {Number(payAmount ?? amount).toFixed(6)} USDT
                         </p>
                         <p className="text-xs text-muted">Network: {network}</p>
-                        <p className="mt-3 break-all font-mono text-xs text-primary">
-                          {payAddress}
-                        </p>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="mt-2 gap-1"
-                          onClick={() => void copyAddress()}
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                          {copied ? "Copied!" : "Copy address"}
-                        </Button>
+                        {payAddress ? (
+                          <>
+                            <p className="mt-3 break-all font-mono text-xs text-primary">
+                              {payAddress}
+                            </p>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="secondary"
+                              className="mt-2 gap-1"
+                              onClick={() => void copyAddress()}
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                              {copied ? "Copied!" : "Copy address"}
+                            </Button>
+                          </>
+                        ) : (
+                          <p className="mt-3 text-sm text-danger">
+                            Address missing — go back and generate again.
+                          </p>
+                        )}
                       </>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500">
-                    We check automatically every 8 seconds. Manual refresh unlocks
-                    after the 2-minute countdown — no need to keep tapping refresh.
+                  {error && <p className="text-sm text-danger">{error}</p>}
+                  <p className="text-xs text-muted">
+                    We check automatically every few seconds. Keep this window
+                    open until the deposit confirms.
                   </p>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="w-full"
+                    onClick={() => {
+                      setError("");
+                      setPaymentId(null);
+                      setPayAddress("");
+                      setStep(depositMethod === "momo" ? "amount" : "network");
+                    }}
+                  >
+                    Start over
+                  </Button>
                 </>
               )}
             </>

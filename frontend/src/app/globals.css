@@ -74,10 +74,6 @@ body {
   -webkit-backdrop-filter: none !important;
 }
 
-html.dark .modal-panel {
-  background: #121212 !important;
-}
-
 /* MT5 terminal shell — theme-aware surfaces, fixed buy/sell accent colors */
 .mt5-shell {
   --mt5-blue: #4a9eff;

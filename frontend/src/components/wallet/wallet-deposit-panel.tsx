@@ -77,10 +77,10 @@ export function WalletDepositPanel({
 
   if (paymentId && payAddress) {
     return (
-      <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-        <p className="text-sm text-gray-300">
+      <div className="space-y-3 rounded-xl border border-[var(--color-border)] bg-white/[0.02] p-4">
+        <p className="text-sm text-foreground/80">
           Send{" "}
-          <strong className="text-white">
+          <strong className="text-foreground">
             {payAmount != null ? payAmount : amount} USDT
           </strong>{" "}
           on {network} to:
@@ -88,7 +88,7 @@ export function WalletDepositPanel({
         <code className="block break-all rounded-lg bg-black/40 p-3 text-xs text-primary">
           {payAddress}
         </code>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-muted">
           After confirmation, a 5-day earning plan starts automatically at{" "}
           {riskPercent}% risk (1:2 RR).
         </p>
@@ -100,7 +100,7 @@ export function WalletDepositPanel({
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
         <div>
-          <label className="mb-1 block text-xs text-gray-400">Amount (USDT)</label>
+          <label className="mb-1 block text-xs text-muted">Amount (USDT)</label>
           <Input
             type="number"
             min={minDeposit}
@@ -109,7 +109,7 @@ export function WalletDepositPanel({
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-gray-400">Risk % (1:2 RR)</label>
+          <label className="mb-1 block text-xs text-muted">Risk % (1:2 RR)</label>
           <Input
             type="number"
             min={0.5}
@@ -138,7 +138,7 @@ export function WalletDepositPanel({
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Deposit {formatCurrency(Number(amount) || minDeposit)}
       </Button>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-muted">
         Minimum deposit: {formatCurrency(minDeposit)} USDT
       </p>
     </div>

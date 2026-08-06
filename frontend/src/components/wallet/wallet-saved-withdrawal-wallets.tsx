@@ -100,15 +100,15 @@ export function WalletAddWithdrawalWalletModal({
       onClick={onClose}
     >
       <div
-        className="modal-panel w-full max-w-md rounded-t-2xl border border-white/10 shadow-2xl sm:rounded-2xl"
+        className="modal-panel w-full max-w-md rounded-t-2xl border border-[var(--color-border)] shadow-2xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-          <h2 className="text-lg font-semibold text-white">Add withdrawal wallet</h2>
+        <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+          <h2 className="text-lg font-semibold text-foreground">Add withdrawal wallet</h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-white/5 hover:text-white"
+            className="rounded-lg p-1.5 text-muted hover:bg-foreground/5 hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -117,12 +117,12 @@ export function WalletAddWithdrawalWalletModal({
         <div className="space-y-4 p-5">
           {step === "form" ? (
             <>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted">
                 Save a wallet for withdrawals. We&apos;ll email you a code to verify
                 ownership before it can be used.
               </p>
               <div>
-                <label className="mb-1 block text-xs text-gray-400">Description</label>
+                <label className="mb-1 block text-xs text-muted">Description</label>
                 <Input
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
@@ -130,13 +130,13 @@ export function WalletAddWithdrawalWalletModal({
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-gray-400">Network</label>
+                <label className="mb-1 block text-xs text-muted">Network</label>
                 <select
                   value={network}
                   onChange={(e) =>
                     setNetwork(e.target.value as WithdrawalWalletNetwork)
                   }
-                  className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+                  className="w-full rounded-md border border-[var(--color-border)] bg-foreground/5 px-3 py-2 text-sm text-foreground"
                 >
                   {NETWORKS.map((n) => (
                     <option key={n} value={n}>
@@ -148,14 +148,14 @@ export function WalletAddWithdrawalWalletModal({
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted">
                   {isMomoNetwork(network)
                     ? "MoMo withdrawals send to your verified phone number via Flutterwave."
                     : "USDT crypto withdrawals currently send on TRC20 only."}
                 </p>
               </div>
               <div>
-                <label className="mb-1 block text-xs text-gray-400">
+                <label className="mb-1 block text-xs text-muted">
                   {isMomoNetwork(network) ? "Phone number" : "Wallet address"}
                 </label>
                 <Input
@@ -184,9 +184,9 @@ export function WalletAddWithdrawalWalletModal({
             </>
           ) : (
             <>
-              <p className="text-sm text-gray-400">
-                Enter the 6-digit code sent to <strong className="text-white">{email}</strong>{" "}
-                to save <strong className="text-white">{label}</strong> ({network}).
+              <p className="text-sm text-muted">
+                Enter the 6-digit code sent to <strong className="text-foreground">{email}</strong>{" "}
+                to save <strong className="text-foreground">{label}</strong> ({network}).
               </p>
               <Input
                 value={code}
@@ -270,15 +270,15 @@ export function WalletSavedWithdrawalWallets({
     <>
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-sm font-medium text-white">Saved withdrawal wallets</p>
+          <p className="text-sm font-medium text-foreground">Saved withdrawal wallets</p>
           <Button size="sm" variant="secondary" onClick={() => setAddOpen(true)}>
             Add wallet
           </Button>
         </div>
         {loading ? (
-          <p className="text-sm text-gray-400">Loading wallets…</p>
+          <p className="text-sm text-muted">Loading wallets…</p>
         ) : wallets.length === 0 ? (
-          <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-3 text-sm text-gray-400">
+          <p className="rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-3 py-3 text-sm text-muted">
             No saved wallets yet. Add one with a description, network, and address —
             we&apos;ll verify it by email before you can withdraw.
           </p>
@@ -287,17 +287,17 @@ export function WalletSavedWithdrawalWallets({
             {wallets.map((wallet) => (
               <li
                 key={wallet.id}
-                className="flex items-start justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5"
+                className="flex items-start justify-between gap-3 rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-3 py-2.5"
               >
                 <div className="min-w-0">
-                  <p className="font-medium text-white">{wallet.label}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="font-medium text-foreground">{wallet.label}</p>
+                  <p className="text-xs text-muted">
                     {wallet.network} · <span className="font-mono">{maskAddress(wallet.address)}</span>
                   </p>
                 </div>
                 <button
                   type="button"
-                  className="shrink-0 rounded p-1.5 text-gray-400 hover:bg-white/5 hover:text-danger"
+                  className="shrink-0 rounded p-1.5 text-muted hover:bg-foreground/5 hover:text-danger"
                   disabled={removingId === wallet.id}
                   onClick={() => void removeWallet(wallet.id)}
                   aria-label={`Remove ${wallet.label}`}

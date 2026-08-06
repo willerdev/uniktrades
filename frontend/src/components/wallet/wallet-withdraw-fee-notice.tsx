@@ -99,12 +99,12 @@ export function WalletWithdrawFeeNotice({
 
   return (
     <div
-      className={`space-y-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs leading-relaxed text-gray-400 ${className}`}
+      className={`space-y-2 rounded-lg border border-[var(--color-border)] bg-foreground/[0.03] px-3 py-2 text-xs leading-relaxed text-muted ${className}`}
     >
       {scheduleEnabled ? (
         <p>
           Preferred withdrawals:{" "}
-          <strong className="text-gray-300">{windowLabel}</strong>
+          <strong className="text-foreground/80">{windowLabel}</strong>
           {inWindow ? (
             <>
               {" "}
@@ -155,7 +155,7 @@ export function WalletWithdrawFeeNotice({
             <>
               {" "}
               → you receive{" "}
-              <strong className="text-gray-300">{formatCurrency(net)}</strong>{" "}
+              <strong className="text-foreground/80">{formatCurrency(net)}</strong>{" "}
               ({formatCurrency(gross)} − {formatCurrency(quote!.totalFeesUsdt)}).
             </>
           ) : gross != null && Number.isFinite(gross) && gross > 0 && quote ? (

@@ -269,15 +269,15 @@ export function WalletWithdrawModal({
         onClick={onClose}
       >
         <div
-          className="modal-panel w-full max-w-md rounded-t-2xl border border-white/10 shadow-2xl sm:rounded-2xl"
+          className="modal-panel w-full max-w-md rounded-t-2xl border border-[var(--color-border)] shadow-2xl sm:rounded-2xl"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-            <h2 className="text-lg font-semibold text-white">Send / Withdraw</h2>
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
+            <h2 className="text-lg font-semibold text-foreground">Send / Withdraw</h2>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-gray-400 hover:bg-white/5 hover:text-white"
+              className="rounded-lg p-1.5 text-muted hover:bg-foreground/5 hover:text-foreground"
             >
               <X className="h-5 w-5" />
             </button>
@@ -287,7 +287,7 @@ export function WalletWithdrawModal({
             {success ? (
               <div className="flex flex-col items-center gap-3 py-4 text-center">
                 <CheckCircle2 className="h-12 w-12 text-success" />
-                <p className="text-sm text-gray-300">
+                <p className="text-sm text-foreground/80">
                   {p2p
                     ? "MoMo withdrawal marked complete. Thank you."
                     : "Withdrawal requested. You will receive an email when processed."}
@@ -299,28 +299,28 @@ export function WalletWithdrawModal({
                 {p2pPhase === "initiated" ? (
                   <div className="space-y-3 py-2 text-center">
                     <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
-                    <p className="text-base font-medium text-white">
+                    <p className="text-base font-medium text-foreground">
                       Withdraw initiated
                     </p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted">
                       Notifying ops to send MoMo… {timerSec}s
                     </p>
-                    <p className="text-sm text-gray-300">
+                    <p className="text-sm text-foreground/80">
                       {formatCurrency(p2p.amountUsdt)} →{" "}
                       {formatUgx(p2p.amountUgx)} to {p2p.momoPhone}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <p className="text-base font-medium text-white">
+                    <p className="text-base font-medium text-foreground">
                       Status: under process
                     </p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-muted">
                       We are sending{" "}
-                      <strong className="text-white">
+                      <strong className="text-foreground">
                         {formatUgx(p2p.amountUgx)}
                       </strong>{" "}
-                      to <strong className="text-white">{p2p.momoPhone}</strong>{" "}
+                      to <strong className="text-foreground">{p2p.momoPhone}</strong>{" "}
                       ({p2p.momoNetwork}). Rate{" "}
                       {p2p.rateUgxPerUsdt.toFixed(2)} UGX/USDT (Binance P2P).
                     </p>
@@ -343,24 +343,24 @@ export function WalletWithdrawModal({
               </>
             ) : step === "otp" ? (
               <>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted">
                   We emailed a 6-digit code to{" "}
-                  <strong className="text-white">{otpEmail || "your email"}</strong>{" "}
+                  <strong className="text-foreground">{otpEmail || "your email"}</strong>{" "}
                   to confirm withdrawing{" "}
-                  <strong className="text-white">{formatCurrency(gross)}</strong>
+                  <strong className="text-foreground">{formatCurrency(gross)}</strong>
                   {selectedWallet
                     ? ` to ${selectedWallet.label}`
                     : ""}
                   .
                 </p>
                 {isMomo && momoQuote && (
-                  <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-gray-300">
+                  <p className="rounded-lg border border-[var(--color-border)] bg-foreground/5 px-3 py-2 text-sm text-foreground/80">
                     MoMo P2P: ~{formatUgx(momoQuote.amountUgx)} at{" "}
                     {momoQuote.price.toFixed(2)} UGX/USDT
                   </p>
                 )}
                 <div>
-                  <label className="mb-1 block text-xs text-gray-400">
+                  <label className="mb-1 block text-xs text-muted">
                     Verification code
                   </label>
                   <Input
@@ -408,14 +408,14 @@ export function WalletWithdrawModal({
               </>
             ) : (
               <>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-muted">
                   Available:{" "}
-                  <strong className="text-white">
+                  <strong className="text-foreground">
                     {formatCurrency(availableBalance)}
                   </strong>
                 </p>
                 <div>
-                  <label className="mb-1 block text-xs text-gray-400">
+                  <label className="mb-1 block text-xs text-muted">
                     Amount (USDT)
                   </label>
                   <Input
@@ -435,7 +435,7 @@ export function WalletWithdrawModal({
                 </div>
                 <div>
                   <div className="mb-1 flex items-center justify-between gap-2">
-                    <label className="block text-xs text-gray-400">
+                    <label className="block text-xs text-muted">
                       Withdraw to
                     </label>
                     <button
@@ -447,7 +447,7 @@ export function WalletWithdrawModal({
                     </button>
                   </div>
                   {walletsLoading ? (
-                    <p className="text-sm text-gray-400">Loading saved wallets…</p>
+                    <p className="text-sm text-muted">Loading saved wallets…</p>
                   ) : wallets.length === 0 ? (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
                       Add a verified TRC20 or MoMo destination before withdrawing.
@@ -456,7 +456,7 @@ export function WalletWithdrawModal({
                     <select
                       value={selectedWalletId}
                       onChange={(e) => setSelectedWalletId(e.target.value)}
-                      className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white"
+                      className="w-full rounded-md border border-[var(--color-border)] bg-foreground/5 px-3 py-2 text-sm text-foreground"
                     >
                       {wallets.map((wallet) => (
                         <option key={wallet.id} value={wallet.id}>
@@ -467,7 +467,7 @@ export function WalletWithdrawModal({
                     </select>
                   )}
                   {selectedWallet && (
-                    <p className="mt-1 font-mono text-xs text-gray-500">
+                    <p className="mt-1 font-mono text-xs text-muted">
                       {selectedWallet.address}
                     </p>
                   )}
@@ -487,7 +487,7 @@ export function WalletWithdrawModal({
                     )}
                   </div>
                 )}
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted">
                   We&apos;ll email a one-time code to confirm this withdrawal.
                 </p>
                 {error && <p className="text-sm text-danger">{error}</p>}

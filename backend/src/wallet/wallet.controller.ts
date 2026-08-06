@@ -87,7 +87,7 @@ export class WalletController {
     }
     return this.wallet.createDeposit(
       req.user.id,
-      body.network,
+      body.network ?? 'TRC20',
       body.amount,
       body.riskPercent,
     );
