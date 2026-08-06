@@ -28,7 +28,7 @@ export const en = {
     wallet: "Wallet",
     blockchain: "Blockchain",
     chain: "Chain",
-    payouts: "Payouts",
+    payouts: "Withdrawals",
     messages: "Messages",
     chat: "Chat",
     settings: "Settings",

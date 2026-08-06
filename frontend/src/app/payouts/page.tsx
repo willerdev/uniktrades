@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AuthLoadingScreen, useRequireAuth } from "@/hooks/use-require-auth";
-import { api, PayoutRecord, UserSettings, PayoutRewardStatus } from "@/lib/api";
+import { api, PayoutRecord, UserSettings } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
-import { Wallet, Info, ShieldAlert, Loader2 } from "lucide-react";
-import { PayoutRewardTiersCard } from "@/components/dashboard/payout-reward-tiers";
+import { Wallet, ShieldAlert } from "lucide-react";
 import { PayoutRequestForm } from "@/components/payments/payout-request-form";
 
 function payoutTitle(payout: PayoutRecord) {
@@ -22,11 +20,9 @@ function payoutTitle(payout: PayoutRecord) {
 }
 
 export default function PayoutsPage() {
-  const router = useRouter();
   const { ready } = useRequireAuth();
   const [payouts, setPayouts] = useState<PayoutRecord[]>([]);
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [rewardTier, setRewardTier] = useState<PayoutRewardStatus | null>(null);
   const [kycStatus, setKycStatus] = useState<string>("NOT_STARTED");
   const [loading, setLoading] = useState(true);
 
@@ -34,11 +30,9 @@ export default function PayoutsPage() {
     return Promise.all([
       api.payouts.history().catch(() => [] as PayoutRecord[]),
       api.users.settings().catch(() => null),
-      api.payouts.rewardTier().catch(() => null),
-    ]).then(([history, userSettings, tier]) => {
+    ]).then(([history, userSettings]) => {
       setPayouts(history);
       setSettings(userSettings);
-      setRewardTier(tier);
       setKycStatus(userSettings?.kyc?.status ?? "NOT_STARTED");
     });
   }
@@ -75,19 +69,11 @@ export default function PayoutsPage() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 xl:max-w-6xl xl:px-8">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-foreground">Payouts</h1>
+          <h1 className="text-2xl font-bold text-foreground">Withdrawals</h1>
           <p className="mt-1 text-muted">
-            {rewardTier?.weeklyPayoutsEnabled === false
-              ? "Weekly tier payouts are paused — TP rewards and other payouts still apply."
-              : "Weekly USDT rewards by performance tier — $10 Starter, $50 Pro, $100 Elite"}
+            View your payout history and submit withdrawal requests
           </p>
         </div>
-
-        {rewardTier && (
-          <div className="mb-6">
-            <PayoutRewardTiersCard reward={rewardTier} compact />
-          </div>
-        )}
 
         {!kycApproved && (
           <Card className="mb-6 border-rank-gold/30 bg-rank-gold/5">
@@ -118,7 +104,7 @@ export default function PayoutsPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-lg">Ready to request</CardTitle>
               <CardDescription>
-                Use your saved payout details or enter a destination for pending weekly payouts
+                Use your saved payout details or enter a destination for pending payouts
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -152,21 +138,11 @@ export default function PayoutsPage() {
           </Card>
         )}
 
-        <Card className="mb-6">
-          <CardContent className="flex items-start gap-3 pt-6">
-            <Info className="h-5 w-5 shrink-0 text-primary mt-0.5" />
-            <p className="text-sm text-foreground/80">
-              Trader payouts are funded by subscription revenue, premium memberships,
-              signal marketplace fees, and sponsorships — not registration fees.
-            </p>
-          </CardContent>
-        </Card>
-
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
               <Wallet className="h-5 w-5 text-primary" />
-              <CardTitle>Payout History</CardTitle>
+              <CardTitle>Withdrawal History</CardTitle>
             </div>
             <CardDescription>
               Track submitted requests and admin approvals
@@ -179,7 +155,7 @@ export default function PayoutsPage() {
               </div>
             ) : payouts.length === 0 ? (
               <p className="py-8 text-center text-muted">
-                No payouts yet. Keep trading to earn weekly profits.
+                No withdrawals yet. Approved payouts will appear here.
               </p>
             ) : (
               <div className="space-y-3">
@@ -199,11 +175,6 @@ export default function PayoutsPage() {
                         {payout.payoutMethod && (
                           <p className="mt-1 text-xs text-muted">
                             Method: {payout.payoutMethod === "MOBILE_MONEY" ? "Mobile money" : "TRC20"}
-                          </p>
-                        )}
-                        {payout.rewardTier && (
-                          <p className="mt-1 text-xs text-muted">
-                            Tier: {payout.rewardTier}
                           </p>
                         )}
                         {payout.walletAddress && (
