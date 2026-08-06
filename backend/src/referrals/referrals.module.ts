@@ -3,6 +3,7 @@ import { ReferralsService } from './referrals.service';
 import {
   ReferralsController,
   AdminReferralsController,
+  AdminInviteCodesController,
 } from './referrals.controller';
 import { EmailModule } from '../email/email.module';
 import { PlatformNotificationsModule } from '../platform-notifications/platform-notifications.module';
@@ -10,7 +11,11 @@ import { PlatformNotificationsModule } from '../platform-notifications/platform-
 @Global()
 @Module({
   imports: [EmailModule, PlatformNotificationsModule],
-  controllers: [ReferralsController, AdminReferralsController],
+  controllers: [
+    ReferralsController,
+    AdminReferralsController,
+    AdminInviteCodesController,
+  ],
   providers: [ReferralsService],
   exports: [ReferralsService],
 })

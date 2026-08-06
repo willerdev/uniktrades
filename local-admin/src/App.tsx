@@ -13,6 +13,7 @@ import {
   type UserRow,
   type PromoCodeRow,
   type PromoUsageRow,
+  type RegistrationInviteRow,
   type HubSenderReport,
   type MetaApiAccountsResult,
   type MetaApiTerminalState,
@@ -454,6 +455,14 @@ export default function App() {
   const [tpClaims, setTpClaims] = useState<TpClaimRow[]>([]);
   const [promoCodes, setPromoCodes] = useState<PromoCodeRow[]>([]);
   const [promoUsage, setPromoUsage] = useState<PromoUsageRow[]>([]);
+  const [inviteCodes, setInviteCodes] = useState<RegistrationInviteRow[]>([]);
+  const [newInviteCode, setNewInviteCode] = useState("");
+  const [newInviteDays, setNewInviteDays] = useState("30");
+  const [newInviteSingleUse, setNewInviteSingleUse] = useState(true);
+  const [bulkInviteCount, setBulkInviteCount] = useState("5");
+  const [bulkInvitePrefix, setBulkInvitePrefix] = useState("INVITE");
+  const [bulkInviteDays, setBulkInviteDays] = useState("30");
+  const [bulkInviteLoading, setBulkInviteLoading] = useState(false);
   const [hubReport, setHubReport] = useState<HubSenderReport | null>(null);
   const [metaApiAccounts, setMetaApiAccounts] =
     useState<MetaApiAccountsResult | null>(null);
@@ -849,12 +858,14 @@ export default function App() {
       } else if (active === "tpClaims") {
         setTpClaims(await api.tpClaimsPending());
       } else if (active === "promos") {
-        const [codes, usage] = await Promise.all([
+        const [codes, usage, invites] = await Promise.all([
           api.promoCodes(),
           api.promoUsage().catch(() => []),
+          api.inviteCodes().catch(() => []),
         ]);
         setPromoCodes(codes);
         setPromoUsage(usage);
+        setInviteCodes(invites);
       } else if (active === "marketing") {
         const [schedule, history] = await Promise.all([
           api.marketingSchedule(),
@@ -1435,7 +1446,7 @@ export default function App() {
     return (
       <div className="login">
         <h1>UnikTrades Local Admin</h1>
-        <p className="muted">Runs on your machine only — not on the public site</p>
+        <p className="muted">Admin console — sign in with an ADMIN account</p>
         <form onSubmit={(e) => void handleLogin(e)}>
           {loginStep === "credentials" ? (
             <>
@@ -4162,7 +4173,265 @@ export default function App() {
         {tab === "promos" && (
           <>
             <div className="toolbar">
-              <h2>Promo / invite codes</h2>
+              <h2>Registration codes</h2>
+            </div>
+            <p className="muted" style={{ marginBottom: "1rem" }}>
+              <strong>Invite codes</strong> unlock signup at /register.
+              <strong> Promo codes</strong> waive or discount the registration fee
+              at checkout (after signup).
+            </p>
+
+            <div
+              className="kyc-card"
+              style={{ marginBottom: "1.5rem", maxWidth: 480 }}
+            >
+              <h3 style={{ marginTop: 0 }}>Create invite code</h3>
+              <p className="muted" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
+                People enter this on the registration page to create an account.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <input
+                  placeholder="Code (optional — leave blank to auto-generate)"
+                  value={newInviteCode}
+                  onChange={(e) => setNewInviteCode(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0b0f14",
+                    color: "#e8eaed",
+                  }}
+                />
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  placeholder="Valid for days (default 30, blank = no expiry)"
+                  value={newInviteDays}
+                  onChange={(e) => setNewInviteDays(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0b0f14",
+                    color: "#e8eaed",
+                  }}
+                />
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.85rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={newInviteSingleUse}
+                    onChange={(e) => setNewInviteSingleUse(e.target.checked)}
+                  />
+                  Single use (one signup only)
+                </label>
+                <button
+                  type="button"
+                  className="primary"
+                  onClick={() =>
+                    void api
+                      .createInviteCode({
+                        code: newInviteCode.trim() || undefined,
+                        maxUses: newInviteSingleUse ? 1 : undefined,
+                        expiresInDays: Number(newInviteDays) || undefined,
+                      })
+                      .then((row) => {
+                        setNewInviteCode("");
+                        setMessage(`Invite code created: ${row.code}`);
+                        return loadTab("promos");
+                      })
+                      .catch((err) =>
+                        setMessage(
+                          err instanceof Error ? err.message : "Create failed",
+                        ),
+                      )
+                  }
+                >
+                  Create invite code
+                </button>
+              </div>
+            </div>
+
+            <div
+              className="kyc-card"
+              style={{ marginBottom: "1.5rem", maxWidth: 480 }}
+            >
+              <h3 style={{ marginTop: 0 }}>Bulk invite codes</h3>
+              <p className="muted" style={{ margin: "0 0 0.75rem", fontSize: "0.85rem" }}>
+                Generate unique single-use signup codes (default 30 days).
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  placeholder="How many codes"
+                  value={bulkInviteCount}
+                  onChange={(e) => setBulkInviteCount(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0b0f14",
+                    color: "#e8eaed",
+                  }}
+                />
+                <input
+                  placeholder="Prefix (default INVITE)"
+                  value={bulkInvitePrefix}
+                  onChange={(e) => setBulkInvitePrefix(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0b0f14",
+                    color: "#e8eaed",
+                  }}
+                />
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  placeholder="Valid for days (default 30)"
+                  value={bulkInviteDays}
+                  onChange={(e) => setBulkInviteDays(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    borderRadius: 6,
+                    border: "1px solid #334155",
+                    background: "#0b0f14",
+                    color: "#e8eaed",
+                  }}
+                />
+                <button
+                  type="button"
+                  className="secondary"
+                  disabled={bulkInviteLoading}
+                  onClick={() => {
+                    const count = Number(bulkInviteCount);
+                    if (!Number.isFinite(count) || count < 1) {
+                      setMessage("Enter a valid count (1–100).");
+                      return;
+                    }
+                    setBulkInviteLoading(true);
+                    void api
+                      .bulkCreateInviteCodes({
+                        count,
+                        prefix: bulkInvitePrefix.trim() || "INVITE",
+                        maxUses: 1,
+                        expiresInDays: Number(bulkInviteDays) || 30,
+                      })
+                      .then((res) => {
+                        setMessage(
+                          `Created ${res.count} invite codes: ${res.items.map((c) => c.code).join(", ")}`,
+                        );
+                        return loadTab("promos");
+                      })
+                      .catch((err) =>
+                        setMessage(
+                          err instanceof Error
+                            ? err.message
+                            : "Bulk create failed",
+                        ),
+                      )
+                      .finally(() => setBulkInviteLoading(false));
+                  }}
+                >
+                  {bulkInviteLoading
+                    ? "Generating…"
+                    : `Generate ${bulkInviteCount || "5"} invite codes`}
+                </button>
+              </div>
+            </div>
+
+            <h3 style={{ marginTop: "0.5rem" }}>
+              Invite codes ({inviteCodes.length})
+            </h3>
+            <table style={{ marginBottom: "2rem" }}>
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Uses</th>
+                  <th>Expires</th>
+                  <th>Status</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {inviteCodes.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="muted">
+                      No admin invite codes yet — create one above, or share a
+                      user referral code.
+                    </td>
+                  </tr>
+                ) : (
+                  inviteCodes.map((inv) => (
+                    <tr key={inv.id}>
+                      <td>
+                        <code>{inv.code}</code>
+                      </td>
+                      <td>
+                        {inv.maxUses != null
+                          ? `${inv.usedCount}/${inv.maxUses}`
+                          : inv.usedCount}
+                        {inv.singleUse ? " · 1×" : ""}
+                      </td>
+                      <td>
+                        {inv.expiresAt ? fmtDate(inv.expiresAt) : "—"}
+                      </td>
+                      <td>
+                        <span
+                          className={badgeClass(
+                            !inv.active
+                              ? "rejected"
+                              : inv.exhausted
+                                ? "pending"
+                                : inv.expired
+                                  ? "expired"
+                                  : "approved",
+                          )}
+                        >
+                          {!inv.active
+                            ? "INACTIVE"
+                            : inv.exhausted
+                              ? "USED"
+                              : inv.expired
+                                ? "EXPIRED"
+                                : "ACTIVE"}
+                        </span>
+                      </td>
+                      <td>
+                        {inv.active && !inv.expired && !inv.exhausted && (
+                          <button
+                            type="button"
+                            className="danger"
+                            onClick={() =>
+                              void api
+                                .deactivateInviteCode(inv.code)
+                                .then(() => loadTab("promos"))
+                            }
+                          >
+                            Deactivate
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+
+            <div className="toolbar">
+              <h2>Promo / fee codes</h2>
             </div>
             <p className="muted" style={{ marginBottom: "1rem" }}>
               Create reusable codes for campaigns, or single-use codes for people who

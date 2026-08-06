@@ -2,7 +2,7 @@
   "name": "uniktrades-local-admin",
   "private": true,
   "version": "1.0.0",
-  "description": "Local-only admin console — NOT deployed to Render",
+  "description": "UnikTrades admin console (local or Render static site)",
   "type": "module",
   "scripts": {
     "dev": "vite",

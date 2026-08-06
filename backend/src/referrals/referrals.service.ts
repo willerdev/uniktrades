@@ -679,4 +679,236 @@ export class ReferralsService {
       throw err;
     }
   }
+
+  private normalizeInviteCode(raw: string): string {
+    return raw.trim().toUpperCase();
+  }
+
+  private async assertInviteCodeAvailable(code: string) {
+    const [userHit, inviteHit] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { referralCode: code },
+        select: { id: true },
+      }),
+      this.prisma.registrationInvite.findUnique({
+        where: { code },
+        select: { id: true },
+      }),
+    ]);
+    if (userHit || inviteHit) {
+      throw new BadRequestException(`Code ${code} is already in use`);
+    }
+  }
+
+  private async randomInviteCode(prefix = ''): Promise<string> {
+    const cleanPrefix = prefix
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 12);
+    for (let attempt = 0; attempt < 8; attempt += 1) {
+      const suffix = randomBytes(3).toString('hex').toUpperCase();
+      const code = cleanPrefix ? `${cleanPrefix}-${suffix}` : suffix;
+      try {
+        await this.assertInviteCodeAvailable(code);
+        return code;
+      } catch {
+        continue;
+      }
+    }
+    throw new BadRequestException('Could not generate a unique invite code');
+  }
+
+  private serializeInvite(invite: {
+    id: string;
+    code: string;
+    maxUses: number | null;
+    usedCount: number;
+    expiresAt: Date | null;
+    active: boolean;
+    note: string | null;
+    createdAt: Date;
+    createdBy?: { id: string; displayName: string; email: string | null };
+  }) {
+    const expired =
+      invite.expiresAt != null && invite.expiresAt.getTime() <= Date.now();
+    const exhausted =
+      invite.maxUses != null &&
+      invite.maxUses > 0 &&
+      invite.usedCount >= invite.maxUses;
+    return {
+      id: invite.id,
+      code: invite.code,
+      maxUses: invite.maxUses,
+      usedCount: invite.usedCount,
+      remainingUses:
+        invite.maxUses != null && invite.maxUses > 0
+          ? Math.max(0, invite.maxUses - invite.usedCount)
+          : null,
+      expiresAt: invite.expiresAt?.toISOString() ?? null,
+      active: invite.active,
+      expired,
+      exhausted,
+      valid: invite.active && !expired && !exhausted,
+      singleUse: invite.maxUses === 1,
+      note: invite.note,
+      createdAt: invite.createdAt.toISOString(),
+      createdBy: invite.createdBy
+        ? {
+            id: invite.createdBy.id,
+            displayName: invite.createdBy.displayName,
+            email: invite.createdBy.email,
+          }
+        : null,
+    };
+  }
+
+  /**
+   * Resolve a signup invite: user referralCode OR admin RegistrationInvite.
+   * Does not consume uses.
+   */
+  async resolveSignupInvite(rawCode: string): Promise<{
+    code: string;
+    referrerId: string;
+    inviteId?: string;
+  }> {
+    const code = this.normalizeInviteCode(rawCode);
+    if (!code || code.length < 4) {
+      throw new BadRequestException('Enter a valid code');
+    }
+
+    const referrer = await this.prisma.user.findUnique({
+      where: { referralCode: code },
+      select: { id: true },
+    });
+    if (referrer) {
+      return { code, referrerId: referrer.id };
+    }
+
+    const invite = await this.prisma.registrationInvite.findUnique({
+      where: { code },
+    });
+    if (!invite || !invite.active) {
+      throw new BadRequestException('This code is not valid');
+    }
+    if (invite.expiresAt && invite.expiresAt.getTime() <= Date.now()) {
+      throw new BadRequestException('This invite code has expired');
+    }
+    if (
+      invite.maxUses != null &&
+      invite.maxUses > 0 &&
+      invite.usedCount >= invite.maxUses
+    ) {
+      throw new BadRequestException('This invite code has already been used');
+    }
+
+    return { code, referrerId: invite.createdById, inviteId: invite.id };
+  }
+
+  /** Increment use count after a successful registration with an admin invite. */
+  async consumeRegistrationInvite(inviteId: string) {
+    await this.prisma.registrationInvite.update({
+      where: { id: inviteId },
+      data: { usedCount: { increment: 1 } },
+    });
+  }
+
+  async listRegistrationInvites() {
+    const rows = await this.prisma.registrationInvite.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        createdBy: {
+          select: { id: true, displayName: true, email: true },
+        },
+      },
+    });
+    return rows.map((row) => this.serializeInvite(row));
+  }
+
+  async createRegistrationInvite(
+    adminId: string,
+    dto: {
+      code?: string;
+      maxUses?: number;
+      expiresInDays?: number;
+      note?: string;
+    },
+  ) {
+    const code = dto.code?.trim()
+      ? this.normalizeInviteCode(dto.code)
+      : await this.randomInviteCode();
+    if (code.length < 4 || code.length > 32) {
+      throw new BadRequestException('Code must be 4–32 characters');
+    }
+    await this.assertInviteCodeAvailable(code);
+
+    const expiresAt =
+      dto.expiresInDays != null && dto.expiresInDays > 0
+        ? new Date(Date.now() + dto.expiresInDays * 24 * 60 * 60 * 1000)
+        : null;
+
+    const created = await this.prisma.registrationInvite.create({
+      data: {
+        code,
+        createdById: adminId,
+        maxUses: dto.maxUses ?? null,
+        expiresAt,
+        note: dto.note?.trim() || null,
+      },
+      include: {
+        createdBy: {
+          select: { id: true, displayName: true, email: true },
+        },
+      },
+    });
+    return this.serializeInvite(created);
+  }
+
+  async bulkCreateRegistrationInvites(
+    adminId: string,
+    dto: {
+      count: number;
+      prefix?: string;
+      maxUses?: number;
+      expiresInDays?: number;
+      note?: string;
+    },
+  ) {
+    const count = Math.min(100, Math.max(1, Math.floor(dto.count)));
+    const items: Awaited<
+      ReturnType<ReferralsService['createRegistrationInvite']>
+    >[] = [];
+    for (let i = 0; i < count; i += 1) {
+      const code = await this.randomInviteCode(dto.prefix ?? 'INVITE');
+      items.push(
+        await this.createRegistrationInvite(adminId, {
+          code,
+          maxUses: dto.maxUses ?? 1,
+          expiresInDays: dto.expiresInDays ?? 30,
+          note: dto.note,
+        }),
+      );
+    }
+    return { count: items.length, items };
+  }
+
+  async deactivateRegistrationInvite(code: string) {
+    const normalized = this.normalizeInviteCode(code);
+    const existing = await this.prisma.registrationInvite.findUnique({
+      where: { code: normalized },
+    });
+    if (!existing) {
+      throw new NotFoundException('Invite code not found');
+    }
+    const updated = await this.prisma.registrationInvite.update({
+      where: { code: normalized },
+      data: { active: false },
+      include: {
+        createdBy: {
+          select: { id: true, displayName: true, email: true },
+        },
+      },
+    });
+    return this.serializeInvite(updated);
+  }
 }

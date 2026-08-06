@@ -14,6 +14,8 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import {
   SettleReferralDto,
   UpdateReferralSettingsDto,
+  CreateRegistrationInviteDto,
+  BulkCreateRegistrationInvitesDto,
 } from '../common/dto';
 
 @Controller('referrals')
@@ -24,6 +26,42 @@ export class ReferralsController {
   @Get('me')
   getMine(@Request() req: { user: { id: string } }) {
     return this.referralsService.getMyReferralInfo(req.user.id);
+  }
+}
+
+@Controller('admin/invite-codes')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('ADMIN')
+export class AdminInviteCodesController {
+  constructor(private referralsService: ReferralsService) {}
+
+  @Get()
+  list() {
+    return this.referralsService.listRegistrationInvites();
+  }
+
+  @Post()
+  create(
+    @Request() req: { user: { id: string } },
+    @Body() dto: CreateRegistrationInviteDto,
+  ) {
+    return this.referralsService.createRegistrationInvite(req.user.id, dto);
+  }
+
+  @Post('bulk')
+  bulkCreate(
+    @Request() req: { user: { id: string } },
+    @Body() dto: BulkCreateRegistrationInvitesDto,
+  ) {
+    return this.referralsService.bulkCreateRegistrationInvites(
+      req.user.id,
+      dto,
+    );
+  }
+
+  @Post(':code/deactivate')
+  deactivate(@Param('code') code: string) {
+    return this.referralsService.deactivateRegistrationInvite(code);
   }
 }
 

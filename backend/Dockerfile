@@ -1,5 +1,5 @@
 FROM node:20-alpine AS base
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl libc6-compat
 
 FROM base AS deps
 WORKDIR /app
@@ -21,4 +21,4 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 EXPOSE 4000
-CMD ["sh", "-c", "npm run prisma:push && node dist/src/main"]
+CMD ["sh", "-c", "npx prisma db push --accept-data-loss && node dist/src/main"]

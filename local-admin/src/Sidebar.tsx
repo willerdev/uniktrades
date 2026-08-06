@@ -33,6 +33,7 @@ type NavItem = { id: Tab; label: string; icon: keyof typeof icons };
 export const ADMIN_TABS: Tab[] = [
   "overview",
   "users",
+  "promos",
   "platform",
   "wallet",
   "payouts",
@@ -135,6 +136,7 @@ export function resolveTabForPermissions(
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: "overview" },
   { id: "users", label: "Users", icon: "users" },
+  { id: "promos", label: "Registration codes", icon: "promos" },
   { id: "platform", label: "Investor & depositor", icon: "forecast" },
   { id: "wallet", label: "Wallet", icon: "wallet" },
   { id: "payouts", label: "Payouts", icon: "payouts" },

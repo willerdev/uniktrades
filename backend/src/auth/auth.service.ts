@@ -73,20 +73,8 @@ export class AuthService {
   }
 
   async validateInviteCode(rawCode: string) {
-    const code = rawCode?.trim().toUpperCase();
-    if (!code || code.length < 4) {
-      throw new BadRequestException('Enter a valid code');
-    }
-
-    const referrer = await this.prisma.user.findUnique({
-      where: { referralCode: code },
-      select: { id: true },
-    });
-    if (!referrer) {
-      throw new BadRequestException('This code is not valid');
-    }
-
-    return { valid: true, code };
+    const resolved = await this.referrals.resolveSignupInvite(rawCode);
+    return { valid: true, code: resolved.code };
   }
 
   async register(dto: RegisterDto, ip?: string) {
@@ -116,13 +104,7 @@ export class AuthService {
       );
     }
 
-    const referrer = await this.prisma.user.findUnique({
-      where: { referralCode },
-      select: { id: true },
-    });
-    if (!referrer) {
-      throw new BadRequestException('This code is not valid');
-    }
+    const resolved = await this.referrals.resolveSignupInvite(referralCode);
 
     const user = await this.prisma.user.create({
       data: {
@@ -133,9 +115,21 @@ export class AuthService {
         lastLoginIp: ip,
         termsAcceptedAt: new Date(),
         status: 'PENDING_PAYMENT',
-        referredById: referrer.id,
+        referredById: resolved.referrerId,
       },
     });
+
+    if (resolved.inviteId) {
+      try {
+        await this.referrals.consumeRegistrationInvite(resolved.inviteId);
+      } catch (err) {
+        this.logger.error(
+          `Invite consume failed for ${user.id}: ${
+            err instanceof Error ? err.message : err
+          }`,
+        );
+      }
+    }
 
     try {
       await this.referrals.getOrCreateCode(user.id);
@@ -148,7 +142,7 @@ export class AuthService {
     }
 
     this.logger.log(
-      `Invite-only registration: ${user.id} referred by ${referrer.id} (${referralCode})`,
+      `Invite-only registration: ${user.id} referred by ${resolved.referrerId} (${resolved.code})`,
     );
 
     this.notifications.userRegistered(user.id);

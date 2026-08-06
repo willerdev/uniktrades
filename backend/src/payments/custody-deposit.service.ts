@@ -36,13 +36,60 @@ export class CustodyDepositService {
     return orderId.slice(CUSTODY_ORDER_PREFIX.length);
   }
 
+  async getPlatformLedger() {
+    const [deposited, withdrawnConfirmed, withdrawnPending] = await Promise.all([
+      this.prisma.custodyDeposit.aggregate({
+        where: { status: 'CONFIRMED' },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      this.prisma.custodyWithdraw.aggregate({
+        where: { status: 'CONFIRMED' },
+        _sum: { amount: true },
+        _count: true,
+      }),
+      this.prisma.custodyWithdraw.aggregate({
+        where: { status: 'PENDING' },
+        _sum: { amount: true },
+        _count: true,
+      }),
+    ]);
+
+    const depositedTotal = Number(deposited._sum.amount ?? 0);
+    const withdrawnTotal = Number(withdrawnConfirmed._sum.amount ?? 0);
+    const pendingWithdrawTotal = Number(withdrawnPending._sum.amount ?? 0);
+    const available = Math.max(
+      0,
+      Math.round((depositedTotal - withdrawnTotal - pendingWithdrawTotal) * 100) /
+        100,
+    );
+
+    return {
+      depositedTotal,
+      withdrawnTotal,
+      pendingWithdrawTotal,
+      available,
+      depositCount: deposited._count,
+      withdrawCount: withdrawnConfirmed._count,
+      pendingWithdrawCount: withdrawnPending._count,
+    };
+  }
+
   async getWalletSummary() {
+    const ledger = await this.getPlatformLedger();
+
     if (!this.nowPayments.isConfigured) {
       return {
         configured: false,
         payoutConfigured: false,
         message: 'NOWPayments not configured — set NOWPAYMENTS_API_KEY',
-        usdtBalance: 0,
+        /** UnikTrades platform ledger (starts at 0). */
+        usdtBalance: ledger.available,
+        platformUsdtBalance: ledger.available,
+        gatewayUsdtBalance: 0,
+        depositedTotal: ledger.depositedTotal,
+        withdrawnTotal: ledger.withdrawnTotal,
+        pendingWithdrawTotal: ledger.pendingWithdrawTotal,
         balances: {},
         pendingCryptoPayoutTotal: 0,
         pendingCryptoPayoutCount: 0,
@@ -69,6 +116,8 @@ export class CustodyDepositService {
       }),
     ]);
 
+    const gatewayUsdtBalance = this.nowPayments.sumUsdtBalance(balances);
+
     return {
       configured: true,
       payoutConfigured: payoutStatus.payoutConfigured,
@@ -76,8 +125,14 @@ export class CustodyDepositService {
       payoutPasswordSet: payoutStatus.payoutPasswordSet,
       message: payoutStatus.payoutConfigured
         ? undefined
-        : `Wallet withdrawals need ${missing.join(' and ')} on the Render service traders-api (backend / traders-c53s), not the frontend. Set them, then Manual Deploy / restart that API service.`,
-      usdtBalance: this.nowPayments.sumUsdtBalance(balances),
+        : `Wallet withdrawals need ${missing.join(' and ')} on the API service. Set them, then redeploy.`,
+      /** Shown in admin — UnikTrades deposits − withdrawals (not shared NOWPayments account). */
+      usdtBalance: ledger.available,
+      platformUsdtBalance: ledger.available,
+      gatewayUsdtBalance,
+      depositedTotal: ledger.depositedTotal,
+      withdrawnTotal: ledger.withdrawnTotal,
+      pendingWithdrawTotal: ledger.pendingWithdrawTotal,
       balances,
       pendingCryptoPayoutTotal: Number(pendingAgg._sum.traderShare ?? 0),
       pendingCryptoPayoutCount: pendingAgg._count,
@@ -463,7 +518,7 @@ export class CustodyDepositService {
   }
 
   async createWithdraw(
-    _adminId: string,
+    adminId: string,
     amount: number,
     address: string,
     network: string,
@@ -490,9 +545,14 @@ export class CustodyDepositService {
     }
 
     const summary = await this.getWalletSummary();
-    if (amount > summary.usdtBalance) {
+    if (amount > summary.platformUsdtBalance) {
       throw new BadRequestException(
-        `Insufficient custody balance (available $${summary.usdtBalance.toFixed(2)} USDT)`,
+        `Insufficient UnikTrades custody balance (available $${summary.platformUsdtBalance.toFixed(2)} USDT). Deposit from this admin first.`,
+      );
+    }
+    if (amount > summary.gatewayUsdtBalance) {
+      throw new BadRequestException(
+        `Insufficient NOWPayments gateway balance (available $${summary.gatewayUsdtBalance.toFixed(2)} USDT)`,
       );
     }
 
@@ -513,11 +573,24 @@ export class CustodyDepositService {
       );
     }
 
+    const row = await this.prisma.custodyWithdraw.create({
+      data: {
+        adminId,
+        amount,
+        network: (network || 'TRC20').toUpperCase(),
+        address: dest,
+        status: 'PENDING',
+        gatewayPayoutId: result.id,
+        gatewayResponse: { payoutId: result.id } as object,
+      },
+    });
+
     return {
       payoutId: result.id,
+      withdrawId: row.id,
       amount,
       address: dest,
-      network: (network || 'TRC20').toUpperCase(),
+      network: row.network,
       needsVerification: true,
       message:
         'Withdrawal queued. Enter the 2FA / email verification code from NOWPayments to confirm.',
@@ -539,10 +612,45 @@ export class CustodyDepositService {
         err instanceof Error ? err.message : 'Verification failed';
       throw new BadRequestException(message);
     }
+
+    await this.prisma.custodyWithdraw.updateMany({
+      where: { gatewayPayoutId: payoutId.trim(), status: 'PENDING' },
+      data: {
+        status: 'CONFIRMED',
+        verifiedAt: new Date(),
+      },
+    });
+
     return {
       ok: true as const,
       payoutId: payoutId.trim(),
       message: 'Withdrawal verified and sent.',
+      wallet: await this.getWalletSummary().catch(() => null),
+    };
+  }
+
+  async listWithdrawals(limit = 20) {
+    const take = Math.min(Math.max(limit, 1), 50);
+    const items = await this.prisma.custodyWithdraw.findMany({
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        admin: { select: { email: true, displayName: true } },
+      },
+    });
+    return {
+      items: items.map((w) => ({
+        id: w.id,
+        amount: w.amount.toString(),
+        currency: w.currency,
+        network: w.network,
+        address: w.address,
+        status: w.status,
+        gatewayPayoutId: w.gatewayPayoutId,
+        verifiedAt: w.verifiedAt?.toISOString() ?? null,
+        createdAt: w.createdAt.toISOString(),
+        admin: w.admin,
+      })),
     };
   }
 }

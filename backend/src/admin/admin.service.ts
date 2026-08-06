@@ -1405,6 +1405,10 @@ export class AdminService {
     );
   }
 
+  listCustodyWithdrawals(limit?: number) {
+    return this.custodyDeposits.listWithdrawals(limit);
+  }
+
   verifyCustodyWithdraw(payoutId: string, code: string) {
     return this.custodyDeposits.verifyWithdraw(payoutId, code);
   }

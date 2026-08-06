@@ -254,6 +254,14 @@ export class AdminController {
     return this.adminService.getCustodyDepositStatus(depositId);
   }
 
+  @Get('payouts/custody/withdrawals')
+  @RequireAdminPermission('payout')
+  listPayoutCustodyWithdrawals(@Query('limit') limit?: string) {
+    return this.adminService.listCustodyWithdrawals(
+      limit ? Number(limit) : undefined,
+    );
+  }
+
   @Post('payouts/custody/withdraw')
   createPayoutCustodyWithdraw(
     @Request() req: { user: { id: string } },

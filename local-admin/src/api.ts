@@ -367,6 +367,11 @@ export const api = {
     ).then(normalizeCustodyDepositsList);
   },
 
+  custodyWithdrawals: (limit = 20) =>
+    request<{ items: CustodyWithdrawRow[] }>(
+      `/admin/payouts/custody/withdrawals?limit=${limit}`,
+    ),
+
   syncCustodyDeposit: (depositId: string) =>
     request<CustodyDepositStatus>(
       `/admin/payouts/custody/deposits/${depositId}/sync`,
@@ -424,6 +429,36 @@ export const api = {
     }),
   deactivatePromoCode: (code: string) =>
     request(`/admin/promo-codes/${encodeURIComponent(code)}/deactivate`, {
+      method: "POST",
+    }),
+
+  inviteCodes: () => request<RegistrationInviteRow[]>("/admin/invite-codes"),
+  createInviteCode: (data: {
+    code?: string;
+    maxUses?: number;
+    expiresInDays?: number;
+    note?: string;
+  }) =>
+    request<RegistrationInviteRow>("/admin/invite-codes", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  bulkCreateInviteCodes: (data: {
+    count: number;
+    prefix?: string;
+    maxUses?: number;
+    expiresInDays?: number;
+    note?: string;
+  }) =>
+    request<{ count: number; items: RegistrationInviteRow[] }>(
+      "/admin/invite-codes/bulk",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+    ),
+  deactivateInviteCode: (code: string) =>
+    request(`/admin/invite-codes/${encodeURIComponent(code)}/deactivate`, {
       method: "POST",
     }),
 
@@ -1535,10 +1570,30 @@ export type NowPaymentsWalletSummary = {
   payoutEmailSet?: boolean;
   payoutPasswordSet?: boolean;
   message?: string;
+  /** UnikTrades platform ledger (deposits − withdrawals). */
   usdtBalance: number;
+  platformUsdtBalance?: number;
+  /** Shared NOWPayments account balance (may include other apps). */
+  gatewayUsdtBalance?: number;
+  depositedTotal?: number;
+  withdrawnTotal?: number;
+  pendingWithdrawTotal?: number;
   balances?: Record<string, { amount?: number; pendingAmount?: number }>;
   pendingCryptoPayoutTotal: number;
   pendingCryptoPayoutCount: number;
+};
+
+export type CustodyWithdrawRow = {
+  id: string;
+  amount: string;
+  currency?: string;
+  network: string;
+  address: string;
+  status: string;
+  gatewayPayoutId?: string | null;
+  verifiedAt?: string | null;
+  createdAt: string;
+  admin?: { email: string | null; displayName: string };
 };
 
 export type CustodyDepositCreated = {
@@ -1667,6 +1722,23 @@ export type PromoCodeRow = {
   exhausted?: boolean;
   singleUse?: boolean;
   createdAt: string;
+};
+
+export type RegistrationInviteRow = {
+  id: string;
+  code: string;
+  maxUses: number | null;
+  usedCount: number;
+  remainingUses: number | null;
+  expiresAt: string | null;
+  active: boolean;
+  expired: boolean;
+  exhausted: boolean;
+  valid: boolean;
+  singleUse?: boolean;
+  note: string | null;
+  createdAt: string;
+  createdBy: { id: string; displayName: string; email: string | null } | null;
 };
 
 export type PromoUsageRow = {

@@ -32,8 +32,15 @@ async function bootstrap() {
         );
       }
 
-      // Custom domains (e.g. thetradeguard.com)
-      allowed.push('https://thetradeguard.com', 'https://www.thetradeguard.com');
+      // Custom domains
+      allowed.push(
+        'https://thetradeguard.com',
+        'https://www.thetradeguard.com',
+        'https://uniktrades.com',
+        'https://www.uniktrades.com',
+        'https://admin.uniktrades.com',
+        'https://uniktrades-1.onrender.com',
+      );
 
       if (!origin || allowed.includes(origin)) {
         callback(null, origin ?? allowed[0]);

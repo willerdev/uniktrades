@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { ensureDemoLeaderboardTraders } from '../src/leaderboard/demo-leaderboard.seed';
 
 const prisma = new PrismaClient();
@@ -48,7 +49,7 @@ async function main() {
 
   if (!existingAdmin) {
     const passwordHash = await bcrypt.hash(adminPassword, 12);
-    await prisma.user.create({
+    const admin = await prisma.user.create({
       data: {
         email: adminEmail,
         passwordHash,
@@ -67,13 +68,51 @@ async function main() {
         },
       },
     });
+    const code = randomBytes(4).toString('hex').toUpperCase();
+    await prisma.user.update({
+      where: { id: admin.id },
+      data: { referralCode: code },
+    });
     console.log(`Admin user created: ${adminEmail}`);
+    console.log(`Admin password: ${adminPassword}`);
+    console.log(`Admin invite/referral code: ${code}`);
   } else if (existingAdmin.role !== 'ADMIN') {
     await prisma.user.update({
       where: { email: adminEmail },
       data: { role: 'ADMIN', status: 'ACTIVE' },
     });
     console.log(`Promoted ${adminEmail} to ADMIN`);
+  }
+
+  const adminUser = await prisma.user.findUnique({
+    where: { email: adminEmail },
+    select: { id: true, referralCode: true },
+  });
+  if (adminUser && !adminUser.referralCode) {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const code = randomBytes(4).toString('hex').toUpperCase();
+      try {
+        await prisma.user.update({
+          where: { id: adminUser.id },
+          data: { referralCode: code },
+        });
+        console.log(`Admin invite/referral code: ${code}`);
+        break;
+      } catch {
+        continue;
+      }
+    }
+  } else if (adminUser?.referralCode) {
+    console.log(`Admin invite/referral code: ${adminUser.referralCode}`);
+  }
+
+  console.log(`Admin login email: ${adminEmail}`);
+  if (!existingAdmin) {
+    console.log(`Admin password: ${adminPassword}`);
+  } else {
+    console.log(
+      `(Password unchanged — use existing password or set ADMIN_PASSWORD and reset manually)`,
+    );
   }
 
   await prisma.promoCode.upsert({

@@ -329,6 +329,51 @@ export class ApplyPromoDto {
   code: string;
 }
 
+export class CreateRegistrationInviteDto {
+  @IsOptional()
+  @IsString()
+  code?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxUses?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  expiresInDays?: number;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+}
+
+export class BulkCreateRegistrationInvitesDto {
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  count: number;
+
+  @IsOptional()
+  @IsString()
+  prefix?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  maxUses?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  expiresInDays?: number;
+
+  @IsOptional()
+  @IsString()
+  note?: string;
+}
+
 export class CreatePromoCodeDto {
   @IsString()
   @IsNotEmpty()

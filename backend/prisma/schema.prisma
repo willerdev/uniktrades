@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -323,6 +324,7 @@ model User {
   withdrawalWalletOtps WithdrawalWalletOtp[]
   withdrawOtps         WithdrawOtp[]
   custodyDeposits    CustodyDeposit[]
+  custodyWithdrawals CustodyWithdraw[]
   copyTradesSource   CopyTrade[] @relation("CopyTradeSource")
   copyPoolEntry      CopyPoolTrader? @relation("CopyPoolTrader")
   copyPoolAdds       CopyPoolTrader[] @relation("CopyPoolAddedBy")
@@ -348,6 +350,7 @@ model User {
   chainReferralsAsReferrer ChainReferral[] @relation("ChainReferralReferrer")
   chainReferralsAsReferee  ChainReferral[] @relation("ChainReferralReferee")
   chainContractEnrollment ChainContractEnrollment?
+  registrationInvitesCreated RegistrationInvite[] @relation("RegistrationInviteCreator")
 
   @@index([status])
   @@index([role])
@@ -822,6 +825,29 @@ model CustodyDeposit {
   @@map("custody_deposits")
 }
 
+/// Admin custody withdrawals initiated from UnikTrades (platform ledger).
+model CustodyWithdraw {
+  id              String        @id @default(cuid())
+  adminId         String
+  amount          Decimal       @db.Decimal(18, 8)
+  currency        String        @default("USDT")
+  network         String
+  address         String
+  status          PaymentStatus @default(PENDING)
+  gatewayPayoutId String?
+  gatewayResponse Json?
+  verifiedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([status])
+  @@index([gatewayPayoutId])
+  @@map("custody_withdrawals")
+}
+
 model Subscription {
   id        String           @id @default(cuid())
   userId    String
@@ -1218,6 +1244,27 @@ model PromoCode {
   @@index([expiresAt])
   @@index([active])
   @@map("promo_codes")
+}
+
+/// Admin-minted signup codes (enter at /register). Distinct from user referralCode
+/// and from PromoCode (fee discount at checkout).
+model RegistrationInvite {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  createdById String
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  note        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  createdBy User @relation("RegistrationInviteCreator", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([active])
+  @@index([expiresAt])
+  @@map("registration_invites")
 }
 
 /// Field cash agent — unlocks /agent with a code to process MoMo P2P withdrawals.
