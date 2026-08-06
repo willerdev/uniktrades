@@ -194,7 +194,7 @@ export function InvestScreen() {
                 VIP (~{formatUsdt(vipFee ?? 50)}/mo) ·{" "}
                 {status?.vip?.benefits?.dailyYieldPercent ??
                   status?.vipDailyYieldPercent ??
-                  10}
+                  8}
                 % daily + $0 withdrawal fee
               </Text>
             )}
