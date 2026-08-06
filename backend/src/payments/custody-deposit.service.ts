@@ -75,17 +75,67 @@ export class CustodyDepositService {
     };
   }
 
+  /**
+   * Admin platform wallet (FEE_PROFIT, referral rewards, etc.) — separate from
+   * the custody crypto ledger used for trader payouts.
+   */
+  private async getAdminPlatformWalletBalance(): Promise<{
+    adminUserId: string | null;
+    adminEmail: string | null;
+    adminWalletBalance: number;
+  }> {
+    const adminEmail = this.config.get<string>('ADMIN_EMAIL')?.trim();
+    const byEmail = adminEmail
+      ? await this.prisma.user.findUnique({
+          where: { email: adminEmail },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            platformWallet: { select: { availableBalance: true } },
+          },
+        })
+      : null;
+    const adminUser =
+      byEmail?.role === 'ADMIN'
+        ? byEmail
+        : await this.prisma.user.findFirst({
+            where: { role: 'ADMIN' },
+            orderBy: { createdAt: 'asc' },
+            select: {
+              id: true,
+              email: true,
+              platformWallet: { select: { availableBalance: true } },
+            },
+          });
+
+    return {
+      adminUserId: adminUser?.id ?? null,
+      adminEmail: adminUser?.email ?? null,
+      adminWalletBalance: Number(
+        adminUser?.platformWallet?.availableBalance ?? 0,
+      ),
+    };
+  }
+
   async getWalletSummary() {
-    const ledger = await this.getPlatformLedger();
+    const [ledger, adminWallet] = await Promise.all([
+      this.getPlatformLedger(),
+      this.getAdminPlatformWalletBalance(),
+    ]);
 
     if (!this.nowPayments.isConfigured) {
       return {
         configured: false,
         payoutConfigured: false,
         message: 'Crypto payments are not configured on this server',
-        /** UnikTrades platform ledger (starts at 0). */
+        /** Custody crypto ledger (confirmed deposits − withdrawals). */
         usdtBalance: ledger.available,
         platformUsdtBalance: ledger.available,
+        /** Admin user platform wallet — enrollment FEE_PROFIT, referrals, etc. */
+        adminWalletBalance: adminWallet.adminWalletBalance,
+        adminWalletEmail: adminWallet.adminEmail,
+        adminWalletUserId: adminWallet.adminUserId,
         gatewayUsdtBalance: 0,
         depositedTotal: ledger.depositedTotal,
         withdrawnTotal: ledger.withdrawnTotal,
@@ -126,9 +176,13 @@ export class CustodyDepositService {
       message: payoutStatus.payoutConfigured
         ? undefined
         : `Wallet withdrawals need ${missing.join(' and ')} on the API service. Set them, then redeploy.`,
-      /** Shown in admin — UnikTrades deposits − withdrawals. */
+      /** Custody crypto ledger — deposits confirmed here for trader payouts. */
       usdtBalance: ledger.available,
       platformUsdtBalance: ledger.available,
+      /** Admin platform wallet (FEE_PROFIT / referrals) — not custody crypto. */
+      adminWalletBalance: adminWallet.adminWalletBalance,
+      adminWalletEmail: adminWallet.adminEmail,
+      adminWalletUserId: adminWallet.adminUserId,
       gatewayUsdtBalance,
       depositedTotal: ledger.depositedTotal,
       withdrawnTotal: ledger.withdrawnTotal,

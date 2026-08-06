@@ -3380,11 +3380,24 @@ export default function App() {
             </div>
 
             <div className="kyc-card" style={{ marginBottom: "1rem" }}>
-              <h3 style={{ margin: "0 0 0.5rem" }}>Custody wallet</h3>
+              <h3 style={{ margin: "0 0 0.5rem" }}>Platform &amp; custody wallet</h3>
               {npWallet ? (
                 <>
                   <p>
-                    Available USDT balance:{" "}
+                    Admin platform wallet
+                    {npWallet.adminWalletEmail
+                      ? ` (${npWallet.adminWalletEmail})`
+                      : ""}
+                    :{" "}
+                    <strong>
+                      {showSensitiveFinance
+                        ? fmtMoney(npWallet.adminWalletBalance ?? 0)
+                        : STATIC_CUSTODY_BALANCE_LABEL}
+                    </strong>
+                    <span className="muted"> · fees &amp; rewards</span>
+                  </p>
+                  <p>
+                    Custody crypto balance:{" "}
                     <strong>
                       {showSensitiveFinance
                         ? fmtMoney(npWallet.usdtBalance)

@@ -1602,9 +1602,16 @@ export type NowPaymentsWalletSummary = {
   payoutEmailSet?: boolean;
   payoutPasswordSet?: boolean;
   message?: string;
-  /** UnikTrades platform ledger (deposits − withdrawals). */
+  /** Custody crypto ledger (confirmed deposits − withdrawals). */
   usdtBalance: number;
   platformUsdtBalance?: number;
+  /**
+   * Admin user platform wallet available balance (FEE_PROFIT, referrals).
+   * Separate from custody crypto used for trader payouts.
+   */
+  adminWalletBalance?: number;
+  adminWalletEmail?: string | null;
+  adminWalletUserId?: string | null;
   /** Shared payment-gateway account balance (may include other apps). */
   gatewayUsdtBalance?: number;
   depositedTotal?: number;

@@ -70,11 +70,17 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
     void refresh(false);
   }, [refresh]);
 
-  const platformBalance =
+  /** Custody crypto for trader payouts (deposits − withdrawals). */
+  const custodyBalance =
     wallet?.platformUsdtBalance ?? wallet?.usdtBalance ?? 0;
+  /** Admin platform wallet — FEE_PROFIT, referral rewards, etc. */
+  const adminWalletBalance = wallet?.adminWalletBalance ?? 0;
 
-  const balanceLabel = showSensitiveFinance
-    ? fmtMoney(platformBalance)
+  const adminBalanceLabel = showSensitiveFinance
+    ? fmtMoney(adminWalletBalance)
+    : STATIC_CUSTODY_BALANCE_LABEL;
+  const custodyBalanceLabel = showSensitiveFinance
+    ? fmtMoney(custodyBalance)
     : STATIC_CUSTODY_BALANCE_LABEL;
 
   const activity = useMemo<ActivityItem[]>(() => {
@@ -198,10 +204,10 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
       <header className="wallet-page-head">
         <div>
           <p className="wallet-page-eyebrow">Treasury</p>
-          <h2 className="wallet-page-title">Custody wallet</h2>
+          <h2 className="wallet-page-title">Platform wallet</h2>
           <p className="wallet-page-desc muted">
-            UnikTrades ledger starts at $0. Balance rises when deposits confirm
-            here and falls when you withdraw from this admin.
+            Fee profits and referral rewards credit the admin platform wallet.
+            Custody deposits below fund on-chain trader payouts.
           </p>
         </div>
         <button
@@ -220,28 +226,33 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
           <div className="wallet-hero">
             <div className="wallet-hero-top">
               <div>
-                <p className="wallet-hero-label">Platform balance · USDT</p>
-                <h3 className="wallet-hero-title">Available to use</h3>
+                <p className="wallet-hero-label">
+                  Admin platform wallet · USDT
+                  {wallet?.adminWalletEmail
+                    ? ` · ${wallet.adminWalletEmail}`
+                    : ""}
+                </p>
+                <h3 className="wallet-hero-title">Fees &amp; rewards</h3>
               </div>
             </div>
 
             <p className="wallet-hero-balance">
-              {loading && !wallet ? "—" : balanceLabel}
+              {loading && !wallet ? "—" : adminBalanceLabel}
             </p>
             <p className="wallet-hero-sub">
-              {wallet?.configured === false
-                ? (wallet.message ?? "Crypto payouts not configured")
-                : "Deposits and withdrawals on UnikTrades only"}
+              Enrollment FEE_PROFIT and referral rewards for this admin account
             </p>
 
             <div className="wallet-stat-row wallet-stat-row-2">
               <div className="wallet-stat">
-                <span>Deposited</span>
-                <strong>{fmtMoney(wallet?.depositedTotal ?? 0)}</strong>
+                <span>Custody (crypto)</span>
+                <strong>
+                  {loading && !wallet ? "—" : custodyBalanceLabel}
+                </strong>
               </div>
               <div className="wallet-stat">
-                <span>Withdrawn</span>
-                <strong>{fmtMoney(wallet?.withdrawnTotal ?? 0)}</strong>
+                <span>Custody deposited</span>
+                <strong>{fmtMoney(wallet?.depositedTotal ?? 0)}</strong>
               </div>
             </div>
 
@@ -261,7 +272,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
                 disabled={
                   !wallet?.configured ||
                   wallet?.payoutConfigured === false ||
-                  platformBalance <= 0
+                  custodyBalance <= 0
                 }
                 onClick={() => openSheet("withdraw")}
               >
@@ -366,7 +377,7 @@ export function AdminWalletPanel({ onMessage, showSensitiveFinance }: Props) {
               {sheet === "withdraw" && !pendingPayoutId && (
                 <>
                   <p className="muted" style={{ marginTop: 0 }}>
-                    Available on this platform: {fmtMoney(platformBalance)}
+                    Custody available to withdraw: {fmtMoney(custodyBalance)}
                   </p>
                   <label className="wallet-field">
                     <span>Amount</span>
