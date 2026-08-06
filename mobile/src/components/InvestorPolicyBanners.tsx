@@ -5,7 +5,7 @@ import { useTheme } from "../stores/theme";
 export const INVESTOR_AUTO_STOP_THRESHOLD_USDT = 500;
 export const INVESTOR_LOAN_ELIGIBILITY_USDT = 1000;
 export const INVESTOR_AUTO_STOP_DATE_LABEL = "27 July 2026";
-export const INVESTOR_VIP_YIELD_PERCENT = 10;
+export const INVESTOR_VIP_YIELD_PERCENT = 8;
 
 type Props = {
   investmentBalance: number;

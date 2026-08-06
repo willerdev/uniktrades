@@ -8,7 +8,7 @@ export const INVESTOR_AUTO_STOP_THRESHOLD_USDT = 500;
 /** Minimum investment to see loan / reinvest-profit eligibility messaging. */
 export const INVESTOR_LOAN_ELIGIBILITY_USDT = 100;
 export const INVESTOR_AUTO_STOP_DATE_LABEL = "27 July 2026";
-export const INVESTOR_VIP_YIELD_PERCENT = 10;
+export const INVESTOR_VIP_YIELD_PERCENT = 8;
 
 export type MinBalancePolicy = {
   thresholdUsdt: number;

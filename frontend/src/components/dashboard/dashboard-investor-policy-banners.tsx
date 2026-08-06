@@ -25,7 +25,7 @@ export function DashboardInvestorPolicyBanners() {
           balance: Number.isFinite(n) ? n : 0,
           vipActive: Boolean(s.vip?.active),
           vipYield:
-            s.vip?.benefits?.dailyYieldPercent ?? s.vipDailyYieldPercent ?? 10,
+            s.vip?.benefits?.dailyYieldPercent ?? s.vipDailyYieldPercent ?? 8,
           minBalancePolicy: s.minBalancePolicy ?? null,
         });
       })

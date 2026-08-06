@@ -186,7 +186,7 @@ export function InvestScreen() {
             </Text>
             {status?.vip?.active ? (
               <Text style={{ color: theme.primary, marginTop: 8, fontWeight: "700" }}>
-                VIP · {status.vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}%
+                VIP · {status.vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 8}%
                 daily · expires {status.vip.expiresAt ? fmtDate(status.vip.expiresAt) : "—"}
               </Text>
             ) : (

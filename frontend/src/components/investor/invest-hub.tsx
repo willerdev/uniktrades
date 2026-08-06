@@ -370,7 +370,7 @@ export function InvestHub() {
                 </strong>
                 {status?.vipDailyYieldPercent
                   ? ` (VIP ${status.vipDailyYieldPercent}%)`
-                  : " (VIP up to 10%)"}
+                  : " (VIP up to 8%)"}
               </p>
             </div>
           </div>
@@ -564,8 +564,8 @@ export function InvestHub() {
             </div>
             <p className="mt-1 text-xs text-muted">
               {vip?.active
-                ? `Expires ${vip.expiresAt ? new Date(vip.expiresAt).toLocaleDateString() : "—"} · ${vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`
-                : `$${vip?.feeUsdt ?? 50}/month from wallet · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 10}% daily + weekends + $0 withdraw fee`}
+                ? `Expires ${vip.expiresAt ? new Date(vip.expiresAt).toLocaleDateString() : "—"} · ${vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 8}% daily + weekends + $0 withdraw fee`
+                : `$${vip?.feeUsdt ?? 50}/month from wallet · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 8}% daily + weekends + $0 withdraw fee`}
             </p>
             <ul className="mt-2 space-y-1 text-xs text-muted">
               <li>

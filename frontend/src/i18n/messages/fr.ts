@@ -60,7 +60,7 @@ export const fr = {
     seePath: "Voir le parcours",
     dailyYield: "Rendement quotidien de la plateforme",
     vipNote:
-      "Le VIP porte le rendement quotidien à 10 %, débloque les week-ends et retire les frais de retrait du portefeuille pendant qu’il est actif.",
+      "Le VIP porte le rendement quotidien à 8 %, débloque les week-ends et retire les frais de retrait du portefeuille pendant qu’il est actif.",
     howTitle: "Comment ça marche",
     howHeadline: "Quatre étapes. Une boucle.",
     howSupport:
@@ -95,7 +95,7 @@ export const fr = {
       "Les nouvelles allocations ne rapportent qu’après au moins 24 h d’investissement. Les crédits quotidiens sont versés",
     vipTitle: "Passage VIP",
     vipBody:
-      "Le VIP (50 $/mois) porte le rendement quotidien à 10 %, débloque les gains le week-end et retire les frais de retrait du portefeuille tant qu’il est actif.",
+      "Le VIP (50 $/mois) porte le rendement quotidien à 8 %, débloque les gains le week-end et retire les frais de retrait du portefeuille tant qu’il est actif.",
     minTitle: "Minimum 500 $",
     minBody:
       "À partir du 27 juillet 2026, les investissements inférieurs à 500 $ cessent automatiquement de rapporter. Rechargez sur Investir pour rester actif.",

@@ -66,7 +66,7 @@ export function InvestmentProductChooser({ onChooseSmart, className }: Props) {
             <div className="flex justify-between gap-3 border-b border-white/15 pb-2">
               <dt className="text-white/65">Daily yield</dt>
               <dd className="font-semibold text-emerald-300">
-                {SMART_INVEST_DAILY_YIELD_PERCENT}% (VIP up to 10%)
+                {SMART_INVEST_DAILY_YIELD_PERCENT}% (VIP up to 8%)
               </dd>
             </div>
             <div className="flex justify-between gap-3">

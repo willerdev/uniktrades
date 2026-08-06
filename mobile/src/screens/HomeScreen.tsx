@@ -116,7 +116,7 @@ export function HomeScreen() {
           vipDailyYieldPercent={
             investor?.vip?.benefits?.dailyYieldPercent ??
             investor?.vipDailyYieldPercent ??
-            10
+            8
           }
         />
 
