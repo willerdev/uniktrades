@@ -18,12 +18,13 @@
 html.dark {
   --color-background: #0B1520;
   --color-foreground: #F5F7F8;
-  --color-muted: #A8B4BA;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-surface: rgba(18, 32, 42, 0.96);
-  --color-primary: #2A6F8F;
+  /* Brighter muted so nav/labels stay readable on navy surfaces */
+  --color-muted: #C5D0D6;
+  --color-border: rgba(255, 255, 255, 0.14);
+  --color-surface: rgba(22, 36, 48, 0.98);
+  --color-primary: #3B8BB0;
   --color-accent: #E06A1C;
-  --color-success: #2A6F8F;
+  --color-success: #3B8BB0;
   --color-rank-gold: #E06A1C;
 }
 

@@ -102,7 +102,7 @@ export function PlatformNotificationsBell({
           void load();
         }}
         className={cn(
-          "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-foreground/5 hover:text-foreground",
+          "relative flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-foreground/75 transition-colors hover:bg-foreground/10 hover:text-foreground",
           compact && "justify-center px-0",
         )}
       >
