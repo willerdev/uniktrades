@@ -6,19 +6,16 @@ import { motion } from "framer-motion";
 import {
   CheckCircle2,
   Copy,
-  LineChart,
   Loader2,
   RefreshCw,
   Shield,
   TrendingUp,
   Wallet,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { api, type InvestorStatus } from "@/lib/api";
-import { Mt5ConnectForm } from "@/components/mt5/mt5-connect-form";
 import { InvestmentReturnsPanel } from "@/components/investor/investment-returns";
 import { InvestorPolicyBanners } from "@/components/investor/investor-policy-banners";
 import { CurrencySwitcher } from "@/components/currency-switcher";
@@ -36,19 +33,10 @@ import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
 
 const NETWORKS = ["TRC20", "BEP20", "ERC20"] as const;
 
-const DEFAULT_FEE_TIERS = [
-  { min: 100, max: 200, fee: 10, label: "$100 – $200" },
-  { min: 201, max: 500, fee: 50, label: "$201 – $500" },
-  { min: 501, max: 999.99, fee: 100, label: "$501 – under $1,000" },
-  { min: 1000, max: 5000, fee: 200, label: "$1,000 – $5,000" },
-] as const;
-
+/** Enrollment fee waived — amount must still be in range. */
 function resolveFeeClient(amount: number): number | null {
   if (!Number.isFinite(amount) || amount < 100 || amount > 5000) return null;
-  if (amount <= 200) return 10;
-  if (amount <= 500) return 50;
-  if (amount < 1000) return 100;
-  return 200;
+  return 0;
 }
 
 type Progress = "waiting" | "confirming" | "complete" | "failed";
@@ -62,7 +50,6 @@ function PortfolioSummary({
   balance,
   enrolledAt,
   dailyYieldPercent,
-  riskPercent,
   totalProfit,
   tradingProfit,
   walletEarnings,
@@ -78,7 +65,6 @@ function PortfolioSummary({
   balance: number;
   enrolledAt?: string | null;
   dailyYieldPercent: number;
-  riskPercent: number;
   totalProfit: number;
   tradingProfit: number;
   walletEarnings: number;
@@ -130,7 +116,7 @@ function PortfolioSummary({
               )}
               {paused && (
                 <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-xs text-amber-200">
-                  Trading paused
+                  Paused
                 </span>
               )}
               {yieldPaused && (
@@ -185,11 +171,11 @@ function PortfolioSummary({
         </div>
         <div className="border-b border-white/10 px-5 py-4 sm:border-b-0 sm:border-r sm:px-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
-            Risk per trade
+            Credited daily
           </p>
-          <p className="mt-1.5 text-2xl font-bold text-white">{riskPercent}%</p>
+          <p className="mt-1.5 text-2xl font-bold text-white">Wallet</p>
           <p className="mt-1 text-xs leading-relaxed text-muted">
-            1:2 reward-risk on MT5
+            Yield lands in your platform wallet
           </p>
         </div>
         <div className="px-5 py-4 sm:px-6">
@@ -226,7 +212,6 @@ function tradeStatusClass(status: string) {
 export function InvestHub() {
   const [status, setStatus] = useState<InvestorStatus | null>(null);
   const [loading, setLoading] = useState(true);
-  const [risk, setRisk] = useState("2");
   const [payLoading, setPayLoading] = useState(false);
   const [source, setSource] = useState<PaymentSource>("wallet");
   const [network, setNetwork] = useState("TRC20");
@@ -245,16 +230,13 @@ export function InvestHub() {
   const [investmentAmount, setInvestmentAmount] = useState("100");
   const [vipLoading, setVipLoading] = useState(false);
 
-  const tiers = status?.feeTiers?.length ? status.feeTiers : DEFAULT_FEE_TIERS;
   const investmentMin = status?.investmentMin ?? 100;
   const investmentMax = status?.investmentMax ?? 5000;
   const parsedInvestment = Number(investmentAmount);
   const feeUsdt =
     (Number.isFinite(parsedInvestment)
       ? resolveFeeClient(parsedInvestment)
-      : null) ??
-    tiers[0]?.fee ??
-    10;
+      : null) ?? 0;
   const netInvested =
     Number.isFinite(parsedInvestment) && parsedInvestment > feeUsdt
       ? Math.round((parsedInvestment - feeUsdt) * 100) / 100
@@ -270,7 +252,6 @@ export function InvestHub() {
       ]);
       setStatus(s);
       setWalletBalance(w.availableBalance);
-      if (s.settings) setRisk(String(s.settings.riskPercent));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load investment status");
     } finally {
@@ -368,11 +349,6 @@ export function InvestHub() {
     }
   }
 
-  async function saveRisk() {
-    await api.investor.updateSettings(Number(risk));
-    await refresh();
-  }
-
   async function upgradeVip() {
     setVipLoading(true);
     setError("");
@@ -411,26 +387,26 @@ export function InvestHub() {
           <div className="pointer-events-none absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-cyan-500/15 blur-3xl" />
           <div className="relative">
             <p className="text-xs font-semibold uppercase tracking-widest text-indigo-300">
-              Investor program
+              Smart Investment
             </p>
             <h2 className="mt-2 text-2xl font-bold text-white">
-              Start investing with MT5
+              Start Smart Investment
             </h2>
             <p className="mt-2 max-w-lg text-sm text-gray-400">
-              Choose your investment size, pay the matching one-time subscription
-              fee, then earn {status?.dailyYieldPercent ?? 5}% daily on investment —
-              credited to wallet{" "}
+              Deposit from ${investmentMin} USDT with no enrollment fee. Earn{" "}
+              {status?.dailyYieldPercent ?? 5}% daily on invested capital —
+              credited to your wallet{" "}
               <DailyCreditTimeText
                 country={status?.displayCurrency?.derivedFromCountry}
                 variant="short"
               />
-              . Trade on platform MT5 or link your own for auto-copy.
+              . New capital starts earning after 24 hours.
             </p>
             <ul className="mt-5 grid gap-3 sm:grid-cols-3">
               {[
-                { icon: LineChart, text: "Trade on platform MT5" },
-                { icon: Shield, text: "1:2 risk-reward always" },
-                { icon: Wallet, text: "Daily investment yield" },
+                { icon: TrendingUp, text: `${status?.dailyYieldPercent ?? 5}% daily yield` },
+                { icon: Shield, text: "No enrollment fee" },
+                { icon: Wallet, text: "Credits to platform wallet" },
               ].map(({ icon: Icon, text }) => (
                 <li
                   key={text}
@@ -441,25 +417,25 @@ export function InvestHub() {
                 </li>
               ))}
             </ul>
-            <div className="mt-5 overflow-hidden rounded-xl border border-white/10 bg-black/25">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-gray-500">
-                    <th className="px-3 py-2 font-medium">Investment</th>
-                    <th className="px-3 py-2 font-medium text-right">Fee</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {tiers.map((tier) => (
-                    <tr key={tier.label} className="border-b border-white/5 last:border-0">
-                      <td className="px-3 py-2 text-gray-300">{tier.label}</td>
-                      <td className="px-3 py-2 text-right font-medium text-white">
-                        {formatCurrency(tier.fee)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="mt-5 rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-gray-300">
+              <p>
+                Minimum deposit{" "}
+                <strong className="text-white">
+                  {formatCurrency(investmentMin)}
+                </strong>
+                {" · "}
+                maximum{" "}
+                <strong className="text-white">
+                  {formatCurrency(investmentMax)}
+                </strong>
+                {" · "}
+                <strong className="text-emerald-300">
+                  {status?.dailyYieldPercent ?? 5}% daily
+                </strong>
+                {status?.vipDailyYieldPercent
+                  ? ` (VIP ${status.vipDailyYieldPercent}%)`
+                  : " (VIP up to 10%)"}
+              </p>
             </div>
           </div>
         </motion.div>
@@ -549,11 +525,10 @@ export function InvestHub() {
                     </Button>
                   </div>
                   <p className="text-xs text-gray-500">
-                    After payment confirms,{" "}
-                    {formatCurrency(feeUsdt)} fee is deducted and{" "}
+                    After payment confirms, the full{" "}
                     {formatCurrency(netInvested || parsedInvestment)} is invested
-                    automatically. Keep this page open or reload — your invoice
-                    is restored if you leave.
+                    automatically (no enrollment fee). Keep this page open or
+                    reload — your invoice is restored if you leave.
                   </p>
                 </>
               )}
@@ -573,17 +548,17 @@ export function InvestHub() {
                   onChange={(e) => setInvestmentAmount(e.target.value)}
                 />
                 <p className="mt-1.5 text-xs text-gray-500">
-                  You pay{" "}
+                  Deposit{" "}
                   <strong className="text-white">
                     {formatCurrency(depositDue || 0)}
                   </strong>
                   {" — "}
-                  <strong className="text-white">{formatCurrency(feeUsdt)}</strong>{" "}
-                  fee deducted,{" "}
+                  <strong className="text-emerald-300">$0 enrollment fee</strong>
+                  ,{" "}
                   <strong className="text-white">
-                    {formatCurrency(netInvested)}
+                    {formatCurrency(netInvested || depositDue)}
                   </strong>{" "}
-                  invested
+                  invested · earn {status?.dailyYieldPercent ?? 5}% daily
                 </p>
               </div>
               <PaymentSourceSelector
@@ -635,7 +610,6 @@ export function InvestHub() {
     );
   }
 
-  const riskPercent = status.settings?.riskPercent ?? 2;
   const display = status.displayCurrency;
   const vip = status.vip;
   const localCurrency = isLocalCurrencyDisplay(display);
@@ -662,7 +636,6 @@ export function InvestHub() {
         balance={status.investmentBalance ?? status.investmentDeposited ?? 0}
         enrolledAt={status.enrolledAt}
         dailyYieldPercent={status.dailyYieldPercent}
-        riskPercent={riskPercent}
         totalProfit={status.totalProfit}
         tradingProfit={status.tradingProfit}
         walletEarnings={status.walletEarnings}
@@ -868,15 +841,12 @@ export function InvestHub() {
             value: `${status.dailyYieldPercent}%`,
           },
           {
-            label: "On MT5",
+            label: "Invested",
             value: formatMoney(status.investmentBalance ?? 0, display),
           },
           {
-            label: "Broker MT5",
-            value:
-              status.mt5Balance != null
-                ? `${formatCurrency(status.mt5Balance)} ${status.currency}`
-                : "—",
+            label: "Wallet earnings",
+            value: formatMoney(status.walletEarnings ?? 0, display),
           },
         ].map((item) => (
           <div
@@ -901,82 +871,40 @@ export function InvestHub() {
         transition={{ delay: 0.25 }}
         className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 xl:col-span-5 xl:row-start-5"
       >
-        <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-cyan-400" />
-          <h3 className="text-base font-semibold text-white">Trade on MT5</h3>
-        </div>
-        <p className="mt-1 text-sm text-gray-400">
-          Open the platform MT5 terminal to trade with your investment balance
-          ({formatCurrency(status.investmentBalance ?? 0)}). Optionally link your
-          own MT5 for auto-copy of system signals.
-        </p>
-        <p className="mt-2 text-sm text-gray-400">
-          Link status:{" "}
-          <span className="text-white">
-            {status.mt5Connected
-              ? "Connected"
-              : status.mt5Linked
-                ? "Linked — checking…"
-                : "Not linked (optional)"}
-          </span>
-          {status.mt5HealthMessage && (
-            <span className="ml-2 text-xs text-gray-500">
-              ({status.mt5HealthMessage})
-            </span>
-          )}
-        </p>
-        {!status.mt5Linked && (
-          <div className="mt-4">
-            <Mt5ConnectForm
-              compact
-              onSubmit={async (c) => {
-                await api.users.claimTradingAccount(c);
-                await refresh();
-              }}
-            />
-          </div>
-        )}
-        <div className="mt-4 flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <label className="mb-1 block text-xs text-gray-400">
-              Risk % per signal (1:2 RR)
-            </label>
-            <Input
-              type="number"
-              min={0.5}
-              max={10}
-              step={0.5}
-              value={risk}
-              onChange={(e) => setRisk(e.target.value)}
-              className="w-24"
-            />
+            <h3 className="text-base font-semibold text-white">
+              Yield controls
+            </h3>
+            <p className="mt-1 text-sm text-gray-400">
+              Pause or resume Smart Investment. Prefer the on-chain vault?{" "}
+              <Link href="/blockchain" className="text-primary hover:underline">
+                Open blockchain contract
+              </Link>
+              .
+            </p>
           </div>
-          <Button size="sm" onClick={() => void saveRisk()}>
-            Save risk
-          </Button>
-          {status.settings?.paused ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => void api.investor.resume().then(refresh)}
-            >
-              Resume trading
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => void api.investor.pause().then(refresh)}
-            >
-              Pause trading
-            </Button>
-          )}
-          <Link href="/mt5" className="ml-auto">
-            <Button size="sm" className="gap-1.5">
-              <TrendingUp className="h-4 w-4" />
-              Open MT5 terminal
-            </Button>
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            {status.settings?.paused ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => void api.investor.resume().then(refresh)}
+              >
+                Resume
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={() => void api.investor.pause().then(refresh)}
+              >
+                Pause
+              </Button>
+            )}
+          </div>
         </div>
       </motion.div>
 
@@ -987,7 +915,7 @@ export function InvestHub() {
           className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.02] xl:col-span-12 xl:row-start-6"
         >
           <div className="border-b border-white/5 px-5 py-4">
-            <h3 className="text-base font-semibold text-white">Recent trades</h3>
+            <h3 className="text-base font-semibold text-white">Recent activity</h3>
           </div>
           <div className="divide-y divide-white/5">
             {status.recentTrades.map((t) => (

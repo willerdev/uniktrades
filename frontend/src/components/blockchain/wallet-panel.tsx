@@ -20,7 +20,7 @@ import {
 export function WalletPanel({
   wallet,
   loading,
-  withdrawFeePercent = 5,
+  withdrawFeePercent = 0,
 }: {
   wallet: WalletState | null;
   loading: boolean;
@@ -64,11 +64,17 @@ export function WalletPanel({
         </span>
       </div>
 
-      <p className="mb-4 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-gray-400">
-        Contract withdrawals deduct a{" "}
-        <strong className="text-gray-200">{withdrawFeePercent}%</strong> fee from
-        the withdrawn amount.
-      </p>
+      {withdrawFeePercent > 0 ? (
+        <p className="mb-4 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-gray-400">
+          Contract withdrawals deduct a{" "}
+          <strong className="text-gray-200">{withdrawFeePercent}%</strong> fee from
+          the withdrawn amount.
+        </p>
+      ) : (
+        <p className="mb-4 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-2 text-xs text-gray-400">
+          Contract withdrawals have <strong className="text-emerald-200">no platform fee</strong>.
+        </p>
+      )}
 
       <dl className="grid gap-3 sm:grid-cols-2">
         <Field label="Wallet Address" value={shortAddr(wallet.address, 6)} mono />
@@ -170,7 +176,11 @@ export function WalletPanel({
           variant="secondary"
           disabled={!wallet.connected || action.status === "loading"}
           onClick={() => void withdraw(amt)}
-          title={`Withdraws principal; ${withdrawFeePercent}% fee applies`}
+          title={
+            withdrawFeePercent > 0
+              ? `Withdraws principal; ${withdrawFeePercent}% fee applies`
+              : "Withdraws principal — no platform fee"
+          }
         >
           Withdraw all
         </Button>

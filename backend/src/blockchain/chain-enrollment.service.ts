@@ -16,7 +16,7 @@ export const CHAIN_CONTRACT_MIN_USD = 2000;
 export const CHAIN_CONTRACT_TIER_CUTOFF_USD = 5000;
 export const CHAIN_CONTRACT_YIELD_MID = 10;
 export const CHAIN_CONTRACT_YIELD_HIGH = 15;
-export const CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT = 5;
+export const CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT = 0;
 
 export function yieldPercentForDeposit(amountUsd: number): number {
   if (amountUsd < CHAIN_CONTRACT_MIN_USD) {

@@ -74,7 +74,7 @@ export class InvestorService {
 
   /** @deprecated Prefer resolveFeeForInvestment — flat config is no longer the source of truth. */
   async investorFee(): Promise<number> {
-    return listInvestorFeeTiers()[0]?.fee ?? 10;
+    return listInvestorFeeTiers()[0]?.fee ?? 0;
   }
 
   resolveFeeForInvestment(investmentAmount: number): number {

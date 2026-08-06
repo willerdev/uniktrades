@@ -111,7 +111,9 @@ export function BlockchainDashboard({
               {enrollment.yieldPercent != null
                 ? ` · ${enrollment.yieldPercent}% contract yield (indicative; may vary)`
                 : ""}
-              . Withdrawals deduct {enrollment.withdrawFeePercent}% fee.
+              {enrollment.withdrawFeePercent > 0
+                ? `. Withdrawals deduct ${enrollment.withdrawFeePercent}% fee.`
+                : ". No withdrawal fee."}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

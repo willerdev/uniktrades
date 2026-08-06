@@ -70,7 +70,7 @@ export const fr = {
       "Déposez des USDT dans votre portefeuille. Le capital reste le vôtre jusqu’à l’allocation.",
     pathAllocate: "Allouer",
     pathAllocateBody:
-      "Passez dans Smart-Invest, payez les frais par palier et définissez votre montant.",
+      "Passez dans Smart Investment, déposez sans frais d’inscription et définissez votre montant.",
     pathCompound: "Composer",
     pathCompoundBody:
       "Après le délai de 24 h, le solde éligible génère un rendement",
@@ -86,9 +86,9 @@ export const fr = {
   rules: {
     eyebrow: "Les règles",
     title: "Claires avant d’engager du capital",
-    feeTitle: "Frais d’inscription par palier",
+    feeTitle: "Pas de frais d’inscription",
     feeBody:
-      "Payez des frais uniques selon la taille du capital à l’inscription. Votre investissement génère ensuite un rendement quotidien sur le solde éligible.",
+      "Smart Investment n’a pas de frais d’inscription — votre dépôt entier travaille et génère un rendement quotidien sur le solde éligible.",
     holdTitle: "Délai de rendement de 24 h",
     holdBody: "yield-hold",
     holdIntro:
@@ -105,8 +105,9 @@ export const fr = {
     kycTitle: "KYC pour les retraits",
     kycBody:
       "Vous pouvez vous inscrire et gagner sans KYC. La vérification d’identité n’est requise qu’avant un retrait vers un portefeuille externe.",
-    subtitle: "Conditions Smart-Invest en direct — frais, délai, VIP et retraits.",
-    feeBySize: "Frais d’inscription selon le montant",
+    subtitle:
+      "Smart Investment et coffre on-chain — rendements quotidiens, délai, VIP et retraits.",
+    feeBySize: "Frais d’inscription selon le montant (0 $)",
     paidOut: "versés jusqu’ici",
     received: "a reçu",
   },

@@ -240,7 +240,7 @@ function PhaseTerms({
           },
           {
             title: `Above $${t.midTierMaxUsd.toLocaleString()}`,
-            body: `Indicative ${t.highTierYieldPercent}% starting band. Withdrawals deduct a ${t.withdrawFeePercent}% fee.`,
+            body: `Indicative ${t.highTierYieldPercent}% starting band. No withdrawal fee.`,
           },
         ].map((card) => (
           <div
@@ -285,11 +285,17 @@ function PhaseTerms({
               "These percentages are indicative and may change depending on deposit size, available funds, market conditions, and your past behavior on the platform."}
           </li>
           <li>
-            Every withdrawal deducts{" "}
-            <strong className="text-gray-200">
-              {t.withdrawFeePercent}%
-            </strong>{" "}
-            of the withdrawn amount.
+            {t.withdrawFeePercent > 0 ? (
+              <>
+                Every withdrawal deducts{" "}
+                <strong className="text-gray-200">
+                  {t.withdrawFeePercent}%
+                </strong>{" "}
+                of the withdrawn amount.
+              </>
+            ) : (
+              <>Withdrawals have no platform fee.</>
+            )}
           </li>
           <li>
             Contract does not start until KYC is approved and your first deposit
@@ -314,8 +320,11 @@ function PhaseTerms({
         />
         <span>
           I have read and agree to the on-chain vault contract terms, yield
-          tiers, {t.withdrawFeePercent}% withdrawal fee, and the platform Terms
-          &amp; Conditions.
+          tiers
+          {t.withdrawFeePercent > 0
+            ? `, ${t.withdrawFeePercent}% withdrawal fee,`
+            : ","}{" "}
+          and the platform Terms &amp; Conditions.
         </span>
       </label>
 
@@ -651,8 +660,11 @@ export function ContractNullDashboard({
             ${t.minDepositUsd.toLocaleString()}–$
             {t.midTierMaxUsd.toLocaleString()} → indicative {t.midTierYieldPercent}% ·
             above ${t.midTierMaxUsd.toLocaleString()} → indicative{" "}
-            {t.highTierYieldPercent}% · withdrawals: {t.withdrawFeePercent}% fee.
-            Rates may change with funds and past behavior.
+            {t.highTierYieldPercent}% ·{" "}
+            {t.withdrawFeePercent > 0
+              ? `withdrawals: ${t.withdrawFeePercent}% fee`
+              : "no withdrawal fee"}
+            . Rates may change with funds and past behavior.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">

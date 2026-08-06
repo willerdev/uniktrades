@@ -1,9 +1,9 @@
-/** Investor subscription fee by deposit size (USDT). Fee is deducted from the deposit. */
+/** Investor enrollment fee by deposit size (USDT). Fees are currently waived ($0). */
 export const INVESTOR_FEE_TIERS = [
-  { min: 100, max: 200, fee: 10, label: '$100 – $200' },
-  { min: 201, max: 500, fee: 50, label: '$201 – $500' },
-  { min: 501, max: 999.99, fee: 100, label: '$501 – under $1,000' },
-  { min: 1000, max: 5000, fee: 200, label: '$1,000 – $5,000' },
+  { min: 100, max: 200, fee: 0, label: '$100 – $200' },
+  { min: 201, max: 500, fee: 0, label: '$201 – $500' },
+  { min: 501, max: 999.99, fee: 0, label: '$501 – under $1,000' },
+  { min: 1000, max: 5000, fee: 0, label: '$1,000 – $5,000' },
 ] as const;
 
 export const INVESTOR_INVESTMENT_MIN = 100;
@@ -27,7 +27,7 @@ export function listInvestorFeeTiers(): InvestorFeeTier[] {
 
 /**
  * Resolve enrollment fee from investment amount.
- * $100–$200 → $10 · $201–$500 → $50 · $501–under $1,000 → $100 · $1,000–$5,000 → $200
+ * Platform enrollment fee is waived — full deposit is invested.
  */
 export function resolveInvestorSubscriptionFee(investmentAmount: number): number {
   if (!Number.isFinite(investmentAmount)) {
@@ -39,9 +39,5 @@ export function resolveInvestorSubscriptionFee(investmentAmount: number): number
       `Investment must be between $${INVESTOR_INVESTMENT_MIN} and $${INVESTOR_INVESTMENT_MAX} USDT`,
     );
   }
-
-  if (amount <= 200) return 10;
-  if (amount <= 500) return 50;
-  if (amount < 1000) return 100;
-  return 200;
+  return 0;
 }

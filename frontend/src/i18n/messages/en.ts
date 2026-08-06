@@ -70,7 +70,7 @@ export const en = {
       "Deposit USDT to your wallet. Capital stays yours until you allocate.",
     pathAllocate: "Allocate",
     pathAllocateBody:
-      "Move into Smart-Invest, pay the tiered fee, and set your size.",
+      "Move into Smart Investment, deposit with $0 enrollment fee, and set your size.",
     pathCompound: "Compound",
     pathCompoundBody:
       "After the 24-hour hold, eligible balance earns yield",
@@ -86,9 +86,9 @@ export const en = {
   rules: {
     eyebrow: "The rules",
     title: "Clear before you commit capital",
-    feeTitle: "Tiered enrollment fee",
+    feeTitle: "No enrollment fee",
     feeBody:
-      "Pay a one-time fee by capital size when you enroll. Your investment then earns daily yield on eligible balance.",
+      "Smart Investment has no platform enrollment fee — your full deposit goes to work and earns daily yield on eligible balance.",
     holdTitle: "24-hour yield hold",
     holdBody: "yield-hold",
     holdIntro:
@@ -105,8 +105,9 @@ export const en = {
     kycTitle: "KYC for withdrawals",
     kycBody:
       "You can enroll and earn without KYC. Identity verification is required only before withdrawing to an external wallet.",
-    subtitle: "Live Smart-Invest terms — fees, hold period, VIP, and withdrawals.",
-    feeBySize: "Enrollment fee by size",
+    subtitle:
+      "Smart Investment and on-chain vault — daily yields, hold period, VIP, and withdrawals.",
+    feeBySize: "Enrollment fee by size ($0)",
     paidOut: "paid out so far",
     received: "received",
   },

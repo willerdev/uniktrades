@@ -4,6 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
+  Blocks,
   Landmark,
   ScrollText,
   TrendingUp,
@@ -11,26 +12,52 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CHAIN_CONTRACT_MIN_USD,
+  CHAIN_HIGH_YIELD_PERCENT,
+  CHAIN_MID_YIELD_PERCENT,
+  SMART_INVEST_DAILY_YIELD_PERCENT,
+  SMART_INVEST_MIN_USD,
+} from "@/components/investor/investment-product-chooser";
 
 const PRODUCTS = [
   {
-    id: "invest",
+    id: "smart",
     href: "/invest",
     icon: TrendingUp,
-    title: "Smart-Invest",
-    tagline: "Put capital to work with daily yield",
+    title: "Smart Investment",
+    tagline: `${SMART_INVEST_DAILY_YIELD_PERCENT}% daily · min $${SMART_INVEST_MIN_USD.toLocaleString()}`,
     how: [
-      "Deposit USDT to your wallet, then allocate into Smart-Invest.",
-      "Daily yield credits after a 24-hour hold on new allocations.",
-      "VIP unlocks a higher daily rate, weekend earnings, and $0 withdraw fees.",
-      "Optional auto-reinvest compounds most of each day’s return back into capital.",
+      `Minimum deposit $${SMART_INVEST_MIN_USD.toLocaleString()} USDT — $0 enrollment fee.`,
+      `${SMART_INVEST_DAILY_YIELD_PERCENT}% daily yield (VIP up to 10%) credited to your wallet.`,
+      "New allocations earn after a 24-hour hold.",
+      "Optional auto-reinvest compounds most of each day’s return.",
     ],
     start: [
-      "Pay registration if your account is not active yet.",
-      "Open Invest → fund wallet → allocate capital.",
+      "Open Invest and choose Smart Investment.",
+      "Deposit with wallet balance or crypto.",
       "Complete KYC only when you are ready to withdraw.",
     ],
-    cta: "Open Smart-Invest",
+    cta: "Deposit to Smart Investment",
+  },
+  {
+    id: "chain",
+    href: "/blockchain",
+    icon: Blocks,
+    title: "On-chain contract",
+    tagline: `${CHAIN_MID_YIELD_PERCENT}–${CHAIN_HIGH_YIELD_PERCENT}% daily · min $${CHAIN_CONTRACT_MIN_USD.toLocaleString()}`,
+    how: [
+      `Minimum deposit $${CHAIN_CONTRACT_MIN_USD.toLocaleString()} USDT.`,
+      `Indicative ${CHAIN_MID_YIELD_PERCENT}%–${CHAIN_HIGH_YIELD_PERCENT}% daily by tier — no withdrawal fee.`,
+      "Verify ID & liveness, get approved, then deposit to activate.",
+      "Manage the vault from the Blockchain dashboard.",
+    ],
+    start: [
+      "Open Blockchain and agree to contract terms.",
+      "Complete verification and wait for approval.",
+      "Launch your first on-chain deposit.",
+    ],
+    cta: "Deposit on-chain",
   },
   {
     id: "unitrust",
@@ -57,13 +84,12 @@ const PRODUCTS = [
     title: "Loans",
     tagline: "Advance on projected earnings",
     how: [
-      "Choose daily, weekly, or monthly based on your projected invest + Unitrust earnings.",
+      "Choose daily, weekly, or monthly based on your projected invest earnings.",
       "You receive 80% of that period’s projected earnings as an advance.",
       "Repay principal + 20% interest from your wallet after approval.",
-      "Example: $10/day → week $70 → $56 advance → repay $67.20.",
     ],
     start: [
-      "Build at least ~$100 combined invest/Unitrust corpus with meaningful daily earnings.",
+      "Build meaningful Smart Investment or Unitrust earnings.",
       "Complete KYC (same requirement as withdrawals).",
       "Request a term on Loans — admin approves, then funds hit your wallet.",
     ],
@@ -84,9 +110,8 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
           {displayName ? `Welcome, ${displayName}` : "Your investment hub"}
         </h1>
         <p className="max-w-2xl text-sm text-gray-400 sm:text-base">
-          Grow capital with Smart-Invest and Unitrust, or borrow against projected
-          earnings with Loans. Pick a product below to see how it works and get
-          started.
+          Choose Smart Investment or an on-chain vault contract — each shows its
+          minimum and daily yield before you deposit.
         </p>
       </motion.div>
 
@@ -108,6 +133,12 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
             Invest
           </Button>
         </Link>
+        <Link href="/blockchain">
+          <Button size="sm" variant="secondary" className="gap-1.5">
+            <Blocks className="h-3.5 w-3.5" />
+            Blockchain
+          </Button>
+        </Link>
         <Link href="/unitrust">
           <Button size="sm" variant="secondary" className="gap-1.5">
             <ScrollText className="h-3.5 w-3.5" />
@@ -122,7 +153,7 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
         </Link>
       </motion.div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
         {PRODUCTS.map((product, i) => {
           const Icon = product.icon;
           return (
