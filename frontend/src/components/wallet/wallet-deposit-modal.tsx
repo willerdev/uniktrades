@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { ModalPortal } from "@/components/ui/modal-portal";
 import { api } from "@/lib/api";
 import { cn, formatCurrency } from "@/lib/utils";
 import {
@@ -19,6 +20,7 @@ import {
   formatLocalAmount,
 } from "@/components/payments/momo-payment-fields";
 import { useFlutterwaveConfig } from "@/hooks/use-flutterwave-config";
+import { WalletModalErrorBoundary } from "@/components/wallet/wallet-modal-error-boundary";
 
 const NETWORKS = [
   { id: "TRC20", label: "TRC20", hint: "Lowest fees" },
@@ -165,7 +167,8 @@ export function WalletDepositModal({
       setProgress(normalizeProgress(status.progress));
       if (status.confirmed) {
         setStep("done");
-        onComplete?.();
+        // Defer parent refresh so page list remounts after this commit (avoids insertBefore thrash).
+        queueMicrotask(() => onComplete?.());
       }
     } catch {
       /* polling */
@@ -257,8 +260,6 @@ export function WalletDepositModal({
     }
   }
 
-  if (!open) return null;
-
   const stepLabels =
     depositMethod === "momo"
       ? ["Amount", "Pay", "Done"]
@@ -267,14 +268,19 @@ export function WalletDepositModal({
   const progressLabel = PROGRESS_LABEL[progress] ?? PROGRESS_LABEL.waiting;
 
   return (
-    <div
-      className="modal-overlay fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4"
-      onClick={onClose}
-    >
-      <div
-        className="modal-panel w-full max-w-lg rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <WalletModalErrorBoundary title="Deposit hit a snag" onClose={onClose}>
+      <ModalPortal open={open}>
+        <div
+          className="modal-overlay fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4"
+          onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Deposit"
+        >
+          <div
+            className="modal-panel w-full max-w-lg rounded-t-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-2xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <h2 className="text-lg font-semibold text-foreground">
             {depositMethod === "momo" ? "Deposit via MoMo" : "Deposit USDT"}
@@ -546,6 +552,8 @@ export function WalletDepositModal({
           )}
         </div>
       </div>
-    </div>
+        </div>
+      </ModalPortal>
+    </WalletModalErrorBoundary>
   );
 }

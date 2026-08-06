@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ModalPortal } from "@/components/ui/modal-portal";
 import { api, type MomoP2pWithdrawal, type SavedWithdrawalWallet } from "@/lib/api";
 import { formatCurrency } from "@/lib/utils";
 import { CheckCircle2, Loader2, X } from "lucide-react";
@@ -17,6 +18,7 @@ import {
   WalletAddWithdrawalWalletModal,
   maskWithdrawalWalletAddress,
 } from "@/components/wallet/wallet-saved-withdrawal-wallets";
+import { WalletModalErrorBoundary } from "@/components/wallet/wallet-modal-error-boundary";
 
 function isMomoNetwork(network?: string) {
   return network === "MOMO_MTN" || network === "MOMO_AIRTEL";
@@ -168,9 +170,9 @@ export function WalletWithdrawModal({
               row.status === "COMPLETED" ? "under_process" : "under_process",
             );
           }
-          if (row.status === "COMPLETED") {
+  if (row.status === "COMPLETED") {
             setSuccess(true);
-            onComplete?.();
+            queueMicrotask(() => onComplete?.());
           }
         })
         .catch(() => {});
@@ -215,7 +217,7 @@ export function WalletWithdrawModal({
         otpSessionId,
         otpCode.trim(),
       );
-      onComplete?.();
+      queueMicrotask(() => onComplete?.());
       if (res.status === "momo_p2p" && res.p2p) {
         setP2p(res.p2p);
         setP2pPhase("initiated");
@@ -238,7 +240,7 @@ export function WalletWithdrawModal({
       const row = await api.wallet.momoP2pConfirmReceived(p2p.id);
       setP2p(row);
       setSuccess(true);
-      onComplete?.();
+      queueMicrotask(() => onComplete?.());
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not confirm arrival");
     } finally {
@@ -263,15 +265,19 @@ export function WalletWithdrawModal({
     gross <= availableBalance;
 
   return (
-    <>
-      <div
-        className="modal-overlay fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4"
-        onClick={onClose}
-      >
+    <WalletModalErrorBoundary title="Withdraw hit a snag" onClose={onClose}>
+      <ModalPortal open={open}>
         <div
-          className="modal-panel w-full max-w-md rounded-t-2xl border border-[var(--color-border)] shadow-2xl sm:rounded-2xl"
-          onClick={(e) => e.stopPropagation()}
+          className="modal-overlay fixed inset-0 z-[120] flex items-end justify-center p-0 sm:items-center sm:p-4"
+          onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Withdraw"
         >
+          <div
+            className="modal-panel w-full max-w-md rounded-t-2xl border border-[var(--color-border)] shadow-2xl sm:rounded-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
             <h2 className="text-lg font-semibold text-foreground">Send / Withdraw</h2>
             <button
@@ -507,13 +513,14 @@ export function WalletWithdrawModal({
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </ModalPortal>
 
       <WalletAddWithdrawalWalletModal
         open={addWalletOpen}
         onClose={() => setAddWalletOpen(false)}
         onSaved={() => void loadWallets()}
       />
-    </>
+    </WalletModalErrorBoundary>
   );
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ModalPortal } from "@/components/ui/modal-portal";
 import { api, type SavedWithdrawalWallet, type WithdrawalWalletNetwork } from "@/lib/api";
 import { Loader2, Trash2, X } from "lucide-react";
 
@@ -95,14 +96,18 @@ export function WalletAddWithdrawalWalletModal({
   if (!open) return null;
 
   return (
-    <div
-      className="modal-overlay fixed inset-0 z-[130] flex items-end justify-center p-0 sm:items-center sm:p-4"
-      onClick={onClose}
-    >
+    <ModalPortal open={open}>
       <div
-        className="modal-panel w-full max-w-md rounded-t-2xl border border-[var(--color-border)] shadow-2xl sm:rounded-2xl"
-        onClick={(e) => e.stopPropagation()}
+        className="modal-overlay fixed inset-0 z-[130] flex items-end justify-center p-0 sm:items-center sm:p-4"
+        onClick={onClose}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Add withdrawal wallet"
       >
+        <div
+          className="modal-panel w-full max-w-md rounded-t-2xl border border-[var(--color-border)] shadow-2xl sm:rounded-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="flex items-center justify-between border-b border-[var(--color-border)] px-5 py-4">
           <h2 className="text-lg font-semibold text-foreground">Add withdrawal wallet</h2>
           <button
@@ -218,7 +223,8 @@ export function WalletAddWithdrawalWalletModal({
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </ModalPortal>
   );
 }
 
