@@ -13,12 +13,10 @@ import { WalletService } from '../wallet/wallet.service';
 import {
   INVESTOR_INVESTMENT_MAX,
   INVESTOR_INVESTMENT_MIN,
-  listInvestorFeeTiers,
   resolveInvestorSubscriptionFee,
 } from './investor-fee.util';
 import {
-  INVESTOR_VIP_DAILY_YIELD_PERCENT,
-  INVESTOR_VIP_FEE_USDT,
+  INVESTOR_VIP_FEE_PERCENT,
   INVESTOR_VIP_REMINDER_DAYS,
   isInvestorVipActive,
   nextVipExpiry,
@@ -27,8 +25,10 @@ import {
 import { FxRatesService } from '../fx/fx-rates.service';
 import { resolvePreferredDisplayCurrency } from '../fx/country-currency.util';
 import {
-  INVESTOR_AUTO_REINVEST_FEE_PERCENT,
-} from '../common/constants';
+  platformRatesFromConfig,
+  resolveVipInvestFee,
+  type PlatformRates,
+} from '../common/platform-rates.util';
 import {
   INVESTOR_MIN_BALANCE_EFFECTIVE_DATE,
   INVESTOR_MIN_BALANCE_USDT,
@@ -56,14 +56,35 @@ export class InvestorService {
     private fxRates: FxRatesService,
   ) {}
 
-  /** @deprecated Prefer resolveFeeForInvestment — flat config is no longer the source of truth. */
-  async investorFee(): Promise<number> {
-    return listInvestorFeeTiers()[0]?.fee ?? 0;
+  async getPlatformRates(): Promise<PlatformRates> {
+    const config = await this.prisma.platformConfig.findUnique({
+      where: { id: 'default' },
+    });
+    return platformRatesFromConfig(config);
   }
 
-  resolveFeeForInvestment(investmentAmount: number): number {
+  /** @deprecated Prefer resolveFeeForInvestment — flat config is no longer the source of truth. */
+  async investorFee(): Promise<number> {
+    const rates = await this.getPlatformRates();
+    return rates.investorFeeTiers[0]?.fee ?? 0;
+  }
+
+  resolveFeeForInvestment(
+    investmentAmount: number,
+    opts?: { vip?: boolean; rates?: PlatformRates },
+  ): number {
     try {
-      return resolveInvestorSubscriptionFee(investmentAmount);
+      const rates = opts?.rates;
+      if (opts?.vip) {
+        return resolveVipInvestFee(
+          investmentAmount,
+          rates?.investorVipFeePercent ?? INVESTOR_VIP_FEE_PERCENT,
+        );
+      }
+      return resolveInvestorSubscriptionFee(
+        investmentAmount,
+        rates?.investorFeeTiers,
+      );
     } catch (err) {
       throw new BadRequestException(
         err instanceof Error ? err.message : 'Invalid investment amount',
@@ -84,30 +105,58 @@ export class InvestorService {
     return amount;
   }
 
-  /** Deposit T → fee F deducted → net N invested. Whitelist (instantWithdraw) pays $0 fee. */
+  /**
+   * Deposit T → fee F deducted → net N invested.
+   * Non-VIP: Smart Invest tier fees. VIP / withVip: percent of deposit (default 15%).
+   * Whitelist (instantWithdraw) pays $0 fee.
+   */
   private async splitDepositForUser(
     userId: string,
     raw: unknown,
+    opts?: { withVip?: boolean },
   ): Promise<{
     deposit: number;
     fee: number;
     netInvested: number;
     feeWaived: boolean;
+    vipFee: boolean;
+    vipFeePercent: number;
   }> {
     const deposit = this.normalizeInvestmentAmount(raw);
+    const rates = await this.getPlatformRates();
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { instantWithdraw: true },
+      select: {
+        instantWithdraw: true,
+        investorVipActive: true,
+        investorVipExpiresAt: true,
+      },
     });
     const feeWaived = Boolean(user?.instantWithdraw);
-    const fee = feeWaived ? 0 : this.resolveFeeForInvestment(deposit);
+    const vipActive = user ? isInvestorVipActive(user) : false;
+    const useVipFee = Boolean(opts?.withVip) || vipActive;
+    const fee = feeWaived
+      ? 0
+      : this.resolveFeeForInvestment(deposit, {
+          vip: useVipFee,
+          rates,
+        });
     const netInvested = Math.round((deposit - fee) * 100) / 100;
     if (netInvested <= 0) {
       throw new BadRequestException(
-        'Deposit must be greater than the subscription fee for that tier',
+        useVipFee
+          ? 'Deposit must be greater than the VIP fee for that amount'
+          : 'Deposit must be greater than the subscription fee for that tier',
       );
     }
-    return { deposit, fee, netInvested, feeWaived };
+    return {
+      deposit,
+      fee,
+      netInvested,
+      feeWaived,
+      vipFee: useVipFee && !feeWaived,
+      vipFeePercent: rates.investorVipFeePercent,
+    };
   }
 
   /** @deprecated Prefer splitDepositForUser — kept for admin/comp helpers. */
@@ -160,11 +209,10 @@ export class InvestorService {
       }
     }
 
-    const feeTiers = listInvestorFeeTiers();
-    const config = await this.prisma.platformConfig.findUnique({
-      where: { id: 'default' },
-    });
-    const platformDailyYield = Number(config?.investorDailyYieldPercent ?? 5);
+    const rates = await this.getPlatformRates();
+    const feeTiers = rates.investorFeeTiers;
+    const platformDailyYield = rates.investorDailyYieldPercent;
+    const vipDailyYield = rates.investorVipDailyYieldPercent;
     const vipActive = isInvestorVipActive(user);
     const effectiveDailyYield = resolveInvestorDailyYieldPercent({
       vipActive,
@@ -173,6 +221,7 @@ export class InvestorService {
           ? Number(user.investorSettings.dailyYieldPercent)
           : null,
       platformYieldPercent: platformDailyYield,
+      vipYieldPercent: vipDailyYield,
     });
 
     const financials = await this.getInvestorFinancials(userId, user);
@@ -187,21 +236,31 @@ export class InvestorService {
       ? LOAN_REINVEST_BLOCKED_MESSAGE
       : REVENUE_REINVEST_BLOCKED_MESSAGE;
 
+    const investmentBalance = Number(financials.investmentBalance ?? 0);
+    const vipFeePreview =
+      investmentBalance > 0
+        ? resolveVipInvestFee(investmentBalance, rates.investorVipFeePercent)
+        : null;
+
     return {
       active: user.investorActive,
       enrolledAt: user.investorEnrolledAt?.toISOString() ?? null,
       vip: {
         active: vipActive,
         expiresAt: user.investorVipExpiresAt?.toISOString() ?? null,
-        feeUsdt: INVESTOR_VIP_FEE_USDT,
+        /** @deprecated Use feePercent — flat $50 VIP fee removed. */
+        feeUsdt: vipFeePreview ?? 0,
+        feePercent: rates.investorVipFeePercent,
+        feeModel: 'percent_of_investment' as const,
         benefits: {
           weekendEarnings: true,
           zeroWithdrawalFee: true,
-          dailyYieldPercent: INVESTOR_VIP_DAILY_YIELD_PERCENT,
+          dailyYieldPercent: vipDailyYield,
         },
       },
       feeUsdt: feeTiers[0]?.fee ?? 10,
       feeTiers,
+      vipFeePercent: rates.investorVipFeePercent,
       investmentMin: INVESTOR_INVESTMENT_MIN,
       investmentMax: INVESTOR_INVESTMENT_MAX,
       committedInvestmentAmount:
@@ -210,7 +269,7 @@ export class InvestorService {
           : null,
       dailyYieldPercent: effectiveDailyYield,
       platformDailyYieldPercent: platformDailyYield,
-      vipDailyYieldPercent: INVESTOR_VIP_DAILY_YIELD_PERCENT,
+      vipDailyYieldPercent: vipDailyYield,
       displayCurrency,
       mt5Linked: Boolean(user.metaApiAccountId),
       mt5Connected,
@@ -226,7 +285,7 @@ export class InvestorService {
             autoReinvestEarnings: user.investorSettings.autoReinvestEarnings,
           }
         : null,
-      autoReinvestFeePercent: INVESTOR_AUTO_REINVEST_FEE_PERCENT,
+      autoReinvestFeePercent: rates.investorAutoReinvestFeePercent,
       reinvestBlocked,
       reinvestBlockedReason,
       minBalancePolicy: await this.resolveMinBalancePolicy(
@@ -427,6 +486,7 @@ export class InvestorService {
     network: string,
     source: 'wallet' | 'crypto' = 'wallet',
     investmentAmountRaw?: number,
+    opts?: { withVip?: boolean },
   ) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
@@ -438,8 +498,10 @@ export class InvestorService {
       };
     }
 
-    const { deposit, fee, netInvested, feeWaived } =
-      await this.splitDepositForUser(userId, investmentAmountRaw);
+    const { deposit, fee, netInvested, feeWaived, vipFee, vipFeePercent } =
+      await this.splitDepositForUser(userId, investmentAmountRaw, {
+        withVip: opts?.withVip,
+      });
 
     // Crypto invoices for Smart Invest are disabled — deposit USDT on /wallet only,
     // then enroll/allocate from platform wallet balance.
@@ -452,6 +514,9 @@ export class InvestorService {
     void network;
     return this.payEnrollmentFromWallet(userId, deposit, fee, netInvested, {
       feeWaived,
+      vipFee,
+      vipFeePercent,
+      activateVip: Boolean(opts?.withVip),
     });
   }
 
@@ -460,7 +525,13 @@ export class InvestorService {
     deposit: number,
     fee: number,
     netInvested: number,
-    opts?: { suppressNotification?: boolean; feeWaived?: boolean },
+    opts?: {
+      suppressNotification?: boolean;
+      feeWaived?: boolean;
+      vipFee?: boolean;
+      vipFeePercent?: number;
+      activateVip?: boolean;
+    },
   ) {
     const wallet = await this.walletService.getOrCreateWallet(userId);
     const balance = Number(wallet.availableBalance);
@@ -470,6 +541,7 @@ export class InvestorService {
       );
     }
 
+    const isVipFee = Boolean(opts?.vipFee);
     const payment = await this.prisma.payment.create({
       data: {
         userId,
@@ -484,6 +556,9 @@ export class InvestorService {
           feeUsdt: fee,
           netInvested,
           feeWaived: Boolean(opts?.feeWaived) || fee === 0,
+          vipFee: isVipFee,
+          vipFeePercent: opts?.vipFeePercent ?? null,
+          activateVip: Boolean(opts?.activateVip),
         } as object,
       },
     });
@@ -493,14 +568,18 @@ export class InvestorService {
         userId,
         fee,
         'INVESTOR_FEE',
-        `Investor subscription fee — $${fee.toFixed(2)} USDT deducted from $${deposit.toFixed(2)} deposit`,
+        isVipFee
+          ? `VIP invest fee ${opts?.vipFeePercent ?? INVESTOR_VIP_FEE_PERCENT}% — $${fee.toFixed(2)} USDT deducted from $${deposit.toFixed(2)} deposit`
+          : `Investor subscription fee — $${fee.toFixed(2)} USDT deducted from $${deposit.toFixed(2)} deposit`,
         payment.id,
       );
       await this.walletService.creditFeeProfitToAdmin({
         feeAmount: fee,
         sourceUserId: userId,
-        category: 'INVESTMENT_FEE',
-        label: 'Smart Invest enrollment fee',
+        category: isVipFee ? 'VIP_FEE' : 'INVESTMENT_FEE',
+        label: isVipFee
+          ? `Smart Invest VIP fee ${opts?.vipFeePercent ?? INVESTOR_VIP_FEE_PERCENT}%`
+          : 'Smart Invest enrollment fee',
         referenceId: payment.id,
         depositAmount: deposit,
       });
@@ -521,6 +600,22 @@ export class InvestorService {
       allowCapitalAllocate: true,
     });
 
+    if (opts?.activateVip) {
+      const expiresAt = nextVipExpiry(null);
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          investorVipActive: true,
+          investorVipExpiresAt: expiresAt,
+          investorVipRemindedAt: null,
+        },
+      });
+      this.notifications.investorVipActivated(userId, {
+        feeUsdt: fee,
+        expiresAt: expiresAt.toISOString(),
+      });
+    }
+
     return {
       success: true,
       active: true,
@@ -529,10 +624,14 @@ export class InvestorService {
       feeUsdt: fee,
       investmentAmount: deposit,
       netInvested,
+      vipFee: isVipFee,
+      vipActivated: Boolean(opts?.activateVip),
       currency: 'USDT',
       network: 'WALLET',
       source: 'wallet',
-      message: `Paid $${deposit.toFixed(2)} — $${fee.toFixed(2)} fee deducted, $${netInvested.toFixed(2)} invested`,
+      message: isVipFee
+        ? `Paid $${deposit.toFixed(2)} — VIP fee $${fee.toFixed(2)} (${opts?.vipFeePercent ?? INVESTOR_VIP_FEE_PERCENT}%) deducted, $${netInvested.toFixed(2)} invested`
+        : `Paid $${deposit.toFixed(2)} — $${fee.toFixed(2)} fee deducted, $${netInvested.toFixed(2)} invested`,
       balanceAfter: balance - deposit,
     };
   }
@@ -930,7 +1029,7 @@ export class InvestorService {
 
     return {
       autoReinvestEarnings: settings.autoReinvestEarnings,
-      feePercent: INVESTOR_AUTO_REINVEST_FEE_PERCENT,
+      feePercent: (await this.getPlatformRates()).investorAutoReinvestFeePercent,
       note: 'Daily earnings credit to available wallet balance — compounding is disabled',
     };
   }
@@ -1089,28 +1188,46 @@ export class InvestorService {
         investorVipActive: true,
         investorVipExpiresAt: true,
         instantWithdraw: true,
-        platformWallet: { select: { availableBalance: true } },
+        platformWallet: {
+          select: { availableBalance: true, investorBalance: true },
+        },
       },
     });
     if (!user) throw new NotFoundException('User not found');
+    const rates = await this.getPlatformRates();
     const active = isInvestorVipActive(user);
     const feeWaived = Boolean(user.instantWithdraw);
+    const investmentBalance = Number(user.platformWallet?.investorBalance ?? 0);
+    const feeUsdt =
+      feeWaived || investmentBalance <= 0
+        ? 0
+        : resolveVipInvestFee(investmentBalance, rates.investorVipFeePercent);
     return {
       eligible: user.investorActive,
       active,
       expiresAt: user.investorVipExpiresAt?.toISOString() ?? null,
-      feeUsdt: feeWaived ? 0 : INVESTOR_VIP_FEE_USDT,
+      feeUsdt,
+      feePercent: rates.investorVipFeePercent,
+      feeModel: 'percent_of_investment' as const,
       feeWaived,
+      investmentBalance,
       walletBalance: Number(user.platformWallet?.availableBalance ?? 0),
       benefits: {
         weekendEarnings: true,
         zeroWithdrawalFee: true,
-        dailyYieldPercent: INVESTOR_VIP_DAILY_YIELD_PERCENT,
+        dailyYieldPercent: rates.investorVipDailyYieldPercent,
       },
     };
   }
 
-  async upgradeVip(userId: string) {
+  /**
+   * Activate / renew Investor VIP for 30 days.
+   * Fee = vipFeePercent of current investment balance, taken from available wallet
+   * (not from the investment balance itself). Pass `investmentAmount` to top up
+   * first: fee is then % of that transfer (deducted from the transfer), net invested,
+   * then VIP activated.
+   */
+  async upgradeVip(userId: string, investmentAmountRaw?: number) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -1119,6 +1236,7 @@ export class InvestorService {
         investorVipActive: true,
         investorVipExpiresAt: true,
         instantWithdraw: true,
+        platformWallet: { select: { investorBalance: true } },
       },
     });
     if (!user) throw new NotFoundException('User not found');
@@ -1128,15 +1246,118 @@ export class InvestorService {
       );
     }
 
+    const rates = await this.getPlatformRates();
     const feeWaived = Boolean(user.instantWithdraw);
-    const fee = feeWaived ? 0 : INVESTOR_VIP_FEE_USDT;
+    let fee = 0;
+    let depositBasis = 0;
+    let toppedUp = false;
+
+    if (investmentAmountRaw != null && Number(investmentAmountRaw) > 0) {
+      const { deposit, fee: splitFee, netInvested, vipFeePercent } =
+        await this.splitDepositForUser(userId, investmentAmountRaw, {
+          withVip: true,
+        });
+      const wallet = await this.walletService.getOrCreateWallet(userId);
+      const balance = Number(wallet.availableBalance);
+      if (balance < deposit) {
+        throw new BadRequestException(
+          `Insufficient wallet balance — need $${deposit.toFixed(2)} USDT for VIP invest but have $${balance.toFixed(2)}`,
+        );
+      }
+      fee = feeWaived ? 0 : splitFee;
+      depositBasis = deposit;
+      const paymentTopUp = await this.prisma.payment.create({
+        data: {
+          userId,
+          amount: deposit,
+          currency: 'USDT',
+          network: 'WALLET',
+          purpose: 'investor_vip',
+          status: 'CONFIRMED',
+          confirmedAt: new Date(),
+          gatewayId: `vip_invest_${Date.now()}`,
+          gatewayResponse: {
+            paymentSource: feeWaived ? 'whitelist' : 'wallet',
+            feeWaived,
+            investmentAmount: deposit,
+            feeUsdt: fee,
+            netInvested: feeWaived ? deposit : netInvested,
+            vipFeePercent,
+            feeModel: 'percent_of_investment',
+          } as object,
+        },
+      });
+      if (fee > 0) {
+        await this.walletService.debitBalance(
+          userId,
+          fee,
+          'INVESTOR_FEE',
+          `VIP invest fee ${vipFeePercent}% — $${fee.toFixed(2)} USDT of $${deposit.toFixed(2)}`,
+          paymentTopUp.id,
+        );
+        await this.walletService.creditFeeProfitToAdmin({
+          feeAmount: fee,
+          sourceUserId: userId,
+          category: 'VIP_FEE',
+          label: `Smart Invest VIP fee ${vipFeePercent}%`,
+          referenceId: paymentTopUp.id,
+          depositAmount: deposit,
+        });
+      }
+      const net = feeWaived ? deposit : netInvested;
+      await this.transferInvestment(userId, net, 'to_investment', {
+        allowCapitalAllocate: true,
+      });
+      toppedUp = true;
+
+      const expiresAt = nextVipExpiry(user.investorVipExpiresAt);
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          investorVipActive: true,
+          investorVipExpiresAt: expiresAt,
+          investorVipRemindedAt: null,
+        },
+      });
+      this.notifications.investorVipActivated(userId, {
+        feeUsdt: fee,
+        expiresAt: expiresAt.toISOString(),
+      });
+      return {
+        success: true,
+        active: true,
+        feeUsdt: fee,
+        feePercent: vipFeePercent,
+        feeModel: 'percent_of_investment' as const,
+        feeWaived,
+        investmentAmount: deposit,
+        netInvested: net,
+        toppedUp: true,
+        expiresAt: expiresAt.toISOString(),
+        paymentId: paymentTopUp.id,
+        message: feeWaived
+          ? `VIP granted free (whitelist) until ${expiresAt.toISOString().slice(0, 10)}`
+          : `VIP active — $${fee.toFixed(2)} (${vipFeePercent}% of $${deposit.toFixed(2)}) deducted, $${net.toFixed(2)} invested until ${expiresAt.toISOString().slice(0, 10)}`,
+      };
+    }
+
+    // Renewal without top-up: fee = % of current investment, from available wallet.
+    depositBasis = Number(user.platformWallet?.investorBalance ?? 0);
+    if (depositBasis <= 0) {
+      throw new BadRequestException(
+        `Add investment capital (or pass investmentAmount) to upgrade VIP — fee is ${rates.investorVipFeePercent}% of the investment amount`,
+      );
+    }
+    fee = feeWaived
+      ? 0
+      : resolveVipInvestFee(depositBasis, rates.investorVipFeePercent);
 
     if (fee > 0) {
       const wallet = await this.walletService.getOrCreateWallet(userId);
       const balance = Number(wallet.availableBalance);
       if (balance < fee) {
         throw new BadRequestException(
-          `Insufficient wallet balance — need $${fee.toFixed(2)} USDT for VIP but have $${balance.toFixed(2)}`,
+          `Insufficient wallet balance — need $${fee.toFixed(2)} USDT (${rates.investorVipFeePercent}% of $${depositBasis.toFixed(2)} investment) for VIP but have $${balance.toFixed(2)}`,
         );
       }
     }
@@ -1159,6 +1380,10 @@ export class InvestorService {
           feeWaived,
           expiresAt: expiresAt.toISOString(),
           months: 1,
+          investmentBasis: depositBasis,
+          feePercent: rates.investorVipFeePercent,
+          feeModel: 'percent_of_investment',
+          toppedUp,
         } as object,
       },
     });
@@ -1168,15 +1393,16 @@ export class InvestorService {
         userId,
         fee,
         'SUBSCRIPTION',
-        `Investor VIP — $${fee.toFixed(2)} USDT / 30 days`,
+        `Investor VIP — ${rates.investorVipFeePercent}% of $${depositBasis.toFixed(2)} = $${fee.toFixed(2)} USDT / 30 days`,
         payment.id,
       );
       await this.walletService.creditFeeProfitToAdmin({
         feeAmount: fee,
         sourceUserId: userId,
         category: 'VIP_FEE',
-        label: 'Smart Invest VIP fee',
+        label: `Smart Invest VIP fee ${rates.investorVipFeePercent}%`,
         referenceId: payment.id,
+        depositAmount: depositBasis,
       });
     }
 
@@ -1198,18 +1424,22 @@ export class InvestorService {
       success: true,
       active: true,
       feeUsdt: fee,
+      feePercent: rates.investorVipFeePercent,
+      feeModel: 'percent_of_investment' as const,
       feeWaived,
+      investmentBasis: depositBasis,
       expiresAt: expiresAt.toISOString(),
       paymentId: payment.id,
       message: feeWaived
         ? `VIP granted free (whitelist) until ${expiresAt.toISOString().slice(0, 10)}`
-        : `VIP active until ${expiresAt.toISOString().slice(0, 10)}`,
+        : `VIP active until ${expiresAt.toISOString().slice(0, 10)} — $${fee.toFixed(2)} (${rates.investorVipFeePercent}% of $${depositBasis.toFixed(2)})`,
     };
   }
 
   /** Clear expired VIP flags and send renewal reminders (~3 days before). */
   async maintainVipSubscriptions() {
     const now = new Date();
+    const rates = await this.getPlatformRates();
     const expired = await this.prisma.user.updateMany({
       where: {
         investorVipActive: true,
@@ -1244,6 +1474,7 @@ export class InvestorService {
       select: {
         id: true,
         investorVipExpiresAt: true,
+        platformWallet: { select: { investorBalance: true } },
       },
       take: 200,
     });
@@ -1251,9 +1482,14 @@ export class InvestorService {
     let reminded = 0;
     for (const user of candidates) {
       if (!user.investorVipExpiresAt) continue;
+      const basis = Number(user.platformWallet?.investorBalance ?? 0);
+      const feeUsdt =
+        basis > 0
+          ? resolveVipInvestFee(basis, rates.investorVipFeePercent)
+          : 0;
       this.notifications.investorVipExpiring(user.id, {
         expiresAt: user.investorVipExpiresAt.toISOString(),
-        feeUsdt: INVESTOR_VIP_FEE_USDT,
+        feeUsdt,
       });
       await this.prisma.user.update({
         where: { id: user.id },
@@ -1266,10 +1502,8 @@ export class InvestorService {
   }
 
   async platformInvestorDailyYield() {
-    const config = await this.prisma.platformConfig.findUnique({
-      where: { id: 'default' },
-    });
-    return Number(config?.investorDailyYieldPercent ?? 5);
+    const rates = await this.getPlatformRates();
+    return rates.investorDailyYieldPercent;
   }
 
   async isGlobalInvestorYieldPaused() {
@@ -1288,7 +1522,10 @@ export class InvestorService {
     const today = this.kampalaToday();
     const dow = this.kampalaDayOfWeek(today);
     const isWeekend = dow === 0 || dow === 6;
-    const platformYield = await this.platformInvestorDailyYield();
+    const rates = await this.getPlatformRates();
+    const platformYield = rates.investorDailyYieldPercent;
+    const vipYield = rates.investorVipDailyYieldPercent;
+    const autoReinvestFeePercent = rates.investorAutoReinvestFeePercent;
     const holdSince = new Date(
       Date.now() - InvestorService.YIELD_MIN_DEPOSIT_AGE_MS,
     );
@@ -1335,6 +1572,7 @@ export class InvestorService {
             ? Number(user.investorSettings.dailyYieldPercent)
             : null,
         platformYieldPercent: platformYield,
+        vipYieldPercent: vipYield,
       });
 
       const baseBalance = Number(user.platformWallet?.investorBalance ?? 0);
@@ -1389,10 +1627,9 @@ export class InvestorService {
 
       if (autoReinvest) {
         const feeAmount =
-          INVESTOR_AUTO_REINVEST_FEE_PERCENT > 0
+          autoReinvestFeePercent > 0
             ? Math.round(
-                ((earningAmount * INVESTOR_AUTO_REINVEST_FEE_PERCENT) / 100) *
-                  100,
+                ((earningAmount * autoReinvestFeePercent) / 100) * 100,
               ) / 100
             : 0;
         const reinvestAmount =
@@ -1402,7 +1639,7 @@ export class InvestorService {
         const newInvestmentBalance = investmentBalance + reinvestAmount;
         const compoundNote =
           feeAmount > 0
-            ? `$${feeAmount.toFixed(2)} ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% fee, $${reinvestAmount.toFixed(2)} compounded`
+            ? `$${feeAmount.toFixed(2)} ${autoReinvestFeePercent}% fee, $${reinvestAmount.toFixed(2)} compounded`
             : `$${reinvestAmount.toFixed(2)} compounded (100%, no fee)`;
 
         const txOps = [
@@ -1438,7 +1675,7 @@ export class InvestorService {
                 amount: -feeAmount,
                 type: 'INVESTOR_REINVEST_FEE',
                 referenceId: user.id,
-                description: `Auto-reinvest fee ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}% of $${earningAmount.toFixed(2)} daily return — $${feeAmount.toFixed(2)} USDT`,
+                description: `Auto-reinvest fee ${autoReinvestFeePercent}% of $${earningAmount.toFixed(2)} daily return — $${feeAmount.toFixed(2)} USDT`,
                 balanceAfter: availableBalance,
               },
             }),
@@ -1452,7 +1689,7 @@ export class InvestorService {
             feeAmount,
             sourceUserId: user.id,
             category: 'AUTO_REINVEST_FEE',
-            label: `Auto-reinvest fee ${INVESTOR_AUTO_REINVEST_FEE_PERCENT}%`,
+            label: `Auto-reinvest fee ${autoReinvestFeePercent}%`,
             referenceId: `auto_reinvest_fee:${user.id}:${today.toISOString().slice(0, 10)}`,
           });
         }
@@ -1466,7 +1703,7 @@ export class InvestorService {
           autoReinvested: true,
           reinvestAmount,
           feeAmount,
-          feePercent: INVESTOR_AUTO_REINVEST_FEE_PERCENT,
+          feePercent: autoReinvestFeePercent,
         });
         credited++;
         continue;

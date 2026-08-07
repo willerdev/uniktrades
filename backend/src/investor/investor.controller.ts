@@ -29,8 +29,11 @@ export class InvestorController {
 
   @Post('vip/upgrade')
   @UseGuards(JwtAuthGuard)
-  vipUpgrade(@Request() req: { user: { id: string } }) {
-    return this.investor.upgradeVip(req.user.id);
+  vipUpgrade(
+    @Request() req: { user: { id: string } },
+    @Body() body?: { investmentAmount?: number },
+  ) {
+    return this.investor.upgradeVip(req.user.id, body?.investmentAmount);
   }
 
   @Get('enroll/pending')
@@ -51,6 +54,7 @@ export class InvestorController {
       network?: string;
       source?: 'wallet' | 'crypto';
       investmentAmount?: number;
+      withVip?: boolean;
     },
   ) {
     return this.investor.createEnrollmentCheckout(
@@ -58,6 +62,7 @@ export class InvestorController {
       body.network ?? 'TRC20',
       body.source ?? 'wallet',
       body.investmentAmount,
+      { withVip: Boolean(body.withVip) },
     );
   }
 

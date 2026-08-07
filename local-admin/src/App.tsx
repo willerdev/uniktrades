@@ -51,6 +51,7 @@ import { InvestorDepositorPlatform } from "./InvestorDepositorPlatform";
 import { EnginePanel } from "./EnginePanel";
 import { DerivPanel } from "./DerivPanel";
 import { ContractBlockchainPanel } from "./ContractBlockchainPanel";
+import { SettingsPanel } from "./SettingsPanel";
 import { TransactionsPanel } from "./TransactionsPanel";
 import { AccountTransfersPanel } from "./AccountTransfersPanel";
 import { SmsPanel } from "./SmsPanel";
@@ -2308,6 +2309,8 @@ export default function App() {
         {tab === "engine" && <EnginePanel onMessage={setMessage} />}
 
         {tab === "deriv" && <DerivPanel onMessage={setMessage} />}
+
+        {tab === "settings" && <SettingsPanel onMessage={setMessage} />}
 
         {tab === "contractBlockchain" && (
           <ContractBlockchainPanel onMessage={setMessage} />

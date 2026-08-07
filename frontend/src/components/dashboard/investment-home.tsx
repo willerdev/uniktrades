@@ -27,7 +27,7 @@ const PRODUCTS = [
     title: "Smart Investment",
     tagline: `${SMART_INVEST_DAILY_YIELD_PERCENT}% daily · min $${SMART_INVEST_MIN_USD.toLocaleString()}`,
     how: [
-      `Minimum deposit $${SMART_INVEST_MIN_USD.toLocaleString()} USDT — enrollment fee deducted from transfer (e.g. $560 → $50 fee → $510 invested).`,
+      `Minimum deposit $${SMART_INVEST_MIN_USD.toLocaleString()} USDT — enrollment fee deducted from transfer (tiers, or VIP 15%: e.g. $560 → $84 fee → $476 invested).`,
       `${SMART_INVEST_DAILY_YIELD_PERCENT}% daily yield (VIP up to 8%) credited to your wallet.`,
       "New allocations earn after a 24-hour hold.",
       "Optional auto-reinvest compounds 100% of each day’s return.",

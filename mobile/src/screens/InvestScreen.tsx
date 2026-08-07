@@ -185,7 +185,8 @@ export function InvestScreen() {
               </Text>
             ) : (
               <Text style={{ color: theme.muted, marginTop: 8 }}>
-                VIP (~{formatUsdt(vipFee ?? 50)}/mo) ·{" "}
+                VIP ({status?.vipFeePercent ?? status?.vip?.feePercent ?? 15}% of
+                investment) ·{" "}
                 {status?.vip?.benefits?.dailyYieldPercent ??
                   status?.vipDailyYieldPercent ??
                   8}
@@ -203,7 +204,9 @@ export function InvestScreen() {
             <SectionCard title="Enroll from wallet">
               <Field label="Amount USDT" value={amount} onChangeText={setAmount} keyboardType="numeric" />
               <Text style={{ color: theme.muted, fontSize: 12, marginBottom: 8 }}>
-                Fee is deducted from the amount (e.g. $560 → $50 fee → $510 invested). Deposit on Wallet first if balance is low.
+                Fee is deducted from the amount. Non-VIP: tier fees. VIP: 15% of
+                transfer (e.g. $560 → $84 fee → $476 invested). Deposit on Wallet
+                first if balance is low.
               </Text>
               <PrimaryButton label={busy ? "…" : "Confirm transfer → Smart Invest"} onPress={() => void enroll()} disabled={busy} />
             </SectionCard>
@@ -233,7 +236,15 @@ export function InvestScreen() {
             <>
               <View style={{ height: 12 }} />
               <PrimaryButton
-                label={busy ? "…" : `Upgrade VIP${vipFee != null ? ` · ${formatUsdt(vipFee)}` : ""}`}
+                label={
+                  busy
+                    ? "…"
+                    : `Upgrade VIP${
+                        status?.vipFeePercent != null || vipFee != null
+                          ? ` · ${status?.vipFeePercent ?? status?.vip?.feePercent ?? 15}%`
+                          : ""
+                      }`
+                }
                 onPress={() => void upgradeVip()}
                 disabled={busy}
                 variant="secondary"

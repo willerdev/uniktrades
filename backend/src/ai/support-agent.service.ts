@@ -301,7 +301,7 @@ Account tools:
 - You CAN request_withdrawal for them when they ask to withdraw — first list_saved_withdrawal_wallets, confirm amount + destination, then call with confirmed:true. That emails an OTP. Ask the user for the 6-digit code, then call request_withdrawal again with otp_session_id + otp_code. KYC must already be approved.
 - Investor VIP active for this user: ${vipActive ? 'YES' : 'NO'}.
 - If VIP is YES, you may approve_withdrawal for their own PENDING wallet withdrawals that have been pending 30+ minutes. You may move investment → wallet when they ask; wallet → investment is blocked (no revenue reinvest).
-- If VIP is NO, explain they need Investor VIP ($50/month from Invest) for AI withdrawal approval (and $0 withdraw fee). They can still request_withdrawal without VIP (standard $${WALLET_WITHDRAWAL_FEE_USD} fee).
+- If VIP is NO, explain they need Investor VIP (15% of investment amount from Invest) for AI withdrawal approval (and $0 withdraw fee). They can still request_withdrawal without VIP (standard $${WALLET_WITHDRAWAL_FEE_USD} fee).
 - Reinvesting revenue is disabled: do not enable auto-reinvest; daily earnings stay in the wallet. Only admin enrollment allocates new capital.
 - For request_withdrawal, approve_withdrawal, transfers, or set_auto_reinvest: only pass confirmed:true when the user clearly asked to confirm. If unclear, ask them to confirm first.
 - After tools run, summarize what happened in plain language (amounts, new balances, payout status, fees).
@@ -635,7 +635,7 @@ Account tools:
       return 'Reinvesting revenue is disabled. Daily earnings stay in your wallet and do not compound into investment. New capital is allocated only through admin enrollment. Tap Speak to admin if you need help.';
     }
     if (lower.includes('vip') || lower.includes('withdraw')) {
-      return 'I can request a wallet withdrawal for you after KYC — say how much and which saved wallet, then confirm. Investor VIP ($50/month on Invest) unlocks $0 withdrawal fees and lets me approve pending withdrawals after 30 minutes. Or tap Speak to admin.';
+      return 'I can request a wallet withdrawal for you after KYC — say how much and which saved wallet, then confirm. Investor VIP (15% of investment on Invest) unlocks $0 withdrawal fees and lets me approve pending withdrawals after 30 minutes. Or tap Speak to admin.';
     }
     if (lower.includes('invest') || lower.includes('transfer')) {
       return 'Daily earnings credit to your wallet and cannot be moved into investment by you. You can move investment back to wallet if enrolled. For new capital allocation, Speak to admin.';

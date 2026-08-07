@@ -1,4 +1,7 @@
-export const INVESTOR_VIP_FEE_USDT = 50;
+/** @deprecated Flat VIP subscription fee removed — VIP fee is % of investment. */
+export const INVESTOR_VIP_FEE_USDT = 0;
+/** Default VIP fee as percent of the wallet transfer / investment amount. */
+export const INVESTOR_VIP_FEE_PERCENT = 15;
 export const INVESTOR_VIP_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
 export const INVESTOR_VIP_REMINDER_DAYS = 3;
 /** Default daily investment yield for active VIP (when no per-user override). */
@@ -27,6 +30,8 @@ export function resolveInvestorDailyYieldPercent(opts: {
   vipActive: boolean;
   settingsYieldPercent?: number | null;
   platformYieldPercent: number;
+  /** Runtime VIP default from PlatformConfig (falls back to constant). */
+  vipYieldPercent?: number;
 }): number {
   if (
     opts.settingsYieldPercent != null &&
@@ -34,7 +39,12 @@ export function resolveInvestorDailyYieldPercent(opts: {
   ) {
     return Number(opts.settingsYieldPercent);
   }
-  if (opts.vipActive) return INVESTOR_VIP_DAILY_YIELD_PERCENT;
+  if (opts.vipActive) {
+    const vipDefault = opts.vipYieldPercent;
+    return Number.isFinite(Number(vipDefault))
+      ? Number(vipDefault)
+      : INVESTOR_VIP_DAILY_YIELD_PERCENT;
+  }
   return opts.platformYieldPercent;
 }
 

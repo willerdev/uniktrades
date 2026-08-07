@@ -25,9 +25,21 @@ import {
 } from "@/lib/utils";
 import { DailyCreditTimeText } from "@/components/daily-credit-time-text";
 
-/** Enrollment fee by deposit size — deducted from transfer amount. */
-function resolveFeeClient(amount: number): number | null {
+/** Enrollment fee by deposit size — deducted from transfer amount. VIP uses %. */
+function resolveFeeClient(
+  amount: number,
+  opts?: { vip?: boolean; vipFeePercent?: number; tiers?: { min: number; max: number; fee: number }[] },
+): number | null {
   if (!Number.isFinite(amount) || amount < 100 || amount > 5000) return null;
+  if (opts?.vip) {
+    const pct = opts.vipFeePercent ?? 15;
+    return Math.round(((amount * pct) / 100) * 100) / 100;
+  }
+  if (opts?.tiers?.length) {
+    for (const t of opts.tiers) {
+      if (amount >= t.min && amount <= t.max) return t.fee;
+    }
+  }
   if (amount <= 200) return 10;
   if (amount <= 500) return 50;
   if (amount < 1000) return 50;
@@ -215,14 +227,25 @@ export function InvestHub() {
   const [reinvestLoading, setReinvestLoading] = useState(false);
   const [investmentAmount, setInvestmentAmount] = useState("");
   const [vipLoading, setVipLoading] = useState(false);
+  const [withVip, setWithVip] = useState(false);
 
   const investmentMin = status?.investmentMin ?? 100;
   const investmentMax = status?.investmentMax ?? 5000;
+  const vipFeePercent =
+    status?.vipFeePercent ?? status?.vip?.feePercent ?? 15;
+  const vipActive = Boolean(status?.vip?.active);
+  const useVipFee = withVip || vipActive;
   const parsedInvestment = Number(investmentAmount);
   const hasValidParsed =
     investmentAmount.trim() !== "" && Number.isFinite(parsedInvestment);
   const feeUsdt =
-    (hasValidParsed ? resolveFeeClient(parsedInvestment) : null) ?? 0;
+    (hasValidParsed
+      ? resolveFeeClient(parsedInvestment, {
+          vip: useVipFee,
+          vipFeePercent,
+          tiers: status?.feeTiers,
+        })
+      : null) ?? 0;
   const netInvested =
     hasValidParsed && parsedInvestment > feeUsdt
       ? Math.round((parsedInvestment - feeUsdt) * 100) / 100
@@ -261,7 +284,13 @@ export function InvestHub() {
           `Enter an investment between ${formatCurrency(investmentMin)} and ${formatCurrency(investmentMax)}`,
         );
       }
-      if (resolveFeeClient(amount) == null) {
+      if (
+        resolveFeeClient(amount, {
+          vip: useVipFee,
+          vipFeePercent,
+          tiers: status?.feeTiers,
+        }) == null
+      ) {
         throw new Error("Investment amount is outside a fee tier");
       }
       if (walletBalance < amount) {
@@ -269,7 +298,12 @@ export function InvestHub() {
           `Insufficient wallet balance — need ${formatCurrency(amount)} but have ${formatCurrency(walletBalance)}. Deposit on the Wallet page first.`,
         );
       }
-      const res = await api.investor.enrollCheckout("TRC20", "wallet", amount);
+      const res = await api.investor.enrollCheckout(
+        "TRC20",
+        "wallet",
+        amount,
+        withVip,
+      );
       if (res.active || res.success) {
         await refresh();
         setInvestmentAmount("");
@@ -329,7 +363,9 @@ export function InvestHub() {
             <p className="mt-2 max-w-lg text-sm text-white/75">
               Fund your platform wallet first, then transfer ${investmentMin}+
               USDT here. Enrollment fee is deducted from the amount you transfer
-              (example: $560 → $50 fee → $510 invested). Earn{" "}
+              (tiers $10 / $50 / $200, or VIP {vipFeePercent}% of amount — e.g.
+              $560 VIP → ${((560 * vipFeePercent) / 100).toFixed(0)} fee → $
+              {(560 - (560 * vipFeePercent) / 100).toFixed(0)} invested). Earn{" "}
               {status?.dailyYieldPercent ?? 5}% daily on invested capital —
               credited to your wallet{" "}
               <DailyCreditTimeText
@@ -441,7 +477,11 @@ export function InvestHub() {
                 </span>
               </div>
               <div className="mt-2 flex justify-between gap-3">
-                <span className="text-muted">Enrollment fee</span>
+                <span className="text-muted">
+                  {useVipFee
+                    ? `VIP fee (${vipFeePercent}%)`
+                    : "Enrollment fee"}
+                </span>
                 <span className="font-semibold text-foreground">
                   {hasValidParsed ? formatCurrency(feeUsdt) : "—"}
                 </span>
@@ -456,11 +496,38 @@ export function InvestHub() {
               </div>
               {hasValidParsed && (
                 <p className="mt-2 text-xs text-muted">
-                  Earn {status?.dailyYieldPercent ?? 5}% daily on invested
-                  capital · tiers $10 / $50 / $50 / $200 by size
+                  Earn{" "}
+                  {useVipFee
+                    ? (status?.vipDailyYieldPercent ?? 8)
+                    : (status?.dailyYieldPercent ?? 5)}
+                  % daily on invested capital
+                  {useVipFee
+                    ? ` · VIP ${vipFeePercent}% of transfer`
+                    : " · tiers $10 / $50 / $50 / $200 by size"}
                 </p>
               )}
             </div>
+
+            {!vipActive && (
+              <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/5 px-4 py-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={withVip}
+                  onChange={(e) => setWithVip(e.target.checked)}
+                />
+                <span>
+                  <span className="font-medium text-foreground">
+                    Include VIP ({vipFeePercent}% fee)
+                  </span>
+                  <span className="mt-0.5 block text-xs text-muted">
+                    Replaces tier fees with {vipFeePercent}% of your transfer ·
+                    unlocks {status?.vipDailyYieldPercent ?? 8}% daily, weekends,
+                    and $0 withdraw fees for 30 days
+                  </span>
+                </span>
+              </label>
+            )}
 
             {insufficientWallet && (
               <p className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-foreground">
@@ -565,14 +632,14 @@ export function InvestHub() {
             <p className="mt-1 text-xs text-muted">
               {vip?.active
                 ? `Expires ${vip.expiresAt ? new Date(vip.expiresAt).toLocaleDateString() : "—"} · ${vip.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 8}% daily + weekends + $0 withdraw fee`
-                : `$${vip?.feeUsdt ?? 50}/month from wallet · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 8}% daily + weekends + $0 withdraw fee`}
+                : `VIP fee = ${vip?.feePercent ?? status.vipFeePercent ?? 15}% of investment (from wallet transfer) · ${vip?.benefits?.dailyYieldPercent ?? status.vipDailyYieldPercent ?? 8}% daily + weekends + $0 withdraw fee`}
             </p>
             <ul className="mt-2 space-y-1 text-xs text-muted">
               <li>
                 •{" "}
                 {vip?.benefits?.dailyYieldPercent ??
                   status.vipDailyYieldPercent ??
-                  10}
+                  8}
                 % daily investment yield (VIP default)
               </li>
               <li>• Earn daily yield on Saturdays &amp; Sundays</li>
@@ -582,16 +649,25 @@ export function InvestHub() {
           <Button
             type="button"
             size="sm"
-            disabled={vipLoading || walletBalance < (vip?.feeUsdt ?? 50)}
+            disabled={
+              vipLoading ||
+              (!vip?.active &&
+                (vip?.feeUsdt ?? 0) > 0 &&
+                walletBalance < (vip?.feeUsdt ?? 0))
+            }
             onClick={() => void upgradeVip()}
           >
             {vipLoading && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-            {vip?.active ? "Renew VIP" : `Upgrade — $${vip?.feeUsdt ?? 50}`}
+            {vip?.active
+              ? "Renew VIP"
+              : `Upgrade — ${vip?.feePercent ?? status.vipFeePercent ?? 15}% of investment`}
           </Button>
         </div>
-        {!vip?.active && walletBalance < (vip?.feeUsdt ?? 50) && (
+        {!vip?.active &&
+          (vip?.feeUsdt ?? 0) > 0 &&
+          walletBalance < (vip?.feeUsdt ?? 0) && (
           <p className="mt-2 text-xs text-muted">
-            Need {formatCurrency(vip?.feeUsdt ?? 50)} in wallet to upgrade.{" "}
+            Need {formatCurrency(vip?.feeUsdt ?? 0)} in wallet to upgrade ({vip?.feePercent ?? status.vipFeePercent ?? 15}% of your investment).{" "}
             <Link href="/wallet" className="text-primary hover:underline">
               Deposit on Wallet
             </Link>

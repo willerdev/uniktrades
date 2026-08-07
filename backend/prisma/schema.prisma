@@ -1023,9 +1023,21 @@ model PlatformConfig {
   weeklyTierPayoutsEnabled Boolean @default(false)
   investorFeeUsdt          Decimal @default(10) @db.Decimal(10, 2)
   investorDailyYieldPercent Decimal @default(5) @db.Decimal(5, 2)
+  /// Default daily yield when Investor VIP is active (per-user admin override still wins).
+  investorVipDailyYieldPercent Decimal @default(8) @db.Decimal(5, 2)
+  /// VIP enrollment/invest fee as % of the wallet transfer amount (deducted from deposit).
+  investorVipFeePercent    Decimal @default(15) @db.Decimal(5, 2)
+  /// Optional JSON override of Smart Invest enrollment fee tiers: [{min,max,fee,label}].
+  investorFeeTierJson      String? @db.Text
+  /// Platform fee on auto-reinvested daily earnings (% of full daily return). 0 = full compound.
+  investorAutoReinvestFeePercent Decimal @default(0) @db.Decimal(5, 2)
   investorYieldPaused      Boolean @default(false)
   /// When true (and on/after 27 Jul 2026), Smart-Invest balances under $500 do not earn daily yield unless the user is exempt.
   investorMinBalanceEnforced Boolean @default(true)
+  /// On-chain contract minimum deposit (USDT).
+  chainContractMinUsd      Decimal @default(2000) @db.Decimal(12, 2)
+  /// Fee % charged on chain contract withdrawals.
+  chainContractWithdrawFeePercent Decimal @default(0) @db.Decimal(5, 2)
   unitrustDailyYieldPercent Decimal @default(5) @db.Decimal(5, 2)
   unitrustYieldPaused      Boolean @default(false)
   unitrustMinDepositUsdt   Decimal @default(100) @db.Decimal(10, 2)

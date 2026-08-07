@@ -780,6 +780,28 @@ export const api = {
       },
     ),
 
+  platformRateSettings: () =>
+    request<PlatformRateSettings>("/admin/platform/rate-settings"),
+  updatePlatformRateSettings: (data: {
+    investorDailyYieldPercent?: number;
+    investorVipDailyYieldPercent?: number;
+    investorVipFeePercent?: number;
+    investorAutoReinvestFeePercent?: number;
+    chainContractMinUsd?: number;
+    chainContractWithdrawFeePercent?: number;
+    walletWithdrawalFeeUsdt?: number;
+    investorFeeTiers?: Array<{
+      min: number;
+      max: number;
+      fee: number;
+      label?: string;
+    }>;
+  }) =>
+    request<PlatformRateSettings>("/admin/platform/rate-settings", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+
   derivSettings: () =>
     request<DerivSettings>("/admin/platform/deriv-settings"),
   updateDerivSettings: (data: {
@@ -1241,6 +1263,9 @@ export type InvestorDepositorSettings = {
   investmentMin?: number;
   investmentMax?: number;
   investorDailyYieldPercent: number;
+  investorVipDailyYieldPercent?: number;
+  investorVipFeePercent?: number;
+  investorAutoReinvestFeePercent?: number;
   investorYieldPaused: boolean;
   investorMinBalanceEnforced?: boolean;
   investorMinBalanceUsdt?: number;
@@ -1252,6 +1277,22 @@ export type InvestorDepositorSettings = {
   withdrawalPreferredSchedule?: "WEEKLY" | "MONTHLY" | string;
   withdrawalOffSchedulePenaltyPercent?: number;
   walletWithdrawalFeeUsdt?: number;
+  chainContractMinUsd?: number;
+  chainContractWithdrawFeePercent?: number;
+};
+
+export type PlatformRateSettings = {
+  investorDailyYieldPercent: number;
+  investorVipDailyYieldPercent: number;
+  investorVipFeePercent: number;
+  investorAutoReinvestFeePercent: number;
+  chainContractMinUsd: number;
+  chainContractWithdrawFeePercent: number;
+  walletWithdrawalFeeUsdt: number;
+  investorFeeTiers: InvestorFeeTier[];
+  investmentMin: number;
+  investmentMax: number;
+  defaults?: Record<string, number>;
 };
 
 export type DerivSettings = {

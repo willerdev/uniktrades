@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AdminService } from './admin.service';
-import { CreatePromoCodeDto, BulkCreatePromoCodesDto, SendMessageDto, AdminRejectReasonDto, UpdateStaffPermissionsDto, ApprovePayoutDto, UpdateEngineSettingsDto, UpdateDerivSettingsDto, UpdateContractBlockchainSettingsDto } from '../common/dto';
+import { CreatePromoCodeDto, BulkCreatePromoCodesDto, SendMessageDto, AdminRejectReasonDto, UpdateStaffPermissionsDto, ApprovePayoutDto, UpdateEngineSettingsDto, UpdateDerivSettingsDto, UpdateContractBlockchainSettingsDto, UpdatePlatformRateSettingsDto } from '../common/dto';
 import { JwtAuthGuard, AdminPermissionGuard } from '../auth/guards';
 import { RequireAdminPermission } from '../auth/decorators/admin-permission.decorator';
 import { UploadStorageService } from '../uploads/upload-storage.service';
@@ -75,6 +75,16 @@ export class AdminController {
     @Body() dto: UpdateContractBlockchainSettingsDto,
   ) {
     return this.adminService.updateContractBlockchainSettings(dto);
+  }
+
+  @Get('platform/rate-settings')
+  getPlatformRateSettings() {
+    return this.adminService.getPlatformRateSettings();
+  }
+
+  @Patch('platform/rate-settings')
+  updatePlatformRateSettings(@Body() dto: UpdatePlatformRateSettingsDto) {
+    return this.adminService.updatePlatformRateSettings(dto);
   }
 
   @Get('presence/live')

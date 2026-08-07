@@ -84,6 +84,65 @@ export class UpdateEngineSettingsDto {
   profitRevenuePercent: number;
 }
 
+export class UpdatePlatformRateSettingsDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  investorDailyYieldPercent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  investorVipDailyYieldPercent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  investorVipFeePercent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  investorAutoReinvestFeePercent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  chainContractMinUsd?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  chainContractWithdrawFeePercent?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  walletWithdrawalFeeUsdt?: number;
+
+  /** Optional override of Smart Invest enrollment fee tiers. */
+  @IsOptional()
+  @IsArray()
+  investorFeeTiers?: Array<{
+    min: number;
+    max: number;
+    fee: number;
+    label?: string;
+  }>;
+}
+
 export class UpdateDerivSettingsDto {
   @IsOptional()
   @IsString()

@@ -23,6 +23,7 @@ export type Tab =
   | "sms"
   | "referrals"
   | "platform"
+  | "settings"
   | "deriv"
   | "contractBlockchain"
   | "wallet"
@@ -39,6 +40,7 @@ export const ADMIN_TABS: Tab[] = [
   "users",
   "promos",
   "platform",
+  "settings",
   "deriv",
   "contractBlockchain",
   "wallet",
@@ -143,6 +145,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "users", label: "Users", icon: "users" },
   { id: "promos", label: "Invite codes", icon: "promos" },
   { id: "platform", label: "Investor & depositor", icon: "forecast" },
+  { id: "settings", label: "Settings", icon: "settings" },
   { id: "deriv", label: "Deriv", icon: "deriv" },
   { id: "contractBlockchain", label: "Contract blockchain", icon: "contract" },
   { id: "wallet", label: "Wallet", icon: "wallet" },
@@ -170,6 +173,15 @@ const icons = {
         strokeLinecap="round"
       />
       <path d="M8 12h8" strokeLinecap="round" />
+    </svg>
+  ),
+  settings: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <circle cx="12" cy="12" r="3" />
+      <path
+        d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
   deriv: (

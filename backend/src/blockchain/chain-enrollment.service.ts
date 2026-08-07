@@ -11,15 +11,24 @@ import { PrismaService } from '../prisma/prisma.service';
 import { KycAiService } from './kyc-ai.service';
 import { NotificationService } from '../email/notification.service';
 import { ReferralsService } from '../referrals/referrals.service';
+import {
+  PLATFORM_RATE_DEFAULTS,
+  platformRatesFromConfig,
+} from '../common/platform-rates.util';
 
-export const CHAIN_CONTRACT_MIN_USD = 2000;
+/** Fallback constants — prefer PlatformConfig via getChainRates(). */
+export const CHAIN_CONTRACT_MIN_USD = PLATFORM_RATE_DEFAULTS.chainContractMinUsd;
 export const CHAIN_CONTRACT_TIER_CUTOFF_USD = 5000;
 export const CHAIN_CONTRACT_YIELD_MID = 10;
 export const CHAIN_CONTRACT_YIELD_HIGH = 15;
-export const CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT = 0;
+export const CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT =
+  PLATFORM_RATE_DEFAULTS.chainContractWithdrawFeePercent;
 
-export function yieldPercentForDeposit(amountUsd: number): number {
-  if (!Number.isFinite(amountUsd) || amountUsd < CHAIN_CONTRACT_MIN_USD) {
+export function yieldPercentForDeposit(
+  amountUsd: number,
+  minUsd: number = CHAIN_CONTRACT_MIN_USD,
+): number {
+  if (!Number.isFinite(amountUsd) || amountUsd < minUsd) {
     throw new BadRequestException('Funds insufficient');
   }
   if (amountUsd <= CHAIN_CONTRACT_TIER_CUTOFF_USD) {
@@ -37,11 +46,23 @@ export class ChainEnrollmentService {
     private readonly referrals: ReferralsService,
   ) {}
 
+  private async getChainRates() {
+    const config = await this.prisma.platformConfig.findUnique({
+      where: { id: 'default' },
+    });
+    const rates = platformRatesFromConfig(config);
+    return {
+      minDepositUsd: rates.chainContractMinUsd,
+      withdrawFeePercent: rates.chainContractWithdrawFeePercent,
+    };
+  }
+
   async getEnrollment(userId: string) {
     await this.ensureTable();
     const row = await this.prisma.chainContractEnrollment.findUnique({
       where: { userId },
     });
+    const rates = await this.getChainRates();
     return this.toDto(
       row ?? {
         id: null,
@@ -60,13 +81,15 @@ export class ChainEnrollmentService {
         approvedAt: null,
         activatedAt: null,
         yieldPercent: null,
-        withdrawFeePercent: CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+        withdrawFeePercent: rates.withdrawFeePercent,
       },
+      rates,
     );
   }
 
   async acceptTerms(userId: string) {
     await this.ensureTable();
+    const rates = await this.getChainRates();
     const existing = await this.prisma.chainContractEnrollment.findUnique({
       where: { userId },
     });
@@ -76,7 +99,7 @@ export class ChainEnrollmentService {
         existing.status === 'APPROVED' ||
         existing.status === 'ACTIVE')
     ) {
-      return this.toDto(existing);
+      return this.toDto(existing, rates);
     }
 
     const platformKyc = await this.prisma.kycVerification.findUnique({
@@ -109,7 +132,7 @@ export class ChainEnrollmentService {
           documentBackUrl: platformKyc.documentBackUrl,
           livenessSelfieUrl: platformKyc.selfieUrl,
           livenessPassedAt: platformKyc.reviewedAt ?? new Date(),
-          withdrawFeePercent: CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+          withdrawFeePercent: rates.withdrawFeePercent,
         },
         update: {
           status: 'APPROVED',
@@ -123,7 +146,7 @@ export class ChainEnrollmentService {
           livenessSelfieUrl: platformKyc.selfieUrl,
         },
       });
-      return this.toDto(row);
+      return this.toDto(row, rates);
     }
 
     const row = await this.prisma.chainContractEnrollment.upsert({
@@ -132,7 +155,7 @@ export class ChainEnrollmentService {
         userId,
         status: 'TERMS_ACCEPTED',
         termsAcceptedAt: new Date(),
-        withdrawFeePercent: CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+        withdrawFeePercent: rates.withdrawFeePercent,
       },
       update: {
         status: 'TERMS_ACCEPTED',
@@ -140,7 +163,7 @@ export class ChainEnrollmentService {
         rejectionReason: null,
       },
     });
-    return this.toDto(row);
+    return this.toDto(row, rates);
   }
 
   async submitKyc(
@@ -220,7 +243,8 @@ export class ChainEnrollmentService {
 
   async markActivated(userId: string, depositUsd: number) {
     await this.ensureTable();
-    if (!Number.isFinite(depositUsd) || depositUsd < CHAIN_CONTRACT_MIN_USD) {
+    const rates = await this.getChainRates();
+    if (!Number.isFinite(depositUsd) || depositUsd < rates.minDepositUsd) {
       throw new BadRequestException('Funds insufficient');
     }
     const existing = await this.prisma.chainContractEnrollment.findUnique({
@@ -231,7 +255,10 @@ export class ChainEnrollmentService {
         'Contract must be approved before deposit activation',
       );
     }
-    const yieldPercent = yieldPercentForDeposit(depositUsd);
+    const yieldPercent = yieldPercentForDeposit(
+      depositUsd,
+      rates.minDepositUsd,
+    );
     const row = await this.prisma.chainContractEnrollment.update({
       where: { userId },
       data: {
@@ -240,7 +267,7 @@ export class ChainEnrollmentService {
         yieldPercent,
       },
     });
-    return this.toDto(row);
+    return this.toDto(row, rates);
   }
 
   async approve(userId: string) {
@@ -312,7 +339,7 @@ export class ChainEnrollmentService {
         approvedAt: null,
         activatedAt: null,
         yieldPercent: null,
-        withdrawFeePercent: CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+        withdrawFeePercent: (await this.getChainRates()).withdrawFeePercent,
       },
     });
     return this.toDto(row);
@@ -320,6 +347,7 @@ export class ChainEnrollmentService {
 
   async listPending(limit = 50) {
     await this.ensureTable();
+    const rates = await this.getChainRates();
     const rows = await this.prisma.chainContractEnrollment.findMany({
       where: { status: 'KYC_PENDING' },
       include: {
@@ -328,11 +356,13 @@ export class ChainEnrollmentService {
       orderBy: { kycSubmittedAt: 'asc' },
       take: Math.min(100, Math.max(1, limit)),
     });
-    return rows.map((r) => ({
-      ...this.toDto(r),
-      email: r.user.email,
-      displayName: r.user.displayName,
-    }));
+    return Promise.all(
+      rows.map(async (r) => ({
+        ...(await this.toDto(r, rates)),
+        email: r.user.email,
+        displayName: r.user.displayName,
+      })),
+    );
   }
 
   /**
@@ -377,25 +407,29 @@ export class ChainEnrollmentService {
     });
   }
 
-  private toDto(row: {
-    id: string | null;
-    userId: string;
-    status: ChainContractEnrollmentStatus;
-    termsAcceptedAt: Date | null;
-    country: string | null;
-    documentType: KycDocumentType | null;
-    documentNumber: string | null;
-    documentFrontUrl: string | null;
-    documentBackUrl: string | null;
-    livenessSelfieUrl: string | null;
-    livenessPassedAt: Date | null;
-    rejectionReason: string | null;
-    kycSubmittedAt: Date | null;
-    approvedAt: Date | null;
-    activatedAt: Date | null;
-    yieldPercent: { toString(): string } | number | null;
-    withdrawFeePercent: { toString(): string } | number;
-  }) {
+  private async toDto(
+    row: {
+      id: string | null;
+      userId: string;
+      status: ChainContractEnrollmentStatus;
+      termsAcceptedAt: Date | null;
+      country: string | null;
+      documentType: KycDocumentType | null;
+      documentNumber: string | null;
+      documentFrontUrl: string | null;
+      documentBackUrl: string | null;
+      livenessSelfieUrl: string | null;
+      livenessPassedAt: Date | null;
+      rejectionReason: string | null;
+      kycSubmittedAt: Date | null;
+      approvedAt: Date | null;
+      activatedAt: Date | null;
+      yieldPercent: { toString(): string } | number | null;
+      withdrawFeePercent: { toString(): string } | number;
+    },
+    rates?: { minDepositUsd: number; withdrawFeePercent: number },
+  ) {
+    const chain = rates ?? (await this.getChainRates());
     const status = row.status;
     const canAccessLiveDashboard = status === 'ACTIVE';
     const showNullDashboard =
@@ -429,18 +463,18 @@ export class ChainEnrollmentService {
       yieldPercent:
         row.yieldPercent != null ? Number(row.yieldPercent) : null,
       withdrawFeePercent: Number(
-        row.withdrawFeePercent ?? CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+        row.withdrawFeePercent ?? chain.withdrawFeePercent,
       ),
       canAccessLiveDashboard,
       showNullDashboard,
       canDeposit: status === 'APPROVED',
       canCancelRestart: status !== 'NOT_STARTED',
       terms: {
-        minDepositUsd: CHAIN_CONTRACT_MIN_USD,
+        minDepositUsd: chain.minDepositUsd,
         midTierMaxUsd: CHAIN_CONTRACT_TIER_CUTOFF_USD,
         midTierYieldPercent: CHAIN_CONTRACT_YIELD_MID,
         highTierYieldPercent: CHAIN_CONTRACT_YIELD_HIGH,
-        withdrawFeePercent: CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT,
+        withdrawFeePercent: chain.withdrawFeePercent,
         yieldDisclaimer:
           'Displayed percentages are indicative starting bands. Actual yield may change based on deposit size, available funds, market conditions, and past user behavior on the platform.',
       },

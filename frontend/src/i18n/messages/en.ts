@@ -88,14 +88,14 @@ export const en = {
     title: "Clear before you commit capital",
     feeTitle: "Enrollment fee by size",
     feeBody:
-      "Smart Investment enrollment fee is deducted from your transfer: $10 ($100–$200), $50 ($201–$999.99), or $200 ($1,000–$5,000). Example: $560 → $50 fee → $510 invested.",
+      "Smart Investment enrollment fee is deducted from your transfer: $10 ($100–$200), $50 ($201–$999.99), or $200 ($1,000–$5,000). VIP replaces tiers with 15% of the transfer (e.g. $560 → $84 fee → $476 invested).",
     holdTitle: "24-hour yield hold",
     holdBody: "yield-hold",
     holdIntro:
       "New allocations only earn after funds have been invested for at least 24 hours. Daily credits post",
     vipTitle: "VIP upgrade",
     vipBody:
-      "VIP ($50/month) raises default daily yield to 8%, unlocks weekend earnings, and removes wallet withdrawal fees while active.",
+      "VIP fee is 15% of your investment amount (deducted from the wallet transfer). Raises default daily yield to 8%, unlocks weekend earnings, and removes wallet withdrawal fees while active.",
     minTitle: "Minimum $500",
     minBody:
       "From 27 July 2026, investments below $500 automatically stop earning. Top up on Invest to stay active.",

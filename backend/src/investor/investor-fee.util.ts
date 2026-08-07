@@ -26,11 +26,15 @@ export function listInvestorFeeTiers(): InvestorFeeTier[] {
 }
 
 /**
- * Resolve enrollment fee from investment amount.
- * $100–$200 → $10 · $201–$500 → $50 · $501–under $1,000 → $50 · $1,000–$5,000 → $200
+ * Resolve enrollment fee from investment amount (non-VIP tier table).
+ * Default: $100–$200 → $10 · $201–$500 → $50 · $501–under $1,000 → $50 · $1,000–$5,000 → $200
  * Fee is taken from the transfer amount (netInvested = amount − fee).
+ * Pass `tiers` to use PlatformConfig overrides.
  */
-export function resolveInvestorSubscriptionFee(investmentAmount: number): number {
+export function resolveInvestorSubscriptionFee(
+  investmentAmount: number,
+  tiers?: InvestorFeeTier[],
+): number {
   if (!Number.isFinite(investmentAmount)) {
     throw new Error('Investment amount must be a number');
   }
@@ -41,6 +45,15 @@ export function resolveInvestorSubscriptionFee(investmentAmount: number): number
     );
   }
 
+  const table = tiers?.length ? tiers : listInvestorFeeTiers();
+  const sorted = [...table].sort((a, b) => a.min - b.min);
+  for (const tier of sorted) {
+    if (amount >= tier.min && amount <= tier.max) return tier.fee;
+  }
+  const last = sorted[sorted.length - 1];
+  if (last && amount >= last.min) return last.fee;
+
+  // Legacy hardcoded fallback when no matching tier
   if (amount <= 200) return 10;
   if (amount <= 500) return 50;
   if (amount < 1000) return 50;

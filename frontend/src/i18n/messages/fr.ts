@@ -88,14 +88,14 @@ export const fr = {
     title: "Claires avant d’engager du capital",
     feeTitle: "Frais d’inscription selon le montant",
     feeBody:
-      "Les frais d’inscription Smart Investment sont déduits du transfert : 10 $ (100–200 $), 50 $ (201–999,99 $) ou 200 $ (1 000–5 000 $). Exemple : 560 $ → 50 $ de frais → 510 $ investis.",
+      "Les frais d’inscription Smart Investment sont déduits du transfert : 10 $ (100–200 $), 50 $ (201–999,99 $) ou 200 $ (1 000–5 000 $). Le VIP remplace les paliers par 15 % du transfert (ex. 560 $ → 84 $ de frais → 476 $ investis).",
     holdTitle: "Délai de rendement de 24 h",
     holdBody: "yield-hold",
     holdIntro:
       "Les nouvelles allocations ne rapportent qu’après au moins 24 h d’investissement. Les crédits quotidiens sont versés",
     vipTitle: "Passage VIP",
     vipBody:
-      "Le VIP (50 $/mois) porte le rendement quotidien à 8 %, débloque les gains le week-end et retire les frais de retrait du portefeuille tant qu’il est actif.",
+      "Le VIP facture 15 % du montant investi (déduit du virement portefeuille). Il porte le rendement quotidien à 8 %, débloque les gains le week-end et retire les frais de retrait du portefeuille tant qu’il est actif.",
     minTitle: "Minimum 500 $",
     minBody:
       "À partir du 27 juillet 2026, les investissements inférieurs à 500 $ cessent automatiquement de rapporter. Rechargez sur Investir pour rester actif.",

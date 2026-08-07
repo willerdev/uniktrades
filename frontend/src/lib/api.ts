@@ -1136,23 +1136,35 @@ class ApiClient {
         walletBalance: number;
         benefits: { weekendEarnings: boolean; zeroWithdrawalFee: boolean; dailyYieldPercent?: number };
       }>("/investor/vip/status"),
-    vipUpgrade: () =>
+    vipUpgrade: (investmentAmount?: number) =>
       this.request<{
         success: boolean;
         active: boolean;
         feeUsdt: number;
+        feePercent?: number;
         expiresAt: string;
         paymentId: string;
         message: string;
-      }>("/investor/vip/upgrade", { method: "POST" }),
+      }>("/investor/vip/upgrade", {
+        method: "POST",
+        body: JSON.stringify(
+          investmentAmount != null ? { investmentAmount } : {},
+        ),
+      }),
     enrollCheckout: (
       network: string,
       source: "wallet" | "crypto" = "wallet",
       investmentAmount?: number,
+      withVip?: boolean,
     ) =>
       this.request<InvestorCheckout>("/investor/enroll/checkout", {
         method: "POST",
-        body: JSON.stringify({ network, source, investmentAmount }),
+        body: JSON.stringify({
+          network,
+          source,
+          investmentAmount,
+          ...(withVip ? { withVip: true } : {}),
+        }),
       }),
     pendingEnrollment: (network?: string) =>
       this.request<{
@@ -1883,6 +1895,8 @@ export interface InvestorStatus {
     active: boolean;
     expiresAt: string | null;
     feeUsdt: number;
+    feePercent?: number;
+    feeModel?: string;
     benefits: {
       weekendEarnings: boolean;
       zeroWithdrawalFee: boolean;
@@ -1891,6 +1905,7 @@ export interface InvestorStatus {
   };
   feeUsdt: number;
   feeTiers?: InvestorFeeTier[];
+  vipFeePercent?: number;
   investmentMin?: number;
   investmentMax?: number;
   committedInvestmentAmount?: number | null;

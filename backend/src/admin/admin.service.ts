@@ -28,14 +28,16 @@ import { PresenceService } from '../presence/presence.service';
 import { WalletService } from '../wallet/wallet.service';
 import { InvestorService } from '../investor/investor.service';
 import {
-  INVESTOR_INVESTMENT_MAX,
-  INVESTOR_INVESTMENT_MIN,
-  listInvestorFeeTiers,
-} from '../investor/investor-fee.util';
-import {
   INVESTOR_MIN_BALANCE_EFFECTIVE_DATE,
   INVESTOR_MIN_BALANCE_USDT,
 } from '../investor/investor-min-balance.util';
+import {
+  parseInvestorFeeTiersJson,
+  platformRatesFromConfig,
+  serializeInvestorFeeTiers,
+  PLATFORM_RATE_DEFAULTS,
+} from '../common/platform-rates.util';
+import type { InvestorFeeTier } from '../investor/investor-fee.util';
 
 @Injectable()
 export class AdminService {
@@ -1894,9 +1896,11 @@ export class AdminService {
   async getInvestorDepositorSettings() {
     await this.ensureLoginOtpColumn();
     await this.ensureWithdrawalScheduleColumns();
+    await this.ensurePlatformRateColumns();
     const config = await this.prisma.platformConfig.findUnique({
       where: { id: 'default' },
     });
+    const rates = platformRatesFromConfig(config);
     const otpRows = await this.prisma.$queryRaw<Array<{ enabled: boolean }>>`
       SELECT COALESCE("login_otp_enabled", false) AS enabled
       FROM "platform_config"
@@ -1905,12 +1909,13 @@ export class AdminService {
     `;
     return {
       investorFeeUsdt: Number(config?.investorFeeUsdt ?? 10),
-      investorFeeTiers: listInvestorFeeTiers(),
-      investmentMin: INVESTOR_INVESTMENT_MIN,
-      investmentMax: INVESTOR_INVESTMENT_MAX,
-      investorDailyYieldPercent: Number(
-        config?.investorDailyYieldPercent ?? 5,
-      ),
+      investorFeeTiers: rates.investorFeeTiers,
+      investmentMin: rates.investmentMin,
+      investmentMax: rates.investmentMax,
+      investorDailyYieldPercent: rates.investorDailyYieldPercent,
+      investorVipDailyYieldPercent: rates.investorVipDailyYieldPercent,
+      investorVipFeePercent: rates.investorVipFeePercent,
+      investorAutoReinvestFeePercent: rates.investorAutoReinvestFeePercent,
       investorYieldPaused: Boolean(config?.investorYieldPaused),
       investorMinBalanceEnforced: config?.investorMinBalanceEnforced !== false,
       investorMinBalanceUsdt: INVESTOR_MIN_BALANCE_USDT,
@@ -1927,7 +1932,9 @@ export class AdminService {
       withdrawalOffSchedulePenaltyPercent: Number(
         config?.withdrawalOffSchedulePenaltyPercent ?? 8,
       ),
-      walletWithdrawalFeeUsdt: Number(config?.walletWithdrawalFeeUsdt ?? 3),
+      walletWithdrawalFeeUsdt: rates.walletWithdrawalFeeUsdt,
+      chainContractMinUsd: rates.chainContractMinUsd,
+      chainContractWithdrawFeePercent: rates.chainContractWithdrawFeePercent,
     };
   }
 
@@ -2320,6 +2327,156 @@ export class AdminService {
       VALUES ('default', false)
       ON CONFLICT ("id") DO NOTHING
     `);
+  }
+
+  private async ensurePlatformRateColumns() {
+    await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE "platform_config"
+      ADD COLUMN IF NOT EXISTS "investorVipDailyYieldPercent" DECIMAL(5,2) NOT NULL DEFAULT 8
+    `);
+    await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE "platform_config"
+      ADD COLUMN IF NOT EXISTS "investorVipFeePercent" DECIMAL(5,2) NOT NULL DEFAULT 15
+    `);
+    await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE "platform_config"
+      ADD COLUMN IF NOT EXISTS "investorFeeTiersJson" TEXT
+    `);
+    await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE "platform_config"
+      ADD COLUMN IF NOT EXISTS "investorAutoReinvestFeePercent" DECIMAL(5,2) NOT NULL DEFAULT 0
+    `);
+    await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE "platform_config"
+      ADD COLUMN IF NOT EXISTS "chainContractMinUsd" DECIMAL(12,2) NOT NULL DEFAULT 2000
+    `);
+    await this.prisma.$executeRawUnsafe(`
+      ALTER TABLE "platform_config"
+      ADD COLUMN IF NOT EXISTS "chainContractWithdrawFeePercent" DECIMAL(5,2) NOT NULL DEFAULT 0
+    `);
+  }
+
+  async getPlatformRateSettings() {
+    await this.ensurePlatformRateColumns();
+    const config = await this.prisma.platformConfig.findUnique({
+      where: { id: 'default' },
+    });
+    const rates = platformRatesFromConfig(config);
+    return {
+      investorDailyYieldPercent: rates.investorDailyYieldPercent,
+      investorVipDailyYieldPercent: rates.investorVipDailyYieldPercent,
+      investorVipFeePercent: rates.investorVipFeePercent,
+      investorAutoReinvestFeePercent: rates.investorAutoReinvestFeePercent,
+      chainContractMinUsd: rates.chainContractMinUsd,
+      chainContractWithdrawFeePercent: rates.chainContractWithdrawFeePercent,
+      walletWithdrawalFeeUsdt: rates.walletWithdrawalFeeUsdt,
+      investorFeeTiers: rates.investorFeeTiers,
+      investmentMin: rates.investmentMin,
+      investmentMax: rates.investmentMax,
+      defaults: { ...PLATFORM_RATE_DEFAULTS },
+    };
+  }
+
+  async updatePlatformRateSettings(input: {
+    investorDailyYieldPercent?: number;
+    investorVipDailyYieldPercent?: number;
+    investorVipFeePercent?: number;
+    investorAutoReinvestFeePercent?: number;
+    chainContractMinUsd?: number;
+    chainContractWithdrawFeePercent?: number;
+    walletWithdrawalFeeUsdt?: number;
+    investorFeeTiers?: Array<{
+      min: number;
+      max: number;
+      fee: number;
+      label?: string;
+    }>;
+  }) {
+    await this.ensurePlatformRateColumns();
+    const data: Record<string, number | string> = {};
+
+    const pct = (
+      value: number | undefined,
+      key: string,
+      label: string,
+    ) => {
+      if (value == null) return;
+      if (value < 0 || value > 100) {
+        throw new BadRequestException(`${label} must be 0–100%`);
+      }
+      data[key] = value;
+    };
+
+    pct(input.investorDailyYieldPercent, 'investorDailyYieldPercent', 'Non-VIP daily yield');
+    pct(input.investorVipDailyYieldPercent, 'investorVipDailyYieldPercent', 'VIP daily yield');
+    pct(input.investorVipFeePercent, 'investorVipFeePercent', 'VIP fee');
+    pct(
+      input.investorAutoReinvestFeePercent,
+      'investorAutoReinvestFeePercent',
+      'Auto-reinvest fee',
+    );
+    pct(
+      input.chainContractWithdrawFeePercent,
+      'chainContractWithdrawFeePercent',
+      'Chain withdraw fee',
+    );
+
+    if (input.chainContractMinUsd != null) {
+      if (input.chainContractMinUsd < 0) {
+        throw new BadRequestException('Contract min budget cannot be negative');
+      }
+      data.chainContractMinUsd = input.chainContractMinUsd;
+    }
+    if (input.walletWithdrawalFeeUsdt != null) {
+      if (input.walletWithdrawalFeeUsdt < 0) {
+        throw new BadRequestException('Wallet withdrawal fee cannot be negative');
+      }
+      data.walletWithdrawalFeeUsdt = input.walletWithdrawalFeeUsdt;
+    }
+
+    if (input.investorFeeTiers != null) {
+      if (!Array.isArray(input.investorFeeTiers) || input.investorFeeTiers.length === 0) {
+        throw new BadRequestException('Fee tiers must be a non-empty array');
+      }
+      const tiers: InvestorFeeTier[] = input.investorFeeTiers.map((t, i) => {
+        const min = Number(t.min);
+        const max = Number(t.max);
+        const fee = Number(t.fee);
+        if (
+          !Number.isFinite(min) ||
+          !Number.isFinite(max) ||
+          !Number.isFinite(fee) ||
+          fee < 0 ||
+          max < min
+        ) {
+          throw new BadRequestException(`Invalid fee tier at index ${i}`);
+        }
+        return {
+          min,
+          max,
+          fee,
+          label: String(t.label ?? '').trim() || `$${min} – $${max}`,
+        };
+      });
+      // Round-trip validate parse
+      const json = serializeInvestorFeeTiers(tiers);
+      if (!parseInvestorFeeTiersJson(json)) {
+        throw new BadRequestException('Could not serialize fee tiers');
+      }
+      data.investorFeeTiersJson = json;
+    }
+
+    if (Object.keys(data).length === 0) {
+      throw new BadRequestException('Nothing to update');
+    }
+
+    await this.prisma.platformConfig.upsert({
+      where: { id: 'default' },
+      create: { id: 'default', ...data },
+      update: data,
+    });
+
+    return this.getPlatformRateSettings();
   }
 
   async enrollInvestor(
