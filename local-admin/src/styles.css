@@ -3035,8 +3035,75 @@ button.secondary,
 
 .engine-head-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
+}
+
+.config-panel {
+  border-radius: 1rem;
+  padding: 1.25rem 1.35rem;
+  background: rgba(17, 24, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.config-form-grid {
+  margin-top: 1rem;
+}
+
+.config-form-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: #e8eef4;
+  cursor: pointer;
+}
+
+.config-hint {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.config-hint a,
+.config-effective a {
+  color: #7dd3fc;
+}
+
+.config-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+button.ghost.compact {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.8rem;
+}
+
+.mono-input {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+.config-effective {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.config-effective ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  line-height: 1.55;
 }
 
 .engine-controls {

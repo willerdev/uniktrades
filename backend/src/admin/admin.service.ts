@@ -2194,7 +2194,7 @@ export class AdminService {
 
   async updateContractBlockchainSettings(input: {
     contractAddress?: string;
-    chainId?: number;
+    chainId?: number | null;
     networkLabel?: string;
     networkKind?: string;
     abi?: string;

@@ -48,13 +48,15 @@ import {
 } from "./Sidebar";
 import { UserDetailModal } from "./UserDetailModal";
 import { InvestorDepositorPlatform } from "./InvestorDepositorPlatform";
+import { EnginePanel } from "./EnginePanel";
+import { DerivPanel } from "./DerivPanel";
+import { ContractBlockchainPanel } from "./ContractBlockchainPanel";
 import { TransactionsPanel } from "./TransactionsPanel";
 import { AccountTransfersPanel } from "./AccountTransfersPanel";
 import { SmsPanel } from "./SmsPanel";
 import { ProductAgentPanel } from "./ProductAgentPanel";
 import { ComposeEmailPanel } from "./ComposeEmailPanel";
 import { AdminWalletPanel } from "./AdminWalletPanel";
-import { EnginePanel } from "./EnginePanel";
 
 function badgeClass(status: string) {
   return `badge ${status.toLowerCase()}`;
@@ -757,6 +759,10 @@ export default function App() {
         /* AdminWalletPanel is self-contained */
       } else if (active === "engine") {
         /* EnginePanel is self-contained */
+      } else if (active === "deriv") {
+        /* DerivPanel is self-contained */
+      } else if (active === "contractBlockchain") {
+        /* ContractBlockchainPanel is self-contained */
       } else if (active === "messages") {
         const res = await api.messageThreads();
         setMessageThreads(res.items);
@@ -1627,7 +1633,7 @@ export default function App() {
                       | { count?: number; amountUsdt?: number }
                       | undefined;
                     return wt
-                      ? `${fmtMoney(wt.amountUsdt)} TRC confirmed deposits`
+                      ? `${fmtMoney(wt.amountUsdt ?? 0)} TRC confirmed deposits`
                       : "TRC confirmed deposits";
                   })()}
                 </div>
@@ -2300,6 +2306,12 @@ export default function App() {
         )}
 
         {tab === "engine" && <EnginePanel onMessage={setMessage} />}
+
+        {tab === "deriv" && <DerivPanel onMessage={setMessage} />}
+
+        {tab === "contractBlockchain" && (
+          <ContractBlockchainPanel onMessage={setMessage} />
+        )}
 
         {tab === "messages" && (
           <>

@@ -128,20 +128,28 @@ export class BlockchainService {
             : chainId === 1
               ? 'Ethereum'
               : `Chain ${chainId}`);
-    const networkKind = (
+    const networkKindRaw = (
       db?.contractNetworkKind?.trim() ||
       (chainId === 1
         ? 'ethereum'
         : chainId === 56 || chainId === 97
-          ? 'bsc'
+          ? 'bnb'
           : 'polygon')
     ).toLowerCase();
+    const network =
+      networkKindRaw === 'ethereum' || networkKindRaw === 'eth'
+        ? ('ethereum' as const)
+        : networkKindRaw === 'bnb' ||
+            networkKindRaw === 'bsc' ||
+            networkKindRaw === 'binance'
+          ? ('bnb' as const)
+          : ('polygon' as const);
     const base = getMockContractStatus();
     return {
       ...base,
       networkMode:
         chainId === 1 || chainId === 56 ? ('mainnet' as const) : ('testnet' as const),
-      network: networkKind,
+      network,
       networkLabel,
       contractAddress: configured
         ? address

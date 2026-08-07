@@ -122,8 +122,10 @@ export class UpdateContractBlockchainSettingsDto {
   contractAddress?: string;
 
   @IsOptional()
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @Type(() => Number)
   @IsNumber()
-  chainId?: number;
+  chainId?: number | null;
 
   @IsOptional()
   @IsString()
