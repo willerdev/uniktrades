@@ -129,7 +129,7 @@ const SUPPORT_TOOLS = [
     function: {
       name: 'transfer_wallet_to_investment',
       description:
-        'Move USDT from available wallet to Smart-Invest investment balance. User must be an enrolled investor. Requires confirmed: true.',
+        'Attempt to move USDT from wallet to Smart Invest. Platform policy blocks this for users (revenue cannot be reinvested). Prefer explaining that daily earnings stay in wallet and only admin enrollment can allocate capital. Requires confirmed: true.',
       parameters: {
         type: 'object',
         properties: {
@@ -163,13 +163,13 @@ const SUPPORT_TOOLS = [
     function: {
       name: 'set_auto_reinvest',
       description:
-        'Enable or disable auto-reinvest of investor daily earnings for compounding. When enabled, 100% of each daily return compounds into investment (no auto-reinvest fee). Requires confirmed: true. User must be an enrolled investor.',
+        'Auto-reinvest is disabled platform-wide. Enabling always fails. You may call with enabled:false to confirm earnings go to wallet. Requires confirmed: true.',
       parameters: {
         type: 'object',
         properties: {
           enabled: {
             type: 'boolean',
-            description: 'true to enable auto-reinvest compounding, false to credit earnings to wallet',
+            description: 'Must be false — enabling reinvest is not allowed',
           },
           confirmed: { type: 'boolean' },
         },
@@ -300,9 +300,9 @@ Account tools:
 - You CAN look up this user's balances, saved withdrawal wallets, and pending withdrawals with tools.
 - You CAN request_withdrawal for them when they ask to withdraw — first list_saved_withdrawal_wallets, confirm amount + destination, then call with confirmed:true. That emails an OTP. Ask the user for the 6-digit code, then call request_withdrawal again with otp_session_id + otp_code. KYC must already be approved.
 - Investor VIP active for this user: ${vipActive ? 'YES' : 'NO'}.
-- If VIP is YES, you may approve_withdrawal for their own PENDING wallet withdrawals that have been pending 30+ minutes, and you may move funds wallet↔investment when they ask.
-- If VIP is NO, explain they need Investor VIP ($50/month from Invest) for AI withdrawal approval (and $0 withdraw fee). They can still request_withdrawal without VIP (standard $${WALLET_WITHDRAWAL_FEE_USD} fee). Transfers still require an enrolled investor account.
-- Enrolled investors can set_auto_reinvest (compounding): 100% of each daily earning compounds into investment (no auto-reinvest fee). Confirm before enabling.
+- If VIP is YES, you may approve_withdrawal for their own PENDING wallet withdrawals that have been pending 30+ minutes. You may move investment → wallet when they ask; wallet → investment is blocked (no revenue reinvest).
+- If VIP is NO, explain they need Investor VIP ($50/month from Invest) for AI withdrawal approval (and $0 withdraw fee). They can still request_withdrawal without VIP (standard $${WALLET_WITHDRAWAL_FEE_USD} fee).
+- Reinvesting revenue is disabled: do not enable auto-reinvest; daily earnings stay in the wallet. Only admin enrollment allocates new capital.
 - For request_withdrawal, approve_withdrawal, transfers, or set_auto_reinvest: only pass confirmed:true when the user clearly asked to confirm. If unclear, ask them to confirm first.
 - After tools run, summarize what happened in plain language (amounts, new balances, payout status, fees).
 - Keep replies concise. Plain text, no markdown headers. Bullet lists OK.
@@ -591,11 +591,11 @@ Account tools:
       return { ok: false, error: 'amount must be a positive number' };
     }
     const investor = this.moduleRef.get(InvestorService, { strict: false });
+    // No adminId — user-facing transfers must respect revenue-reinvest block.
     const result = await investor.transferInvestment(
       userId,
       amount,
       direction,
-      { adminId: `ai_support_${userId}` },
     );
     return {
       ok: true,
@@ -612,7 +612,7 @@ Account tools:
       return {
         ok: false,
         error:
-          'Confirm that the user wants auto-reinvest (100% of daily earnings compound; no fee), then call again with confirmed: true',
+          'Confirm that the user understands compounding is disabled and earnings go to wallet, then call again with confirmed: true',
       };
     }
     if (typeof args.enabled !== 'boolean') {
@@ -632,17 +632,17 @@ Account tools:
       return 'KYC is submitted in Settings under the verification section. Upload your ID and a selfie. Approval is required before payouts. Check your KYC status on the Settings or Payouts page.';
     }
     if (lower.includes('reinvest') || lower.includes('compound')) {
-      return 'On Invest you can turn on auto-reinvest so daily earnings compound 100% into your investment (no auto-reinvest fee). Ask me to enable or disable it, or toggle it on Invest.';
+      return 'Reinvesting revenue is disabled. Daily earnings stay in your wallet and do not compound into investment. New capital is allocated only through admin enrollment. Tap Speak to admin if you need help.';
     }
     if (lower.includes('vip') || lower.includes('withdraw')) {
       return 'I can request a wallet withdrawal for you after KYC — say how much and which saved wallet, then confirm. Investor VIP ($50/month on Invest) unlocks $0 withdrawal fees and lets me approve pending withdrawals after 30 minutes. Or tap Speak to admin.';
     }
     if (lower.includes('invest') || lower.includes('transfer')) {
-      return 'On Invest you can move funds between wallet and investment. If you are enrolled, ask me to move a specific USDT amount either way and confirm. For help, tap Speak to admin.';
+      return 'Daily earnings credit to your wallet and cannot be moved into investment by you. You can move investment back to wallet if enrolled. For new capital allocation, Speak to admin.';
     }
     if (lower.includes('tp') || lower.includes('claim')) {
       return 'To claim take profit, go to Dashboard → Unresolved Setups, upload before and after screenshots, and wait for admin review on the TP Claims page.';
     }
-    return 'Thanks for reaching out! I can help with setups, KYC, wallet withdrawals, VIP approvals, auto-reinvest, and investment transfers. For account-specific issues, tap "Speak to admin".';
+    return 'Thanks for reaching out! I can help with setups, KYC, wallet withdrawals, and VIP approvals. For account-specific issues, tap "Speak to admin".';
   }
 }

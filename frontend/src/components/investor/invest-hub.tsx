@@ -660,7 +660,12 @@ export function InvestHub() {
           <Button
             type="button"
             className="flex-1 sm:flex-none"
-            disabled={transferLoading || insufficientAllocate || !hasValidTransfer}
+            disabled={
+              transferLoading ||
+              insufficientAllocate ||
+              !hasValidTransfer ||
+              Boolean(status.reinvestBlocked)
+            }
             onClick={() => {
               const amount = Number(transferAmount);
               if (!Number.isFinite(amount) || amount <= 0) {
@@ -730,6 +735,12 @@ export function InvestHub() {
           </p>
         )}
         {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+        {status.reinvestBlocked && (
+          <p className="mt-2 text-sm text-amber-600 dark:text-amber-400/90">
+            {status.reinvestBlockedReason ??
+              "Reinvesting revenue is disabled. Daily earnings stay in your wallet."}
+          </p>
+        )}
         <div className="mt-4 border-t border-[var(--color-border)] pt-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -737,13 +748,16 @@ export function InvestHub() {
                 Auto-reinvest (compounding)
               </h4>
               <p className="mt-1 text-xs text-muted">
-                {status.settings?.autoReinvestEarnings
-                  ? (status.autoReinvestFeePercent ?? 0) > 0
-                    ? `On — ${status.autoReinvestFeePercent}% of each daily earning is charged as a fee; the rest compounds into your investment.`
-                    : "On — 100% of each daily earning compounds into your investment (no auto-reinvest fee)."
-                  : (status.autoReinvestFeePercent ?? 0) > 0
-                    ? `Off — daily earnings go to your wallet. Enable to compound after a ${status.autoReinvestFeePercent}% fee.`
-                    : "Off — daily earnings go to your wallet. Enable to compound 100% of each daily return into investment."}
+                {status.reinvestBlocked
+                  ? status.reinvestBlockedReason ??
+                    "Reinvesting revenue is disabled. Daily earnings stay in your wallet."
+                  : status.settings?.autoReinvestEarnings
+                    ? (status.autoReinvestFeePercent ?? 0) > 0
+                      ? `On — ${status.autoReinvestFeePercent}% of each daily earning is charged as a fee; the rest compounds into your investment.`
+                      : "On — 100% of each daily earning compounds into your investment (no auto-reinvest fee)."
+                    : (status.autoReinvestFeePercent ?? 0) > 0
+                      ? `Off — daily earnings go to your wallet. Enable to compound after a ${status.autoReinvestFeePercent}% fee.`
+                      : "Off — daily earnings go to your wallet. Enable to compound 100% of each daily return into investment."}
               </p>
             </div>
             <Button
@@ -752,7 +766,7 @@ export function InvestHub() {
               variant={
                 status.settings?.autoReinvestEarnings ? "secondary" : "default"
               }
-              disabled={reinvestLoading}
+              disabled={reinvestLoading || Boolean(status.reinvestBlocked)}
               onClick={() => {
                 const next = !status.settings?.autoReinvestEarnings;
                 setReinvestLoading(true);

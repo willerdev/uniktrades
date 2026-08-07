@@ -35,6 +35,11 @@ import {
   isBlockedByInvestorMinBalance,
   isInvestorMinBalanceDateReached,
 } from './investor-min-balance.util';
+import {
+  hasApprovedLoan,
+  LOAN_REINVEST_BLOCKED_MESSAGE,
+  REVENUE_REINVEST_BLOCKED_MESSAGE,
+} from '../loans/active-loan.util';
 
 @Injectable()
 export class InvestorService {
@@ -176,6 +181,11 @@ export class InvestorService {
       country: user.profile?.country,
     });
     const displayCurrency = await this.fxRates.buildDisplayCurrency(resolved);
+    const loanBlocksReinvest = await hasApprovedLoan(this.prisma, userId);
+    const reinvestBlocked = true;
+    const reinvestBlockedReason = loanBlocksReinvest
+      ? LOAN_REINVEST_BLOCKED_MESSAGE
+      : REVENUE_REINVEST_BLOCKED_MESSAGE;
 
     return {
       active: user.investorActive,
@@ -217,6 +227,8 @@ export class InvestorService {
           }
         : null,
       autoReinvestFeePercent: INVESTOR_AUTO_REINVEST_FEE_PERCENT,
+      reinvestBlocked,
+      reinvestBlockedReason,
       minBalancePolicy: await this.resolveMinBalancePolicy(
         Number(financials.investmentBalance ?? 0),
         user.investorSettings?.minBalanceExempt ?? false,
@@ -505,7 +517,9 @@ export class InvestorService {
       { suppressNotification: opts?.suppressNotification },
     );
 
-    await this.transferInvestment(userId, netInvested, 'to_investment');
+    await this.transferInvestment(userId, netInvested, 'to_investment', {
+      allowCapitalAllocate: true,
+    });
 
     return {
       success: true,
@@ -623,6 +637,7 @@ export class InvestorService {
     );
     await this.transferInvestment(userId, netInvested, 'to_investment', {
       adminId: opts?.adminId,
+      allowCapitalAllocate: true,
     });
 
     this.notifications.investorAdminEnrolled(userId, {
@@ -774,6 +789,7 @@ export class InvestorService {
         payment.userId,
         netInvested,
         'to_investment',
+        { allowCapitalAllocate: true },
       );
     }
 
@@ -902,33 +918,35 @@ export class InvestorService {
       throw new BadRequestException('Enroll in the investor program first');
     }
 
+    if (autoReinvestEarnings) {
+      throw new BadRequestException(REVENUE_REINVEST_BLOCKED_MESSAGE);
+    }
+
     const settings = await this.prisma.investorSettings.upsert({
       where: { userId },
-      create: { userId, autoReinvestEarnings: Boolean(autoReinvestEarnings) },
-      update: { autoReinvestEarnings: Boolean(autoReinvestEarnings) },
+      create: { userId, autoReinvestEarnings: false },
+      update: { autoReinvestEarnings: false },
     });
 
-    const feePercent = INVESTOR_AUTO_REINVEST_FEE_PERCENT;
     return {
       autoReinvestEarnings: settings.autoReinvestEarnings,
-      feePercent,
-      note: settings.autoReinvestEarnings
-        ? feePercent > 0
-          ? `Daily earnings compound into investment after a ${feePercent}% fee on the full daily return`
-          : 'Daily earnings compound 100% into investment (no auto-reinvest fee)'
-        : 'Daily earnings credit to available wallet balance',
+      feePercent: INVESTOR_AUTO_REINVEST_FEE_PERCENT,
+      note: 'Daily earnings credit to available wallet balance — compounding is disabled',
     };
   }
 
   /**
    * Move funds between liquid wallet and investment balance.
    * direction: to_investment = wallet → investment, to_wallet = investment → wallet
+   *
+   * User self-serve wallet→investment (revenue reinvest) is blocked.
+   * Enrollment / admin capital moves must pass allowCapitalAllocate or adminId.
    */
   async transferInvestment(
     userId: string,
     amount: number,
     direction: 'to_investment' | 'to_wallet',
-    opts?: { adminId?: string },
+    opts?: { adminId?: string; allowCapitalAllocate?: boolean },
   ) {
     if (!Number.isFinite(amount) || amount <= 0) {
       throw new BadRequestException('Amount must be greater than zero');
@@ -939,6 +957,17 @@ export class InvestorService {
     if (!user) throw new NotFoundException('User not found');
     if (!user.investorActive) {
       throw new BadRequestException('User must be enrolled in the investor program');
+    }
+
+    if (direction === 'to_investment') {
+      const allowed =
+        Boolean(opts?.adminId) || Boolean(opts?.allowCapitalAllocate);
+      if (!allowed) {
+        throw new BadRequestException(REVENUE_REINVEST_BLOCKED_MESSAGE);
+      }
+      if (await hasApprovedLoan(this.prisma, userId)) {
+        throw new BadRequestException(LOAN_REINVEST_BLOCKED_MESSAGE);
+      }
     }
 
     const wallet = await this.walletService.getOrCreateWallet(userId);
@@ -1350,7 +1379,8 @@ export class InvestorService {
       const wallet = await this.walletService.getOrCreateWallet(user.id);
       const availableBalance = Number(wallet.availableBalance);
       const investmentBalance = Number(wallet.investorBalance ?? 0);
-      const autoReinvest = Boolean(user.investorSettings?.autoReinvestEarnings);
+      // Platform policy: never auto-compound daily revenue into investment.
+      const autoReinvest = false;
 
       const holdNote =
         recentAllocated > 0
