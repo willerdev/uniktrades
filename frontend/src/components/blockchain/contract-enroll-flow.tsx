@@ -631,6 +631,10 @@ export function ContractNullDashboard({
       : null;
 
   async function activate() {
+    if (!Number.isFinite(amount) || amount < t.minDepositUsd) {
+      setError("Funds insufficient");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -662,7 +666,7 @@ export function ContractNullDashboard({
           {enrollment.status === "KYC_PENDING"
             ? "Your documents and liveness are with the team. Balances, yield, and activity stay empty until approval."
             : enrollment.status === "APPROVED"
-              ? "KYC passed. Choose your launch amount (min $2,000) to set your yield tier, then deposit USDT on-chain via MetaMask on the live dashboard. Platform wallet deposits stay on the Wallet page."
+              ? `KYC passed. Choose your launch amount (minimum $${t.minDepositUsd.toLocaleString()} USDT) to set your yield tier, then deposit USDT on-chain via MetaMask on the live dashboard. Platform wallet deposits stay on the Wallet page.`
               : "Complete verification to continue."}
         </p>
       </div>
@@ -707,14 +711,21 @@ export function ContractNullDashboard({
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex-1 space-y-2">
-              <Label>Launch amount (USDT)</Label>
+              <Label>Launch amount / contract budget (USDT)</Label>
               <Input
                 type="number"
                 min={t.minDepositUsd}
                 step={100}
                 value={deposit}
-                onChange={(e) => setDeposit(e.target.value)}
+                onChange={(e) => {
+                  setDeposit(e.target.value);
+                  setError("");
+                }}
               />
+              <p className="text-xs text-muted">
+                Minimum ${t.minDepositUsd.toLocaleString()} USDT. Below that
+                returns Funds insufficient.
+              </p>
             </div>
             <Button
               disabled={
@@ -730,6 +741,12 @@ export function ContractNullDashboard({
               {previewYield != null ? ` · ${previewYield}%` : ""}
             </Button>
           </div>
+          {Number.isFinite(amount) &&
+            amount > 0 &&
+            amount < t.minDepositUsd &&
+            !error && (
+              <p className="text-sm text-danger">Funds insufficient</p>
+            )}
           {error && <p className="text-sm text-danger">{error}</p>}
         </div>
       )}

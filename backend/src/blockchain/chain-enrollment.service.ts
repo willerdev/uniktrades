@@ -19,10 +19,8 @@ export const CHAIN_CONTRACT_YIELD_HIGH = 15;
 export const CHAIN_CONTRACT_WITHDRAW_FEE_PERCENT = 0;
 
 export function yieldPercentForDeposit(amountUsd: number): number {
-  if (amountUsd < CHAIN_CONTRACT_MIN_USD) {
-    throw new BadRequestException(
-      `Minimum contract deposit is $${CHAIN_CONTRACT_MIN_USD.toLocaleString()} USDT`,
-    );
+  if (!Number.isFinite(amountUsd) || amountUsd < CHAIN_CONTRACT_MIN_USD) {
+    throw new BadRequestException('Funds insufficient');
   }
   if (amountUsd <= CHAIN_CONTRACT_TIER_CUTOFF_USD) {
     return CHAIN_CONTRACT_YIELD_MID;
@@ -222,6 +220,9 @@ export class ChainEnrollmentService {
 
   async markActivated(userId: string, depositUsd: number) {
     await this.ensureTable();
+    if (!Number.isFinite(depositUsd) || depositUsd < CHAIN_CONTRACT_MIN_USD) {
+      throw new BadRequestException('Funds insufficient');
+    }
     const existing = await this.prisma.chainContractEnrollment.findUnique({
       where: { userId },
     });

@@ -180,6 +180,11 @@ export function ChainEnrollScreen() {
 
   async function activate() {
     const amount = Number(deposit);
+    const min = t?.minDepositUsd ?? 2000;
+    if (!Number.isFinite(amount) || amount < min) {
+      setError("Funds insufficient");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
