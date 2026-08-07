@@ -3,7 +3,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../stores/theme";
 
 export const INVESTOR_AUTO_STOP_THRESHOLD_USDT = 500;
-export const INVESTOR_LOAN_ELIGIBILITY_USDT = 1000;
 export const INVESTOR_AUTO_STOP_DATE_LABEL = "27 July 2026";
 export const INVESTOR_VIP_YIELD_PERCENT = 8;
 
@@ -23,9 +22,8 @@ export function InvestorPolicyBanners({
   const hasBalance = Number.isFinite(balance) && balance > 0;
   const showVip = vipActive;
   const showAutoStop = hasBalance && balance < INVESTOR_AUTO_STOP_THRESHOLD_USDT;
-  const showLoan = hasBalance && balance >= INVESTOR_LOAN_ELIGIBILITY_USDT;
 
-  if (!showVip && !showAutoStop && !showLoan) return null;
+  if (!showVip && !showAutoStop) return null;
 
   return (
     <View style={styles.wrap}>
@@ -62,24 +60,6 @@ export function InvestorPolicyBanners({
               {INVESTOR_AUTO_STOP_THRESHOLD_USDT} will automatically stop. Yours is $
               {balance.toFixed(2)}. Top up to at least ${INVESTOR_AUTO_STOP_THRESHOLD_USDT} to keep
               earning.
-            </Text>
-          </View>
-        </View>
-      ) : null}
-
-      {showLoan ? (
-        <View
-          style={[
-            styles.banner,
-            { backgroundColor: "rgba(56, 189, 248, 0.12)", borderColor: "rgba(56, 189, 248, 0.4)" },
-          ]}
-        >
-          <Ionicons name="business" size={18} color="#38BDF8" style={styles.icon} />
-          <View style={styles.body}>
-            <Text style={[styles.title, { color: theme.text }]}>Investment loan eligibility</Text>
-            <Text style={[styles.copy, { color: theme.muted }]}>
-              With ${INVESTOR_LOAN_ELIGIBILITY_USDT}+ invested, you can reinvest profit and borrow up
-              to 80% of your investment while capital keeps earning. Message Support to apply.
             </Text>
           </View>
         </View>
