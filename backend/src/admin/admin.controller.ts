@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AdminService } from './admin.service';
-import { CreatePromoCodeDto, BulkCreatePromoCodesDto, SendMessageDto, AdminRejectReasonDto, UpdateStaffPermissionsDto, ApprovePayoutDto, UpdateEngineSettingsDto } from '../common/dto';
+import { CreatePromoCodeDto, BulkCreatePromoCodesDto, SendMessageDto, AdminRejectReasonDto, UpdateStaffPermissionsDto, ApprovePayoutDto, UpdateEngineSettingsDto, UpdateDerivSettingsDto, UpdateContractBlockchainSettingsDto } from '../common/dto';
 import { JwtAuthGuard, AdminPermissionGuard } from '../auth/guards';
 import { RequireAdminPermission } from '../auth/decorators/admin-permission.decorator';
 import { UploadStorageService } from '../uploads/upload-storage.service';
@@ -53,6 +53,28 @@ export class AdminController {
   @Patch('engine/settings')
   updateEngineSettings(@Body() dto: UpdateEngineSettingsDto) {
     return this.adminService.updateEngineSettings(dto);
+  }
+
+  @Get('platform/deriv-settings')
+  getDerivSettings() {
+    return this.adminService.getDerivSettings();
+  }
+
+  @Patch('platform/deriv-settings')
+  updateDerivSettings(@Body() dto: UpdateDerivSettingsDto) {
+    return this.adminService.updateDerivSettings(dto);
+  }
+
+  @Get('platform/contract-blockchain-settings')
+  getContractBlockchainSettings() {
+    return this.adminService.getContractBlockchainSettings();
+  }
+
+  @Patch('platform/contract-blockchain-settings')
+  updateContractBlockchainSettings(
+    @Body() dto: UpdateContractBlockchainSettingsDto,
+  ) {
+    return this.adminService.updateContractBlockchainSettings(dto);
   }
 
   @Get('presence/live')

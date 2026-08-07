@@ -1612,6 +1612,27 @@ export default function App() {
                 <div className="value">{String(overview.todayRegistrations ?? "—")}</div>
               </div>
               <div className="card">
+                <div className="label">Wallet transfers</div>
+                <div className="value">
+                  {(() => {
+                    const wt = overview.walletTransfers as
+                      | { count?: number; amountUsdt?: number }
+                      | undefined;
+                    return wt ? String(wt.count ?? 0) : "—";
+                  })()}
+                </div>
+                <div className="muted">
+                  {(() => {
+                    const wt = overview.walletTransfers as
+                      | { count?: number; amountUsdt?: number }
+                      | undefined;
+                    return wt
+                      ? `${fmtMoney(wt.amountUsdt)} TRC confirmed deposits`
+                      : "TRC confirmed deposits";
+                  })()}
+                </div>
+              </div>
+              <div className="card">
                 <div className="label">People paid</div>
                 <div className="value">
                   {paymentProjection

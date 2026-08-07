@@ -75,6 +75,33 @@ export class ChainSyncService {
     private config: ConfigService,
   ) {}
 
+  private async resolvedContractConfig() {
+    const db = await this.prisma.platformConfig.findUnique({
+      where: { id: 'default' },
+      select: {
+        contractAddress: true,
+        contractChainId: true,
+        contractRpcUrl: true,
+      },
+    });
+    const address = (
+      db?.contractAddress ||
+      this.config.get<string>('DEMO_VAULT_ADDRESS') ||
+      this.config.get<string>('CONTRACT_ADDRESS') ||
+      ''
+    ).trim();
+    const rpc =
+      db?.contractRpcUrl?.trim() ||
+      this.config.get<string>('BNB_TESTNET_RPC') ||
+      this.config.get<string>('BLOCKCHAIN_RPC_URL') ||
+      'https://data-seed-prebsc-1-s1.binance.org:8545/';
+    const chainId = Number(
+      db?.contractChainId ??
+        (this.config.get('BNB_CHAIN_ID') || 97),
+    );
+    return { address, rpc, chainId };
+  }
+
   private rpcUrl() {
     return (
       this.config.get<string>('BNB_TESTNET_RPC') ||
@@ -192,9 +219,9 @@ export class ChainSyncService {
   }
 
   async syncFromChain(lookbackBlocks = 5000) {
-    const address = this.contractAddress();
+    const { address, rpc, chainId } = await this.resolvedContractConfig();
     const started = Date.now();
-    const provider = new JsonRpcProvider(this.rpcUrl());
+    const provider = new JsonRpcProvider(rpc);
 
     let currentBlock = 0;
     let gasPriceGwei = 0;
@@ -210,9 +237,9 @@ export class ChainSyncService {
     }
 
     await this.prisma.chainNetworkStatus.upsert({
-      where: { chainId: this.chainId() },
+      where: { chainId },
       create: {
-        chainId: this.chainId(),
+        chainId,
         label: 'BNB Testnet',
         currentBlock,
         gasPriceGwei,
@@ -348,7 +375,7 @@ export class ChainSyncService {
     });
     if (latest) {
       await this.prisma.chainNetworkStatus.update({
-        where: { chainId: this.chainId() },
+        where: { chainId },
         data: {
           latestEventName: latest.name,
           latestEventAt: latest.occurredAt,
@@ -367,7 +394,7 @@ export class ChainSyncService {
   }
 
   private async ensureContractRow() {
-    const address = this.contractAddress();
+    const { address, rpc, chainId } = await this.resolvedContractConfig();
     if (!address) return null;
 
     const network = await this.prisma.chainNetwork.upsert({
@@ -375,12 +402,12 @@ export class ChainSyncService {
       create: {
         kind: ChainNetworkKind.BNB,
         label: 'BNB Smart Chain Testnet',
-        chainId: this.chainId(),
-        rpcUrl: this.rpcUrl(),
+        chainId,
+        rpcUrl: rpc,
         explorerUrl: 'https://testnet.bscscan.com',
         isTestnet: true,
       },
-      update: { rpcUrl: this.rpcUrl() },
+      update: { rpcUrl: rpc, chainId },
     });
 
     return this.prisma.chainContract.upsert({

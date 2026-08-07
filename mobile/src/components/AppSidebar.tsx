@@ -72,12 +72,6 @@ function AppSidebar({ visible, onClose }: { visible: boolean; onClose: () => voi
       onPress: () => go("Invest"),
     },
     {
-      key: "loans",
-      title: "Loans",
-      icon: "cash-outline",
-      onPress: () => go("Invest", "Loans"),
-    },
-    {
       key: "chain",
       title: "Chain vault",
       icon: "cube-outline",

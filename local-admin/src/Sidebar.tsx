@@ -40,8 +40,6 @@ export const ADMIN_TABS: Tab[] = [
   "wallet",
   "payouts",
   "whitelist",
-  "loans",
-  "agents",
   "transactions",
   "kyc",
   "marketing",
@@ -101,8 +99,6 @@ export function tabsForPermissions(permissions: AdminPermissions | null): Tab[] 
   if (permissions.payout) {
     allowed.add("payouts");
     allowed.add("whitelist");
-    allowed.add("loans");
-    allowed.add("agents");
     allowed.add("transactions");
   }
   // Staff still get marketing/comms tools when they have hub access
@@ -146,8 +142,6 @@ const NAV_ITEMS: NavItem[] = [
   { id: "wallet", label: "Wallet", icon: "wallet" },
   { id: "payouts", label: "Payouts", icon: "payouts" },
   { id: "whitelist", label: "Whitelist", icon: "whitelist" },
-  { id: "loans", label: "Loans", icon: "loans" },
-  { id: "agents", label: "Agents", icon: "agents" },
   { id: "transactions", label: "Transactions", icon: "transactions" },
   { id: "kyc", label: "KYC", icon: "kyc" },
   { id: "marketing", label: "Email marketing", icon: "marketing" },

@@ -155,12 +155,6 @@ export function InvestScreen() {
             accent
           />
           <VerticalActionCard
-            icon="cash-outline"
-            title="Loans"
-            subtitle="80% earnings advance"
-            onPress={() => navigation.navigate("Loans")}
-          />
-          <VerticalActionCard
             icon="cube-outline"
             title="Chain vault"
             subtitle="On-chain enroll & launch"

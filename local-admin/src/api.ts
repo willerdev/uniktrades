@@ -1356,6 +1356,8 @@ export type PlatformPaymentsResult = {
     momoConfirmedUsdt: number;
     cryptoConfirmedCount: number;
     cryptoConfirmedUsdt: number;
+    walletTransfersConfirmedCount: number;
+    walletTransfersConfirmedUsdt: number;
   };
 };
 

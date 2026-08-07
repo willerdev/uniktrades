@@ -20,7 +20,6 @@ import {
   ScrollText,
   TrendingUp,
   Blocks,
-  Handshake,
   PanelLeftClose,
   PanelLeft,
   Search,
@@ -28,7 +27,6 @@ import {
   Menu,
   X,
   Landmark,
-  HandCoins,
   Banknote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -101,20 +99,6 @@ const NAV_GROUPS: NavGroup[] = [
         shortLabelKey: "nav.unitrust",
         icon: Landmark,
         keywords: "5% monthly",
-      },
-      {
-        href: "/loans",
-        labelKey: "nav.loans",
-        shortLabelKey: "nav.loans",
-        icon: HandCoins,
-        keywords: "advance borrow",
-      },
-      {
-        href: "/agent",
-        labelKey: "nav.agent",
-        shortLabelKey: "nav.agent",
-        icon: Handshake,
-        keywords: "momo cash",
       },
     ],
   },

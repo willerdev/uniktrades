@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import {
   ArrowRight,
   Blocks,
-  Landmark,
   ScrollText,
   TrendingUp,
   Wallet,
@@ -77,24 +76,6 @@ const PRODUCTS = [
     ],
     cta: "Open Unitrust",
   },
-  {
-    id: "loans",
-    href: "/loans",
-    icon: Landmark,
-    title: "Loans",
-    tagline: "Advance on projected earnings",
-    how: [
-      "Choose daily, weekly, or monthly based on your projected invest earnings.",
-      "You receive 80% of that period’s projected earnings as an advance.",
-      "Repay principal + 20% interest from your wallet after approval.",
-    ],
-    start: [
-      "Build meaningful Smart Investment or Unitrust earnings.",
-      "Complete KYC (same requirement as withdrawals).",
-      "Request a term on Loans — admin approves, then funds hit your wallet.",
-    ],
-    cta: "Open Loans",
-  },
 ] as const;
 
 export function InvestmentHome({ displayName }: { displayName?: string }) {
@@ -145,15 +126,9 @@ export function InvestmentHome({ displayName }: { displayName?: string }) {
             Unitrust
           </Button>
         </Link>
-        <Link href="/loans">
-          <Button size="sm" variant="secondary" className="gap-1.5">
-            <Landmark className="h-3.5 w-3.5" />
-            Loans
-          </Button>
-        </Link>
       </motion.div>
 
-      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {PRODUCTS.map((product, i) => {
           const Icon = product.icon;
           return (

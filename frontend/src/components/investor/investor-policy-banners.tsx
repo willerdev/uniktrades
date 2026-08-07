@@ -1,12 +1,10 @@
 "use client";
 
-import { AlertTriangle, Crown, Landmark } from "lucide-react";
+import { AlertTriangle, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Investments below this amount auto-stop from the policy date. */
 export const INVESTOR_AUTO_STOP_THRESHOLD_USDT = 500;
-/** Minimum investment to see loan / reinvest-profit eligibility messaging. */
-export const INVESTOR_LOAN_ELIGIBILITY_USDT = 100;
 export const INVESTOR_AUTO_STOP_DATE_LABEL = "27 July 2026";
 export const INVESTOR_VIP_YIELD_PERCENT = 8;
 
@@ -32,7 +30,6 @@ type Props = {
  * Policy notices for active investors:
  * - VIP: elevated default daily yield
  * - Under $500: auto-stop / not earning when enforced
- * - Loan eligibility
  */
 export function InvestorPolicyBanners({
   investmentBalance,
@@ -52,10 +49,9 @@ export function InvestorPolicyBanners({
     balance < threshold &&
     !minBalancePolicy?.exempt &&
     (minBalancePolicy?.enforced !== false);
-  const showLoan = hasBalance && balance >= INVESTOR_LOAN_ELIGIBILITY_USDT;
   const blockedNow = Boolean(minBalancePolicy?.blocked);
 
-  if (!showVip && !showAutoStop && !showLoan) return null;
+  if (!showVip && !showAutoStop) return null;
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -105,35 +101,6 @@ export function InvestorPolicyBanners({
                     to at least ${threshold.toLocaleString()} to keep earning.
                   </>
                 )}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showLoan && (
-        <div className="rounded-xl border border-sky-500/35 bg-sky-500/10 p-3.5 text-sm text-sky-50">
-          <div className="flex items-start gap-2.5">
-            <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" />
-            <div className="space-y-1">
-              <p className="font-semibold text-sky-100">
-                Investment loan eligibility
-              </p>
-              <p className="text-sky-100/85 leading-relaxed">
-                With{" "}
-                <strong>
-                  ${INVESTOR_LOAN_ELIGIBILITY_USDT.toLocaleString()}+
-                </strong>{" "}
-                invested, you can borrow an advance on your projected daily,
-                weekly, or monthly earnings (80% advance + 20% interest). Capital
-                keeps earning while the loan is open.{" "}
-                <a
-                  href="/loans"
-                  className="font-semibold text-sky-200 underline underline-offset-2 hover:text-foreground"
-                >
-                  Request a loan
-                </a>
-                .
               </p>
             </div>
           </div>

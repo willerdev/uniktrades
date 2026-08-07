@@ -115,6 +115,15 @@ export function TransactionsPanel({ onOpenUser }: Props) {
             <div className="muted">{summary.momoConfirmedCount} payment(s)</div>
           </div>
           <div className="card">
+            <div className="label">Wallet transfers</div>
+            <div className="value">
+              {fmtMoney(summary.walletTransfersConfirmedUsdt ?? 0)}
+            </div>
+            <div className="muted">
+              {summary.walletTransfersConfirmedCount ?? 0} TRC deposit(s)
+            </div>
+          </div>
+          <div className="card">
             <div className="label">All crypto confirmed</div>
             <div className="value">{fmtMoney(summary.cryptoConfirmedUsdt)}</div>
             <div className="muted">{summary.cryptoConfirmedCount} payment(s)</div>
@@ -126,8 +135,8 @@ export function TransactionsPanel({ onOpenUser }: Props) {
         <select value={method} onChange={(e) => setMethod(e.target.value)}>
           <option value="">All methods</option>
           <option value="momo">MoMo</option>
+          <option value="wallet">Wallet transfers</option>
           <option value="crypto">Crypto</option>
-          <option value="wallet">Wallet</option>
         </select>
         <select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">All statuses</option>

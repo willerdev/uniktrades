@@ -72,37 +72,77 @@ export class BlockchainService {
   }
 
   /** Runtime config for the frontend (address is not baked into Next builds). */
-  getPublicContractConfig() {
+  async getPublicContractConfig() {
+    const db = await this.prisma.platformConfig.findUnique({
+      where: { id: 'default' },
+      select: {
+        contractAddress: true,
+        contractChainId: true,
+        contractNetworkLabel: true,
+        contractNetworkKind: true,
+        contractRpcUrl: true,
+        contractExplorerUrl: true,
+        contractAdminWallet: true,
+        contractAbi: true,
+      },
+    });
+
     const address = (
+      db?.contractAddress ||
       process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ||
       process.env.DEMO_VAULT_ADDRESS ||
       process.env.CONTRACT_ADDRESS ||
       ''
     ).trim();
     const chainId = Number(
-      process.env.POLYGON_AMOY_CHAIN_ID ||
-        process.env.BNB_CHAIN_ID ||
-        process.env.NEXT_PUBLIC_CHAIN_ID ||
-        80002,
+      db?.contractChainId ??
+        (process.env.POLYGON_AMOY_CHAIN_ID ||
+          process.env.BNB_CHAIN_ID ||
+          process.env.NEXT_PUBLIC_CHAIN_ID ||
+          80002),
     );
     const rpc =
+      db?.contractRpcUrl?.trim() ||
       process.env.POLYGON_AMOY_RPC ||
       process.env.BNB_TESTNET_RPC ||
       process.env.BLOCKCHAIN_RPC_URL ||
       process.env.NEXT_PUBLIC_RPC_URL ||
       'https://polygon-amoy-bor-rpc.publicnode.com';
     const explorer =
+      db?.contractExplorerUrl?.trim() ||
       process.env.POLYGON_AMOY_EXPLORER ||
       process.env.BNB_EXPLORER_URL ||
       process.env.NEXT_PUBLIC_EXPLORER_URL ||
       'https://amoy.polygonscan.com';
-    const configured = Boolean(address && address.startsWith('0x') && address.length >= 42);
+    const configured = Boolean(
+      address && address.startsWith('0x') && address.length >= 42,
+    );
+    const networkLabel =
+      db?.contractNetworkLabel?.trim() ||
+      (chainId === 80002
+        ? 'Polygon Amoy'
+        : chainId === 97
+          ? 'BNB Testnet'
+          : chainId === 56
+            ? 'BNB Smart Chain'
+            : chainId === 1
+              ? 'Ethereum'
+              : `Chain ${chainId}`);
+    const networkKind = (
+      db?.contractNetworkKind?.trim() ||
+      (chainId === 1
+        ? 'ethereum'
+        : chainId === 56 || chainId === 97
+          ? 'bsc'
+          : 'polygon')
+    ).toLowerCase();
     const base = getMockContractStatus();
     return {
       ...base,
-      networkMode: 'testnet' as const,
-      network: 'polygon' as const,
-      networkLabel: 'Polygon Amoy',
+      networkMode:
+        chainId === 1 || chainId === 56 ? ('mainnet' as const) : ('testnet' as const),
+      network: networkKind,
+      networkLabel,
       contractAddress: configured
         ? address
         : '0x0000000000000000000000000000000000000000',
@@ -110,6 +150,8 @@ export class BlockchainService {
       chainId,
       rpc,
       configured,
+      adminWallet: db?.contractAdminWallet?.trim() || null,
+      hasAbi: Boolean(db?.contractAbi?.trim()),
       version: '4.0.0',
     };
   }
@@ -255,7 +297,7 @@ export class BlockchainService {
   async getDashboard(isAdmin: boolean): Promise<DashboardPayload> {
     await delay(120);
     const dash = getMockDashboard(isAdmin);
-    const cfg = this.getPublicContractConfig();
+    const cfg = await this.getPublicContractConfig();
     return {
       ...dash,
       contract: {

@@ -64,7 +64,7 @@ export function InvestorDepositorPlatform({
 
   const [broadcastSaving, setBroadcastSaving] = useState(false);
   const [broadcastKind, setBroadcastKind] = useState<
-    null | "yield" | "autoStop" | "loan" | "loan-withdraw" | "sunset"
+    null | "yield" | "autoStop" | "sunset"
   >(null);
 
   const [enrollEmail, setEnrollEmail] = useState("");
@@ -668,96 +668,6 @@ export function InvestorDepositorPlatform({
               onClick={() => {
                 if (
                   !window.confirm(
-                    "Email investors with $1,000+ investment about loan eligibility (borrow up to 80%)?",
-                  )
-                ) {
-                  return;
-                }
-                const force = window.confirm(
-                  "Force re-send even if already announced? Click Cancel for one-time send only.",
-                );
-                setBroadcastSaving(true);
-                setBroadcastKind("loan");
-                void api
-                  .broadcastInvestorLoanEligibility(force)
-                  .then((res) => {
-                    if (res.skipped) {
-                      onMessage(
-                        `Loan eligibility already announced at ${res.announcedAt ?? "—"}. Use force to re-send.`,
-                      );
-                      return;
-                    }
-                    onMessage(
-                      `Loan eligibility emails ($1000+): sent ${res.sent}/${res.total} (failed ${res.failed}).`,
-                    );
-                  })
-                  .catch((e) =>
-                    onMessage(
-                      e instanceof Error ? e.message : "Broadcast failed",
-                    ),
-                  )
-                  .finally(() => {
-                    setBroadcastSaving(false);
-                    setBroadcastKind(null);
-                  });
-              }}
-            >
-              {broadcastSaving && broadcastKind === "loan"
-                ? "Emailing $1000+…"
-                : "Email: $1000+ loan offer"}
-            </button>
-            <button
-              type="button"
-              className="platform-btn"
-              disabled={broadcastSaving}
-              onClick={() => {
-                if (
-                  !window.confirm(
-                    "Email all users with an OPEN loan that they may only withdraw the loan advance until they repay?",
-                  )
-                ) {
-                  return;
-                }
-                const force = window.confirm(
-                  "Force re-send even if already announced? Click Cancel for one-time send only.",
-                );
-                setBroadcastSaving(true);
-                setBroadcastKind("loan-withdraw");
-                void api
-                  .broadcastActiveLoanWithdrawPolicy(force)
-                  .then((res) => {
-                    if (res.skipped) {
-                      onMessage(
-                        `Loan withdraw policy already announced at ${res.announcedAt ?? "—"}. Use force to re-send.`,
-                      );
-                      return;
-                    }
-                    onMessage(
-                      `Active loan withdraw policy: sent ${res.sent}/${res.total} (failed ${res.failed}).`,
-                    );
-                  })
-                  .catch((e) =>
-                    onMessage(
-                      e instanceof Error ? e.message : "Broadcast failed",
-                    ),
-                  )
-                  .finally(() => {
-                    setBroadcastSaving(false);
-                    setBroadcastKind(null);
-                  });
-              }}
-            >
-              {broadcastSaving && broadcastKind === "loan-withdraw"
-                ? "Emailing borrowers…"
-                : "Email: open loan withdraw limit"}
-            </button>
-            <button
-              type="button"
-              className="platform-btn"
-              disabled={broadcastSaving}
-              onClick={() => {
-                if (
-                  !window.confirm(
                     "Email ALL users that trader/prop programs are ending and the company is focusing on Smart-Invest? This cannot be casually undone.",
                   )
                 ) {
@@ -798,11 +708,10 @@ export function InvestorDepositorPlatform({
             </button>
           </div>
           <p className="muted" style={{ marginTop: "0.75rem", fontSize: "0.85rem" }}>
-            Templates: under-$500 gets the 27 Jul 2026 auto-stop notice; $1,000+
-            gets the loan eligibility notice (reinvest profit + borrow up to 80%
-            while capital keeps earning). Audiences are filtered by investment
-            balance automatically. The trader/prop sunset email goes to every
-            non-banned user with an email address.
+            Templates: under-$500 gets the 27 Jul 2026 auto-stop notice.
+            Audiences are filtered by investment balance automatically. The
+            trader/prop sunset email goes to every non-banned user with an email
+            address.
           </p>
         </div>
       )}
